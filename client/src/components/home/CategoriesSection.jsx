@@ -1,21 +1,21 @@
 const categories = [
   {
     id: 'repuestos',
-    icon: '⚙️',
+    icon: '⚙',
     title: 'Repuestos',
-    description: 'Piezas, filtros y componentes para mantener tus equipos siempre activos.'
+    description: 'Encontrá repuestos de calidad para tu maquinaria.'
   },
   {
     id: 'maquinarias',
     icon: '🚜',
     title: 'Maquinarias',
-    description: 'Equipamiento agrícola seleccionado para tareas exigentes del campo.'
+    description: 'Maquinarias robustas para cada necesidad del campo.'
   },
   {
     id: 'articulos-rurales',
-    icon: '🌾',
+    icon: '⌂',
     title: 'Artículos rurales',
-    description: 'Insumos y soluciones prácticas para establecimientos agropecuarios.'
+    description: 'Todo lo que necesitás para el trabajo rural.'
   }
 ];
 
@@ -24,7 +24,7 @@ function CategoriesSection() {
     <section className="section categories-section" aria-labelledby="categories-title">
       <div className="section-heading">
         <p className="eyebrow">Rubros principales</p>
-        <h2 id="categories-title">Todo para el trabajo rural</h2>
+        <h2 id="categories-title">Explorá nuestras categorías</h2>
       </div>
 
       <div className="categories-grid">
@@ -33,8 +33,10 @@ function CategoriesSection() {
             <span className="category-card__icon" aria-hidden="true">
               {category.icon}
             </span>
-            <h3>{category.title}</h3>
-            <p>{category.description}</p>
+            <div className="category-card__body">
+              <h3>{category.title}</h3>
+              <p>{category.description}</p>
+            </div>
           </article>
         ))}
       </div>
