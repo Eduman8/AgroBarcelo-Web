@@ -158,30 +158,28 @@ p {
 
 .hero {
   position: relative;
-  left: 50%;
   display: flex;
   align-items: center;
-  width: min(1440px, calc(100vw - 32px));
-  min-height: clamp(560px, 66vh, 680px);
-  margin-left: 0;
+  width: 100%;
+  height: clamp(430px, 40vw, 480px);
+  margin: -8px auto -12px;
   overflow: hidden;
-  padding: clamp(72px, 8vw, 118px) clamp(28px, 8vw, 112px);
-  border-radius: 12px;
+  padding: clamp(48px, 6vw, 64px) clamp(72px, 7vw, 90px);
+  border-radius: 10px;
   background-image:
     linear-gradient(
       90deg,
-      rgba(0,0,0,0.90) 0%,
-      rgba(0,0,0,0.75) 25%,
-      rgba(0,0,0,0.45) 50%,
-      rgba(0,0,0,0.10) 100%
+      rgba(0,0,0,0.88) 0%,
+      rgba(0,0,0,0.68) 32%,
+      rgba(0,0,0,0.35) 58%,
+      rgba(0,0,0,0.05) 100%
     ),
     url('../assets/images/hero-tractor.webp');
   background-size: cover;
   background-position: center right;
   background-repeat: no-repeat;
   color: #ffffff;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
-  transform: translateX(-50%);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.12);
 }
 
 .hero::after {
@@ -191,8 +189,8 @@ p {
 .hero__content {
   position: relative;
   z-index: 1;
-  width: min(100%, 720px);
-  max-width: 720px;
+  width: min(100%, 560px);
+  max-width: 560px;
 }
 
 .eyebrow {
@@ -213,26 +211,26 @@ p {
 h1 {
   max-width: 760px;
   margin-bottom: 18px;
-  font-size: clamp(3rem, 6.6vw, 5.25rem);
-  line-height: 0.9;
-  letter-spacing: -0.06em;
+  font-size: clamp(2.8rem, 8vw, 5.9rem);
+  line-height: 0.94;
+  letter-spacing: -0.07em;
 }
 
 .hero h1 {
-  max-width: 680px;
+  max-width: 560px;
   color: #ffffff;
-  font-size: clamp(4.5rem, 6.7vw, 5.25rem);
+  font-size: clamp(3rem, 5vw, 4.6rem);
   font-weight: 900;
-  line-height: 0.88;
+  line-height: 0.95;
   text-wrap: balance;
   text-shadow: 0 4px 28px rgba(0, 0, 0, 0.55);
 }
 
 .hero__text {
-  max-width: 590px;
-  margin-bottom: 34px;
+  max-width: 460px;
+  margin-bottom: 26px;
   color: rgba(255, 255, 255, 0.9);
-  font-size: clamp(1.08rem, 1.6vw, 1.3rem);
+  font-size: clamp(1rem, 1.4vw, 1.1rem);
   line-height: 1.55;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.48);
 }
@@ -244,16 +242,16 @@ h1 {
 }
 
 .hero .button {
-  min-height: 54px;
-  padding: 0 30px;
+  min-height: 0;
+  padding: 14px 24px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 16px;
   color: #ffffff;
-  box-shadow: 0 18px 38px rgba(143, 31, 33, 0.38);
+  box-shadow: 0 12px 26px rgba(143, 31, 33, 0.3);
 }
 
 .hero .button:hover {
-  box-shadow: 0 22px 44px rgba(143, 31, 33, 0.46);
+  box-shadow: 0 16px 30px rgba(143, 31, 33, 0.38);
 }
 
 .section {
@@ -481,6 +479,17 @@ h1 {
   .products-grid {
     grid-template-columns: 1fr;
   }
+
+  .hero {
+    height: clamp(380px, 48vw, 430px);
+    margin: -6px auto -10px;
+    padding: 46px clamp(48px, 7vw, 72px);
+  }
+
+  .hero h1 {
+    font-size: clamp(3rem, 7vw, 4rem);
+  }
+
 }
 
 @media (max-width: 640px) {
@@ -526,15 +535,16 @@ h1 {
   }
 
   .hero {
-    width: min(100vw - 24px, 1180px);
-    min-height: 520px;
-    padding: 58px 24px;
+    height: clamp(420px, 115vw, 460px);
+    margin: -4px auto -8px;
+    padding: 40px 24px;
     border-radius: 10px;
-    background-position: 62% center;
+    background-position: center right;
   }
 
   .hero h1 {
-    font-size: clamp(3rem, 14vw, 4.5rem);
+    font-size: clamp(2.8rem, 12vw, 3.8rem);
+    line-height: 0.95;
   }
 
   .product-card__meta {
