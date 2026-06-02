@@ -6,7 +6,7 @@ const navigationItems = [
   { label: 'Repuestos', href: '#repuestos' },
   { label: 'Maquinarias', href: '/maquinarias' },
   { label: 'Servicios', href: '/servicios' },
-  { label: 'Contacto', href: '#contacto' }
+  { label: 'Contacto', href: '/contacto' }
 ];
 
 function Header({ currentPath = '/' }) {
@@ -29,7 +29,7 @@ function Header({ currentPath = '/' }) {
           ))}
         </nav>
 
-        <Button href="#contacto" variant="header">
+        <Button href="/contacto" variant="header">
           Consultanos
         </Button>
       </div>
