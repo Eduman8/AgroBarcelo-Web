@@ -30,7 +30,7 @@ const services = [
     title: 'Venta de repuestos',
     description: 'Repuestos agrícolas para maquinaria, con búsqueda y consulta personalizada.',
     action: 'Buscar repuestos',
-    href: '#repuestos'
+    href: '/repuestos'
   }
 ];
 

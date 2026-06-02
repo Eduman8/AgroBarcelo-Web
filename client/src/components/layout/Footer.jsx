@@ -1,13 +1,5 @@
+import { navigationItems } from '../../config/navigation.js';
 import Logo from '../ui/Logo.jsx';
-
-const footerLinks = [
-  { label: 'Inicio', href: '/' },
-  { label: 'Repuestos', href: '/repuestos' },
-  { label: 'Maquinarias', href: '/maquinarias' },
-  { label: 'Servicios', href: '/servicios' },
-  { label: 'Acerca de', href: '/acerca-de' },
-  { label: 'Contacto', href: '#contacto' }
-];
 
 function Footer({ currentPath = '/' }) {
   return (
@@ -24,7 +16,7 @@ function Footer({ currentPath = '/' }) {
         <div className="site-footer__nav-column">
           <h2 className="site-footer__column-title">Navegación</h2>
           <nav className="footer-nav" aria-label="Navegación de pie de página">
-            {footerLinks.map((link) => (
+            {navigationItems.map((link) => (
               <a
                 className={link.href === currentPath ? 'is-active' : undefined}
                 key={link.label}
