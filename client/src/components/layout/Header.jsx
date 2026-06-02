@@ -30,7 +30,7 @@ function Header({ currentPath = '/' }) {
           ))}
         </nav>
 
-        <Button href="#contacto" variant="header">
+        <Button href="/contacto" variant="header">
           Consultanos
         </Button>
       </div>
