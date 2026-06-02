@@ -220,7 +220,7 @@ p {
       rgba(0, 0, 0, 0.35) 56%,
       rgba(0, 0, 0, 0.03) 100%
     ),
-    url('../assets/images/hero-tractor.webp');
+    url('../assets/images/hero-tractor.png');
   background-size: cover, cover;
   background-position: center center;
   background-repeat: no-repeat;
