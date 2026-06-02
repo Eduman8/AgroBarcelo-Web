@@ -4,7 +4,7 @@ import Logo from '../ui/Logo.jsx';
 const navigationItems = [
   { label: 'Inicio', href: '/' },
   { label: 'Repuestos', href: '#repuestos' },
-  { label: 'Maquinarias', href: '#maquinarias' },
+  { label: 'Maquinarias', href: '/maquinarias' },
   { label: 'Servicios', href: '/servicios' },
   { label: 'Contacto', href: '#contacto' }
 ];

@@ -7,7 +7,7 @@ const services = [
     description:
       'Tractores, sembradoras, rastras e implementos agrícolas seleccionados para cada necesidad del campo.',
     action: 'Ver maquinarias',
-    href: '#maquinarias'
+    href: '/maquinarias'
   },
   {
     icon: '☏',
