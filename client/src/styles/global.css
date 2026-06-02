@@ -220,50 +220,13 @@ p {
       rgba(0, 0, 0, 0.35) 56%,
       rgba(0, 0, 0, 0.03) 100%
     ),
-    radial-gradient(circle at 67% 27%, rgba(255, 198, 128, 0.78) 0 8rem, transparent 18rem),
-    linear-gradient(180deg, #5b6670 0%, #c9955e 55%, #2d1c10 56%, #0e0a07 100%),
-    repeating-linear-gradient(178deg, rgba(255, 188, 76, 0.3) 0 2px, transparent 2px 11px),
     url('../assets/images/hero-tractor.webp');
-  background-size: cover, cover, cover, cover, cover;
+  background-size: cover, cover;
   background-position: center center;
   background-repeat: no-repeat;
   color: #ffffff;
 }
 
-
-.hero::before {
-  content: '';
-  position: absolute;
-  right: max(76px, calc((100vw - 1310px) / 2 + 90px));
-  bottom: 28px;
-  width: clamp(260px, 32vw, 470px);
-  aspect-ratio: 1.65;
-  z-index: 0;
-  background:
-    radial-gradient(circle at 25% 78%, transparent 0 16%, #111 17% 29%, #bfb7aa 30% 36%, #181818 37% 46%, transparent 47%),
-    radial-gradient(circle at 72% 76%, transparent 0 10%, #111 11% 21%, #bfb7aa 22% 27%, #181818 28% 36%, transparent 37%),
-    linear-gradient(90deg, transparent 0 14%, #171717 15% 58%, transparent 59%),
-    linear-gradient(160deg, transparent 0 14%, #b5171f 15% 51%, #202020 52% 78%, transparent 79%),
-    linear-gradient(90deg, transparent 0 52%, rgba(25, 25, 25, 0.9) 53% 74%, transparent 75%);
-  background-position: 0 0;
-  background-repeat: no-repeat;
-  filter: drop-shadow(0 18px 20px rgba(0, 0, 0, 0.58));
-  opacity: 0.92;
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  right: max(48px, calc((100vw - 1310px) / 2 + 42px));
-  bottom: 28px;
-  width: clamp(170px, 18vw, 270px);
-  height: clamp(48px, 5vw, 70px);
-  z-index: 0;
-  border-top: 6px solid rgba(111, 33, 12, 0.96);
-  transform: skewX(-18deg);
-  transform-origin: right bottom;
-  opacity: 0.75;
-}
 
 .hero__content {
   position: relative;
