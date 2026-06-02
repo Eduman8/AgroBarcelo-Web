@@ -7,7 +7,7 @@ function Hero() {
         <p className="eyebrow">AGROVENTAS BARCELÓ</p>
         <h1>Soluciones para el agro</h1>
         <p className="hero__text">
-          Repuestos, maquinarias y artículos rurales para acompañar el trabajo de cada día.
+          Repuestos, maquinarias y servicios especializados para acompañar el trabajo de cada día.
         </p>
         <div className="hero__actions">
           <Button href="#catalogo">Ver catálogo</Button>

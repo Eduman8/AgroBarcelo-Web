@@ -505,12 +505,6 @@ h1 {
   font-size: 3.4rem;
 }
 
-.product-card--articulos-rurales .product-card__image span::before {
-  content: '▰';
-  color: #405a27;
-  font-size: 4.6rem;
-}
-
 .product-card__body {
   padding: 0 18px 18px;
 }

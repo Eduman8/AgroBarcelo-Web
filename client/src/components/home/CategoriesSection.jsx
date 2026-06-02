@@ -12,10 +12,10 @@ const categories = [
     description: 'Maquinarias robustas para cada necesidad del campo.'
   },
   {
-    id: 'articulos-rurales',
+    id: 'servicios',
     icon: '⌂',
-    title: 'Artículos rurales',
-    description: 'Todo lo que necesitás para el trabajo rural.'
+    title: 'Servicios',
+    description: 'Postventa, mecanizado CNC y soluciones para acompañar tu maquinaria.'
   }
 ];
 
