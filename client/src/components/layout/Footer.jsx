@@ -1,3 +1,5 @@
+import Logo from '../ui/Logo.jsx';
+
 const footerLinks = [
   { label: 'Inicio', href: '#inicio' },
   { label: 'Repuestos', href: '#repuestos' },
@@ -11,11 +13,8 @@ function Footer() {
     <footer className="site-footer" id="contacto">
       <div className="site-footer__inner">
         <div className="site-footer__brand">
-          <span className="brand__mark">AB</span>
-          <div>
-            <strong>AgroBarceló</strong>
-            <p>Soluciones sobrias y confiables para el trabajo agropecuario.</p>
-          </div>
+          <Logo variant="footer" />
+          <p>Soluciones sobrias y confiables para el trabajo agropecuario.</p>
         </div>
 
         <nav className="footer-nav" aria-label="Navegación de pie de página">
