@@ -1,40 +1,75 @@
-import { useEffect, useState } from 'react';
-import CategoriesSection from './components/home/CategoriesSection.jsx';
-import FeaturedProducts from './components/home/FeaturedProducts.jsx';
-import Hero from './components/home/Hero.jsx';
+import { useEffect, useMemo, useState } from 'react';
 import Footer from './components/layout/Footer.jsx';
 import Header from './components/layout/Header.jsx';
-import { getProducts } from './services/productService.js';
+import HomePage from './pages/HomePage.jsx';
+import ServicesPage from './pages/ServicesPage.jsx';
+
+const routes = {
+  '/': HomePage,
+  '/servicios': ServicesPage
+};
+
+function normalizePath(pathname) {
+  if (pathname.length > 1 && pathname.endsWith('/')) {
+    return pathname.slice(0, -1);
+  }
+
+  return pathname || '/';
+}
 
 function App() {
-  const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [currentPath, setCurrentPath] = useState(() => normalizePath(window.location.pathname));
 
   useEffect(() => {
-    async function loadProducts() {
-      try {
-        const data = await getProducts();
-        setProducts(data);
-      } catch (currentError) {
-        setError(currentError.message);
-      } finally {
-        setIsLoading(false);
+    function handleNavigation(event) {
+      if (!(event.target instanceof Element)) {
+        return;
       }
+
+      const link = event.target.closest('a');
+
+      if (!link || link.target || link.origin !== window.location.origin) {
+        return;
+      }
+
+      const nextPath = normalizePath(link.pathname);
+
+      if (link.hash && nextPath === currentPath) {
+        return;
+      }
+
+      if (!routes[nextPath]) {
+        return;
+      }
+
+      event.preventDefault();
+      window.history.pushState({}, '', `${nextPath}${link.hash}`);
+      setCurrentPath(nextPath);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    loadProducts();
-  }, []);
+    function handlePopState() {
+      setCurrentPath(normalizePath(window.location.pathname));
+    }
+
+    document.addEventListener('click', handleNavigation);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      document.removeEventListener('click', handleNavigation);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [currentPath]);
+
+  const Page = useMemo(() => routes[currentPath] || HomePage, [currentPath]);
 
   return (
     <>
-      <Header />
+      <Header currentPath={currentPath} />
       <main className="page">
-        <Hero />
-        <CategoriesSection />
-        <FeaturedProducts products={products} isLoading={isLoading} error={error} />
+        <Page />
       </main>
-      <Footer />
+      <Footer currentPath={currentPath} />
     </>
   );
 }

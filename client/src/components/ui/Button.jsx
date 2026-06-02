@@ -1,6 +1,6 @@
-function Button({ children, href = '#catalogo', variant = 'primary', className = '' }) {
+function Button({ children, href = '#catalogo', variant = 'primary', className = '', ...props }) {
   return (
-    <a className={`button button--${variant} ${className}`.trim()} href={href}>
+    <a className={`button button--${variant} ${className}`.trim()} href={href} {...props}>
       {children}
     </a>
   );
