@@ -1,4 +1,5 @@
 import Button from '../ui/Button.jsx';
+import Logo from '../ui/Logo.jsx';
 
 const navigationItems = [
   { label: 'Inicio', href: '#inicio' },
@@ -13,11 +14,7 @@ function Header() {
     <header className="site-header">
       <div className="site-header__inner">
         <a className="brand" href="#inicio" aria-label="AgroBarceló - Inicio">
-          <span className="brand__mark">AB</span>
-          <span className="brand__text">
-            <strong>AgroBarceló</strong>
-            <small>AgroVentas Barceló</small>
-          </span>
+          <Logo variant="header" />
         </a>
 
         <nav className="main-nav" aria-label="Navegación principal">
