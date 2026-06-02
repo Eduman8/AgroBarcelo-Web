@@ -5,7 +5,8 @@ const footerLinks = [
   { label: 'Repuestos', href: '#repuestos' },
   { label: 'Maquinarias', href: '/maquinarias' },
   { label: 'Servicios', href: '/servicios' },
-  { label: 'Contacto', href: '/contacto' }
+  { label: 'Acerca de', href: '/acerca-de' },
+  { label: 'Contacto', href: '#contacto' }
 ];
 
 function Footer({ currentPath = '/' }) {

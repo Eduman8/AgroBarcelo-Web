@@ -2,15 +2,15 @@ import { useEffect, useMemo, useState } from 'react';
 import Footer from './components/layout/Footer.jsx';
 import Header from './components/layout/Header.jsx';
 import HomePage from './pages/HomePage.jsx';
-import ContactPage from './pages/ContactPage.jsx';
+import AboutPage from './pages/AboutPage.jsx';
 import MachinesPage from './pages/MachinesPage.jsx';
 import ServicesPage from './pages/ServicesPage.jsx';
 
 const routes = {
   '/': HomePage,
-  '/contacto': ContactPage,
+  '/maquinarias': MachinesPage,
   '/servicios': ServicesPage,
-  '/maquinarias': MachinesPage
+  '/acerca-de': AboutPage
 };
 
 function normalizePath(pathname) {
