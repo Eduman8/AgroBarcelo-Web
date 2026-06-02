@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import logoSrc from '../../assets/images/agrobarcelo-logo.png';
+import logoSrc from '../../assets/images/agrobarcelo-logo.webp';
 
 function Logo({ className = '', variant = 'header' }) {
   const [hasImageError, setHasImageError] = useState(false);

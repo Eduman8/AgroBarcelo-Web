@@ -6,12 +6,11 @@ function FeaturedProducts({ products, isLoading, error }) {
       <div className="section-heading section-heading--split">
         <div>
           <p className="eyebrow">Catálogo destacado</p>
-          <h2 id="products-title">Productos para consultar</h2>
+          <h2 id="products-title">Catálogo destacado</h2>
         </div>
-        <p>
-          Una selección inicial de repuestos, maquinarias y artículos rurales disponibles para
-          cotizar.
-        </p>
+        <a className="featured-heading-button" href="#catalogo">
+          Ver todos los productos
+        </a>
       </div>
 
       {isLoading && <p className="status-message">Cargando productos...</p>}
