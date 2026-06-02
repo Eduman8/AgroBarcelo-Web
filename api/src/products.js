@@ -12,12 +12,6 @@ export const products = [
     inStock: true
   },
   {
-    id: 3,
-    name: 'Bebedero australiano',
-    category: 'Artículos rurales',
-    inStock: true
-  },
-  {
     id: 4,
     name: 'Correa industrial reforzada',
     category: 'Repuestos',

@@ -5,7 +5,7 @@ const navigationItems = [
   { label: 'Inicio', href: '#inicio' },
   { label: 'Repuestos', href: '#repuestos' },
   { label: 'Maquinarias', href: '#maquinarias' },
-  { label: 'Artículos rurales', href: '#articulos-rurales' },
+  { label: 'Servicios', href: '#servicios' },
   { label: 'Contacto', href: '#contacto' }
 ];
 
