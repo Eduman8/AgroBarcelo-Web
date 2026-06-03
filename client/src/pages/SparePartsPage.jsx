@@ -1,11 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getSpareParts } from '../services/sparePartsService.js';
 
 const emptyValue = 'Sin informar';
-
-function normalizeSearchValue(value) {
-  return String(value ?? '').trim().toLocaleLowerCase('es-AR');
-}
+const sparePartsLimit = 50;
 
 function getDisplayValue(value) {
   if (value === null || value === undefined || value === '') {
@@ -22,6 +19,13 @@ function getSparePartKey(sparePart) {
 function SparePartsPage() {
   const [spareParts, setSpareParts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    limit: sparePartsLimit,
+    totalPages: 0
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -29,14 +33,34 @@ function SparePartsPage() {
     let isMounted = true;
 
     async function loadSpareParts() {
+      setIsLoading(true);
+      setError('');
+
       try {
-        const data = await getSpareParts();
+        const response = await getSpareParts({
+          page,
+          limit: sparePartsLimit,
+          search: searchTerm
+        });
 
         if (isMounted) {
-          setSpareParts(Array.isArray(data) ? data : []);
+          setSpareParts(Array.isArray(response.data) ? response.data : []);
+          setPagination({
+            total: response.pagination?.total ?? 0,
+            page: response.pagination?.page ?? page,
+            limit: response.pagination?.limit ?? sparePartsLimit,
+            totalPages: response.pagination?.totalPages ?? 0
+          });
         }
       } catch (currentError) {
         if (isMounted) {
+          setSpareParts([]);
+          setPagination({
+            total: 0,
+            page,
+            limit: sparePartsLimit,
+            totalPages: 0
+          });
           setError(currentError.message);
         }
       } finally {
@@ -51,23 +75,25 @@ function SparePartsPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [page, searchTerm]);
 
-  const filteredSpareParts = useMemo(() => {
-    const normalizedSearchTerm = normalizeSearchValue(searchTerm);
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+    setPage(1);
+  };
 
-    if (!normalizedSearchTerm) {
-      return spareParts;
-    }
+  const goToPreviousPage = () => {
+    setPage((currentPage) => Math.max(currentPage - 1, 1));
+  };
 
-    return spareParts.filter((sparePart) => {
-      const searchableValues = [sparePart.nombre, sparePart.codigo, sparePart.marca];
+  const goToNextPage = () => {
+    setPage((currentPage) => Math.min(currentPage + 1, pagination.totalPages || currentPage));
+  };
 
-      return searchableValues.some((value) =>
-        normalizeSearchValue(value).includes(normalizedSearchTerm)
-      );
-    });
-  }, [searchTerm, spareParts]);
+  const currentPage = pagination.page || page;
+  const totalPages = pagination.totalPages || 1;
+  const isPreviousDisabled = isLoading || currentPage === 1;
+  const isNextDisabled = isLoading || currentPage >= totalPages;
 
   return (
     <section className="spare-parts-page" aria-labelledby="spare-parts-title">
@@ -86,7 +112,7 @@ function SparePartsPage() {
           type="search"
           value={searchTerm}
           placeholder="Buscar por nombre, código o marca..."
-          onChange={(event) => setSearchTerm(event.target.value)}
+          onChange={handleSearchChange}
         />
       </div>
 
@@ -95,6 +121,10 @@ function SparePartsPage() {
 
       {!isLoading && !error && (
         <>
+          <p className="spare-parts-results-count">
+            Mostrando {spareParts.length} de {pagination.total} repuestos
+          </p>
+
           <div className="spare-parts-table-wrapper">
             <table className="spare-parts-table">
               <thead>
@@ -107,7 +137,7 @@ function SparePartsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredSpareParts.map((sparePart) => (
+                {spareParts.map((sparePart) => (
                   <tr key={getSparePartKey(sparePart)}>
                     <td data-label="Código">{getDisplayValue(sparePart.codigo)}</td>
                     <td data-label="Nombre">{getDisplayValue(sparePart.nombre)}</td>
@@ -124,11 +154,23 @@ function SparePartsPage() {
             </table>
           </div>
 
-          {filteredSpareParts.length === 0 ? (
+          {spareParts.length === 0 ? (
             <p className="status-message spare-parts-empty">
               No se encontraron repuestos con ese nombre, código o marca.
             </p>
           ) : null}
+
+          <div className="spare-parts-pagination" aria-label="Paginación de repuestos">
+            <button type="button" onClick={goToPreviousPage} disabled={isPreviousDisabled}>
+              Anterior
+            </button>
+            <span>
+              Página {currentPage} de {totalPages}
+            </span>
+            <button type="button" onClick={goToNextPage} disabled={isNextDisabled}>
+              Siguiente
+            </button>
+          </div>
         </>
       )}
     </section>
