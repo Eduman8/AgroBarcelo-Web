@@ -1708,6 +1708,66 @@ h1 {
   min-height: 46px;
 }
 
+
+.spare-parts-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.spare-parts-table {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+}
+
+.spare-parts-table th,
+.spare-parts-table td {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.spare-parts-table th {
+  background:
+    radial-gradient(circle at 90% 0%, rgba(201, 21, 28, 0.1), transparent 10rem),
+    #fbfbfa;
+  color: var(--color-ink);
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.spare-parts-table td {
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.spare-parts-table td:nth-child(2) {
+  color: var(--color-ink);
+  font-weight: 900;
+}
+
+.spare-parts-table td:first-child {
+  color: var(--color-ink-soft);
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.spare-parts-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.spare-parts-table tbody tr:hover {
+  background: rgba(201, 21, 28, 0.035);
+}
+
 .spare-parts-empty {
   margin-top: 18px;
 }
@@ -1741,5 +1801,61 @@ h1 {
 
   .spare-parts-search {
     padding: 18px;
+  }
+
+  .spare-parts-table-wrapper {
+    overflow-x: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .spare-parts-table {
+    min-width: 0;
+  }
+
+  .spare-parts-table thead {
+    display: none;
+  }
+
+  .spare-parts-table,
+  .spare-parts-table tbody,
+  .spare-parts-table tr,
+  .spare-parts-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .spare-parts-table tr {
+    margin-bottom: 14px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background:
+      radial-gradient(circle at 92% 0%, rgba(201, 21, 28, 0.08), transparent 9rem),
+      var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  .spare-parts-table th,
+  .spare-parts-table td {
+    padding: 14px 16px;
+  }
+
+  .spare-parts-table td {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 14px;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.92rem;
+  }
+
+  .spare-parts-table td::before {
+    content: attr(data-label);
+    color: var(--color-ink);
+    font-size: 0.72rem;
+    font-weight: 950;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 }
