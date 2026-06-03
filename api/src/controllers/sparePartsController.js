@@ -1,4 +1,4 @@
-import { getSpareParts } from '../services/sparePartsService.js';
+import { getSpareParts, getSparePartsCount } from '../services/sparePartsService.js';
 
 const sanitizeLogValue = (value) => {
   if (value === undefined || value === null) {
@@ -12,6 +12,28 @@ const sanitizeLogValue = (value) => {
   });
 
   return sanitizedValue.replace(/user\s+'[^']*'/gi, "user '[redacted]'");
+};
+
+export const getSparePartsCountController = async (request, response) => {
+  try {
+    const sparePartsCount = await getSparePartsCount();
+
+    response.json(sparePartsCount);
+  } catch (error) {
+    const diagnosticError = error?.cause || error;
+
+    console.error('[spare-parts-count] SQL Server query error', {
+      message: sanitizeLogValue(diagnosticError?.message),
+      code: sanitizeLogValue(diagnosticError?.code),
+      originalErrorMessage: sanitizeLogValue(diagnosticError?.originalError?.message),
+      originalErrorCode: sanitizeLogValue(diagnosticError?.originalError?.code)
+    });
+
+    response.status(500).json({
+      status: 'error',
+      message: 'No se pudo obtener el total de repuestos.'
+    });
+  }
 };
 
 export const getSparePartsController = async (request, response) => {

@@ -1,5 +1,11 @@
 import { getSqlPool } from '../config/sqlServer.js';
 
+const sparePartsCountQuery = `
+SELECT COUNT(*) AS total
+FROM Productos p
+WHERE p.ID_Rubro IN (3,4,8,11,13,24,26,27)
+`;
+
 const sparePartsQuery = `
 SELECT
     p.ID_Articulo AS id,
@@ -42,6 +48,13 @@ const mapSparePart = (sparePart) => ({
   marca: getDisplayValue(sparePart.marca, 'Sin marca'),
   disponibilidad: 'Disponible'
 });
+
+export const getSparePartsCount = async () => {
+  const pool = await getSqlPool();
+  const result = await pool.request().query(sparePartsCountQuery);
+
+  return { total: result.recordset?.[0]?.total ?? 0 };
+};
 
 export const getSpareParts = async () => {
   const pool = await getSqlPool();
