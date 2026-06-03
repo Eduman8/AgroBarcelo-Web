@@ -38,7 +38,11 @@ export const getSparePartsCountController = async (request, response) => {
 
 export const getSparePartsController = async (request, response) => {
   try {
-    const spareParts = await getSpareParts();
+    const spareParts = await getSpareParts({
+      page: request.query.page,
+      limit: request.query.limit,
+      search: request.query.search
+    });
 
     response.json(spareParts);
   } catch (error) {
