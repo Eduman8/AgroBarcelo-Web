@@ -1,5 +1,6 @@
+import sql from 'mssql';
+
 let sqlPoolPromise;
-let mssqlModulePromise;
 
 const parseBoolean = (value, defaultValue) => {
   if (value === undefined || value === '') {
@@ -58,29 +59,27 @@ const createSqlConfig = () => {
   return config;
 };
 
-const getMssqlModule = async () => {
-  if (!mssqlModulePromise) {
-    mssqlModulePromise = import('mssql').catch((error) => {
-      mssqlModulePromise = undefined;
-      throw new Error(`No se pudo cargar el paquete mssql: ${error.message}`);
-    });
-  }
+const createSqlPool = async () => {
+  const config = createSqlConfig();
+  const pool = new sql.ConnectionPool(config);
 
-  return mssqlModulePromise;
+  try {
+    await pool.connect();
+    return pool;
+  } catch (error) {
+    throw new Error('No se pudo conectar con SQL Server.', { cause: error });
+  }
 };
 
 export const getSqlPool = async () => {
   if (!sqlPoolPromise) {
-    const config = createSqlConfig();
-    const sql = await getMssqlModule();
-
-    sqlPoolPromise = new sql.ConnectionPool(config)
-      .connect()
-      .catch((error) => {
-        sqlPoolPromise = undefined;
-        throw new Error(`No se pudo conectar con SQL Server (${config.server}/${config.database}): ${error.message}`);
-      });
+    sqlPoolPromise = createSqlPool().catch((error) => {
+      sqlPoolPromise = undefined;
+      throw error;
+    });
   }
 
   return sqlPoolPromise;
 };
+
+export { sql };
