@@ -1,22 +1,56 @@
 import { useEffect, useMemo, useState } from 'react';
-import Button from '../components/ui/Button.jsx';
 import { getSpareParts } from '../services/sparePartsService.js';
 
+const emptyValue = 'Sin informar';
+
 function normalizeSearchValue(value) {
-  return value.trim().toLocaleLowerCase('es-AR');
+  return String(value ?? '').trim().toLocaleLowerCase('es-AR');
+}
+
+function getDisplayValue(value) {
+  if (value === null || value === undefined || value === '') {
+    return emptyValue;
+  }
+
+  return value;
+}
+
+function getSparePartKey(sparePart) {
+  return sparePart.id ?? `${sparePart.codigo}-${sparePart.nombre}`;
 }
 
 function SparePartsPage() {
   const [spareParts, setSpareParts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadSpareParts() {
-      const data = await getSpareParts();
-      setSpareParts(data);
+      try {
+        const data = await getSpareParts();
+
+        if (isMounted) {
+          setSpareParts(Array.isArray(data) ? data : []);
+        }
+      } catch (currentError) {
+        if (isMounted) {
+          setError(currentError.message);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
     }
 
     loadSpareParts();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const filteredSpareParts = useMemo(() => {
@@ -26,9 +60,13 @@ function SparePartsPage() {
       return spareParts;
     }
 
-    return spareParts.filter((sparePart) =>
-      normalizeSearchValue(sparePart.nombre).includes(normalizedSearchTerm)
-    );
+    return spareParts.filter((sparePart) => {
+      const searchableValues = [sparePart.nombre, sparePart.codigo, sparePart.marca];
+
+      return searchableValues.some((value) =>
+        normalizeSearchValue(value).includes(normalizedSearchTerm)
+      );
+    });
   }, [searchTerm, spareParts]);
 
   return (
@@ -47,45 +85,52 @@ function SparePartsPage() {
           id="spare-parts-search-input"
           type="search"
           value={searchTerm}
-          placeholder="Buscar repuestos..."
+          placeholder="Buscar por nombre, código o marca..."
           onChange={(event) => setSearchTerm(event.target.value)}
         />
       </div>
 
-      <div className="spare-parts-grid">
-        {filteredSpareParts.map((sparePart) => (
-          <article className="spare-part-card" key={sparePart.id}>
-            <div className="spare-part-card__topline">
-              <span className="spare-part-card__category">{sparePart.categoria}</span>
-            </div>
+      {isLoading && <p className="status-message">Cargando repuestos...</p>}
+      {error && <p className="status-message status-message--error">{error}</p>}
 
-            <div className="spare-part-card__content">
-              <h2>{sparePart.nombre}</h2>
-              <p>{sparePart.descripcion}</p>
-            </div>
+      {!isLoading && !error && (
+        <>
+          <div className="spare-parts-table-wrapper">
+            <table className="spare-parts-table">
+              <thead>
+                <tr>
+                  <th scope="col">Código</th>
+                  <th scope="col">Nombre</th>
+                  <th scope="col">Marca</th>
+                  <th scope="col">SubRubro</th>
+                  <th scope="col">Disponibilidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredSpareParts.map((sparePart) => (
+                  <tr key={getSparePartKey(sparePart)}>
+                    <td data-label="Código">{getDisplayValue(sparePart.codigo)}</td>
+                    <td data-label="Nombre">{getDisplayValue(sparePart.nombre)}</td>
+                    <td data-label="Marca">{getDisplayValue(sparePart.marca)}</td>
+                    <td data-label="SubRubro">{getDisplayValue(sparePart.subRubro)}</td>
+                    <td data-label="Disponibilidad">
+                      <span className="availability">
+                        {getDisplayValue(sparePart.disponibilidad)}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-            <div className="spare-part-card__status">
-              <span className="availability">{sparePart.disponibilidad}</span>
-            </div>
-
-            <Button
-              href="https://wa.me/5490000000000"
-              variant="primary"
-              className="spare-part-card__button"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Consultar
-            </Button>
-          </article>
-        ))}
-      </div>
-
-      {filteredSpareParts.length === 0 ? (
-        <p className="status-message spare-parts-empty">
-          No se encontraron repuestos con ese nombre.
-        </p>
-      ) : null}
+          {filteredSpareParts.length === 0 ? (
+            <p className="status-message spare-parts-empty">
+              No se encontraron repuestos con ese nombre, código o marca.
+            </p>
+          ) : null}
+        </>
+      )}
     </section>
   );
 }
