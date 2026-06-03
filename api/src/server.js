@@ -3,6 +3,7 @@ import cors from 'cors';
 import express from 'express';
 import { products } from './products.js';
 import dbHealthRoutes from './routes/dbHealthRoutes.js';
+import sparePartsRoutes from './routes/sparePartsRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -11,6 +12,7 @@ const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 app.use(cors({ origin: clientOrigin }));
 app.use(express.json());
 app.use('/api', dbHealthRoutes);
+app.use('/api', sparePartsRoutes);
 
 app.get('/api/health', (request, response) => {
   response.json({
