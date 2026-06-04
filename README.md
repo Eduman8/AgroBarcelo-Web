@@ -1,69 +1,100 @@
-# AgroBarceló Web
+AgroVentas Barceló
 
-Proyecto full-stack en JavaScript para AgroBarceló.
+Agricultural business platform designed for AgroVentas Barceló, focused on machinery, spare parts, and customer inquiry management.
 
-## Estructura
+The project is being developed as a real-world business solution, integrating a modern web interface with the company's existing inventory infrastructure and future Microsoft SQL Server integration.
 
-```text
-AgroBarcelo-Web/
-├── api/      # Backend Node.js + Express
-└── client/   # Frontend React + Vite
-```
+Overview
 
-## Requisitos
+AgroVentas Barceló provides agricultural machinery services, spare parts sales, and technical support for producers and contractors.
 
-- Node.js 20 o superior recomendado.
-- npm 10 o superior recomendado.
+This platform aims to centralize product information, simplify customer inquiries, and offer a scalable foundation for future digital operations.
 
-## Configuración inicial
+Main Features
+Spare Parts Catalog
+Searchable spare parts catalog
+Category filtering
+Pagination
+Product detail pages
+Availability indicators
+Inquiry-based workflow
+Machinery Section
+Machinery showcase
+Technical information
+Product galleries
+Contact-driven lead generation
+Services Section
+Company services presentation
+Agricultural equipment support information
+Customer contact options
+Customer Inquiries
+Product inquiry requests
+WhatsApp integration
+Email contact workflows
+Administration
+Product management
+Machinery management
+Image management
+Content administration
 
-Instalar dependencias desde la raíz del monorepo:
 
-```bash
-npm install
-```
+Technology Stack
+Frontend
+React
+Vite
+JavaScript
+React Router
 
-Crear los archivos de entorno a partir de los ejemplos:
+Backend
+Node.js
+Express
+Database
+Microsoft SQL Server (planned integration)
+Tools
+Git
+GitHub
 
-```bash
-cp api/.env.example api/.env
-cp client/.env.example client/.env
-```
 
-## Ejecutar backend
+Project Status
 
-```bash
-npm run dev:api
-```
+Current stage:
 
-La API queda disponible en `http://localhost:3000`.
+Core frontend structure completed
+Repuestos module implemented
+Search and pagination implemented
+Navigation structure completed
+Services section in progress
+SQL Server integration pending
 
-Endpoints iniciales:
+Status:
 
-- `GET /api/health`
-- `GET /api/products`
+🚧 Active Development
 
-## Ejecutar frontend
+Business Requirements
 
-En otra terminal:
+The platform follows specific client requirements:
 
-```bash
-npm run dev:client
-```
+Machinery prices are not displayed publicly
+Spare parts prices are hidden
+Stock quantities are not exposed
+Availability is shown as "Disponible"
+Customer inquiries are handled directly by AgroVentas Barceló
+Product images can be managed by administrators
+Future Roadmap
+Services module
+Machinery module
+About page
+Contact page
+SQL Server integration
+Administrative dashboard
+Production deployment
 
-La aplicación queda disponible en `http://localhost:5173`.
+Author
 
-## Scripts útiles
+Eduardo Gómez
 
-- `npm run dev:api`: inicia el backend Express en modo desarrollo.
-- `npm run dev:client`: inicia el frontend Vite en modo desarrollo.
-- `npm run build`: genera el build de producción del frontend.
-- `npm run start:api`: inicia el backend sin modo watch.
+Frontend / Full-Stack Developer
 
-## Notas del alcance actual
+GitHub: https://github.com/Eduman8
 
-- El proyecto usa únicamente JavaScript.
-- No usa TypeScript.
-- No usa Next.js.
-- No incluye autenticación todavía.
-- No conecta a SQL Server todavía.
+LinkedIn: https://linkedin.com/in/eduardo-damián-gómez-89a432217
