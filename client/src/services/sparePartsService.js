@@ -18,3 +18,17 @@ export async function getSpareParts({ page = 1, limit = 50, search = '' } = {}) 
 
   return response.json();
 }
+
+export async function getSparePartById(id) {
+  const response = await fetch(`${apiUrl}/api/repuestos/${encodeURIComponent(id)}`);
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error('No se pudo cargar el detalle del repuesto.');
+  }
+
+  return response.json();
+}
