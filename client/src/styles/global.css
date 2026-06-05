@@ -1066,13 +1066,24 @@ h1 {
   transform: translateY(-3px);
 }
 
+.machine-card__image,
 .machine-card__placeholder {
-  display: grid;
   min-height: 132px;
   margin-bottom: 18px;
+  border-radius: 9px;
+}
+
+.machine-card__image {
+  width: 100%;
+  height: 132px;
+  object-fit: cover;
+  border: 1px solid rgba(20, 20, 20, 0.08);
+}
+
+.machine-card__placeholder {
+  display: grid;
   place-items: center;
   border: 1px dashed rgba(201, 21, 28, 0.26);
-  border-radius: 9px;
   background:
     linear-gradient(135deg, rgba(201, 21, 28, 0.08) 0%, rgba(255, 255, 255, 0.78) 52%, rgba(20, 20, 20, 0.04) 100%),
     #fbfbfa;
@@ -1183,12 +1194,32 @@ h1 {
   display: block;
 }
 
+.machine-detail-gallery {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+
 .machine-detail-card__media {
+  display: grid;
+  min-height: 360px;
+  overflow: hidden;
+  border: 1px solid rgba(201, 21, 28, 0.16);
+  border-radius: 10px;
+  background: #fbfbfa;
+}
+
+.machine-detail-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.machine-detail-media__placeholder {
   display: grid;
   min-height: 360px;
   place-items: center;
   border: 1px dashed rgba(201, 21, 28, 0.28);
-  border-radius: 10px;
   background:
     linear-gradient(135deg, rgba(201, 21, 28, 0.09) 0%, rgba(255, 255, 255, 0.82) 52%, rgba(20, 20, 20, 0.05) 100%),
     #fbfbfa;
@@ -1196,7 +1227,73 @@ h1 {
   font-size: 0.86rem;
   font-weight: 950;
   letter-spacing: 0.05em;
+  text-align: center;
   text-transform: uppercase;
+}
+
+.machine-detail-gallery__header h2 {
+  margin-bottom: 8px;
+  color: var(--color-ink);
+  font-size: 1.25rem;
+  font-weight: 950;
+  letter-spacing: -0.035em;
+}
+
+.machine-detail-gallery__header p {
+  margin-bottom: 0;
+  color: var(--color-muted);
+  font-size: 0.94rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.machine-detail-thumbnails {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.machine-detail-thumbnail {
+  min-height: 76px;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid rgba(201, 21, 28, 0.2);
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.machine-detail-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.machine-detail-gallery__empty {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border: 1px dashed rgba(201, 21, 28, 0.26);
+  border-radius: 9px;
+  background:
+    linear-gradient(135deg, rgba(201, 21, 28, 0.07), rgba(255, 255, 255, 0.84)),
+    #fbfbfa;
+}
+
+.machine-detail-gallery__empty span {
+  color: var(--color-ink);
+  font-size: 0.82rem;
+  font-weight: 950;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.machine-detail-gallery__empty p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.94rem;
+  font-weight: 650;
+  line-height: 1.45;
 }
 
 .machine-detail-card__body {

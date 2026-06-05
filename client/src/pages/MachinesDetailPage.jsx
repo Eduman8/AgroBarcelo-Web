@@ -6,12 +6,14 @@ function getMachineId(routeParams) {
 }
 
 function getAvailabilityLabel(isAvailable) {
-  return isAvailable ? 'Disponible' : 'Trabajo realizado';
+  return isAvailable ? 'Disponible' : 'No disponible';
 }
 
 function MachinesDetailPage({ routeParams }) {
   const machineId = getMachineId(routeParams);
   const machine = getMachineById(machineId);
+  const galleryImages = machine?.galeria ?? [];
+  const hasGalleryImages = galleryImages.length > 0;
 
   return (
     <section className="machine-detail-page" aria-labelledby="machine-detail-title">
@@ -30,8 +32,36 @@ function MachinesDetailPage({ routeParams }) {
         </div>
       ) : (
         <article className="machine-detail-card">
-          <div className="machine-detail-card__media" aria-hidden="true">
-            <span>Foto próximamente</span>
+          <div className="machine-detail-gallery" aria-labelledby="machine-gallery-title">
+            <div className="machine-detail-card__media">
+              {machine.imagenPrincipal ? (
+                <img src={machine.imagenPrincipal} alt={`Imagen principal de ${machine.nombre}`} />
+              ) : (
+                <div className="machine-detail-media__placeholder" aria-hidden="true">
+                  <span>Imagen principal próximamente</span>
+                </div>
+              )}
+            </div>
+
+            <div className="machine-detail-gallery__header">
+              <h2 id="machine-gallery-title">Galería de imágenes</h2>
+              <p>Espacio preparado para fotos reales y miniaturas de la publicación.</p>
+            </div>
+
+            {hasGalleryImages ? (
+              <div className="machine-detail-thumbnails" aria-label="Miniaturas de la maquinaria">
+                {galleryImages.map((imageSrc, index) => (
+                  <button className="machine-detail-thumbnail" key={`${imageSrc}-${index}`} type="button">
+                    <img src={imageSrc} alt={`${machine.nombre} - imagen ${index + 1}`} />
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="machine-detail-gallery__empty" aria-live="polite">
+                <span>Galería próximamente</span>
+                <p>Esta publicación todavía no tiene imágenes cargadas.</p>
+              </div>
+            )}
           </div>
 
           <div className="machine-detail-card__body">
@@ -53,14 +83,14 @@ function MachinesDetailPage({ routeParams }) {
                 <dd>{machine.estado}</dd>
               </div>
               <div>
-                <dt>Tipo</dt>
-                <dd>{machine.tipo}</dd>
+                <dt>Disponibilidad</dt>
+                <dd>{getAvailabilityLabel(machine.disponible)}</dd>
               </div>
             </dl>
 
             <div className="machine-detail-description">
-              <h2>Descripción</h2>
-              <p>{machine.descripcionCompleta ?? machine.descripcionCorta}</p>
+              <h2>Descripción larga</h2>
+              <p>{machine.descripcionLarga}</p>
             </div>
 
             <div className="machine-detail-actions">
