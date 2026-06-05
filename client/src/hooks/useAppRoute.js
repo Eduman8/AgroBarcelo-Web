@@ -51,7 +51,11 @@ function matchRoute(pathname) {
 }
 
 export function useAppRoute() {
-  const [currentPath, setCurrentPath] = useState(() => normalizePath(window.location.pathname));
+  const [currentLocation, setCurrentLocation] = useState(() => ({
+    pathname: normalizePath(window.location.pathname),
+    search: window.location.search
+  }));
+  const currentPath = currentLocation.pathname;
 
   useEffect(() => {
     function handleNavigation(event) {
@@ -78,12 +82,15 @@ export function useAppRoute() {
 
       event.preventDefault();
       window.history.pushState({}, '', `${nextPath}${link.search}${link.hash}`);
-      setCurrentPath(nextPath);
+      setCurrentLocation({ pathname: nextPath, search: link.search });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function handlePopState() {
-      setCurrentPath(normalizePath(window.location.pathname));
+      setCurrentLocation({
+        pathname: normalizePath(window.location.pathname),
+        search: window.location.search
+      });
     }
 
     document.addEventListener('click', handleNavigation);
@@ -95,7 +102,7 @@ export function useAppRoute() {
     };
   }, [currentPath]);
 
-  const route = useMemo(() => matchRoute(currentPath), [currentPath]);
+  const route = useMemo(() => matchRoute(currentPath), [currentPath, currentLocation.search]);
 
   return route;
 }
