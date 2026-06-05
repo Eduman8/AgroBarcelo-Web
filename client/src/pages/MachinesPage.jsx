@@ -75,9 +75,17 @@ function MachinesPage() {
       <div className="machines-grid">
         {filteredMachines.map((machine) => (
           <article className="machine-card" key={machine.id}>
-            <div className="machine-card__placeholder" aria-hidden="true">
-              <span>{machine.tipo}</span>
-            </div>
+            {machine.imagenPrincipal ? (
+              <img
+                className="machine-card__image"
+                src={machine.imagenPrincipal}
+                alt={`Imagen principal de ${machine.nombre}`}
+              />
+            ) : (
+              <div className="machine-card__placeholder" aria-hidden="true">
+                <span>Imagen próximamente</span>
+              </div>
+            )}
 
             <div className="machine-card__topline">
               <span className="machine-card__type">{machine.categoria}</span>
