@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getMachineById } from '../data/machinesMock.js';
 import { getSparePartById } from '../services/sparePartsService.js';
+import { whatsappConfig } from '../config/contact.js';
 
 const contactBlocks = [
   {
@@ -8,8 +9,7 @@ const contactBlocks = [
     title: 'WhatsApp',
     text: 'Consultas comerciales y atención rápida.',
     action: {
-      label: 'Enviar WhatsApp',
-      href: 'https://wa.me/5490000000000'
+      label: 'Enviar consulta por WhatsApp'
     }
   },
   {
@@ -47,6 +47,29 @@ function getAvailabilityLabel(isAvailable) {
   return isAvailable ? 'Disponible' : 'Trabajo realizado';
 }
 
+function normalizeWhatsAppPhoneNumber(phoneNumber) {
+  return String(phoneNumber).replace(/\D/g, '');
+}
+
+function buildWhatsAppMessage({ sparePart, machine }) {
+  if (sparePart) {
+    return `Hola AgroBarceló, quiero consultar por el repuesto ${getDisplayValue(sparePart.nombre)} (código: ${getDisplayValue(sparePart.codigo)}).`;
+  }
+
+  if (machine) {
+    return `Hola AgroBarceló, quiero consultar por la maquinaria ${machine.nombre}.`;
+  }
+
+  return 'Hola AgroBarceló, quiero hacer una consulta.';
+}
+
+function buildWhatsAppUrl(message) {
+  const phoneNumber = normalizeWhatsAppPhoneNumber(whatsappConfig.phoneNumber);
+  const params = new URLSearchParams({ text: message });
+
+  return `https://wa.me/${phoneNumber}?${params.toString()}`;
+}
+
 function ContactPage() {
   const searchParams = new URLSearchParams(window.location.search);
   const sparePartId = searchParams.get('producto');
@@ -61,6 +84,7 @@ function ContactPage() {
 
   const machine = machineId ? getMachineById(machineId) : null;
   const wasMachineNotFound = Boolean(machineId && !machine);
+  const whatsappUrl = buildWhatsAppUrl(buildWhatsAppMessage({ sparePart, machine }));
 
   useEffect(() => {
     if (selectedQueryType === 'producto') {
@@ -241,7 +265,7 @@ function ContactPage() {
                 {block.action ? (
                   <a
                     className="button button--primary contact-card__button"
-                    href={block.action.href}
+                    href={whatsappUrl}
                     target="_blank"
                     rel="noreferrer"
                   >
