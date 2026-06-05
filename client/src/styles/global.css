@@ -570,14 +570,14 @@ h1 {
 }
 
 .services-page {
-  padding: 44px 0 58px;
+  padding: 34px 0 58px;
 }
 
 .services-hero {
   position: relative;
   overflow: hidden;
-  margin-bottom: 28px;
-  padding: 48px;
+  margin-bottom: 20px;
+  padding: 30px 38px;
   border: 1px solid rgba(201, 21, 28, 0.14);
   border-radius: 12px;
   background:
@@ -601,26 +601,27 @@ h1 {
 
 .services-hero .eyebrow {
   display: block;
+  margin-bottom: 8px;
 }
 
 .services-hero h1 {
-  max-width: 720px;
-  margin-bottom: 16px;
+  max-width: 760px;
+  margin-bottom: 10px;
   color: var(--color-ink);
-  font-size: clamp(2.7rem, 6vw, 5rem);
-  line-height: 0.98;
+  font-size: clamp(2.25rem, 4.6vw, 3.95rem);
+  line-height: 1;
   text-shadow: none;
 }
 
 .services-hero p:last-child {
   position: relative;
   z-index: 1;
-  max-width: 610px;
+  max-width: 570px;
   margin-bottom: 0;
   color: var(--color-muted);
-  font-size: 1.12rem;
+  font-size: 1.04rem;
   font-weight: 650;
-  line-height: 1.45;
+  line-height: 1.4;
 }
 
 .services-grid {
@@ -1550,6 +1551,21 @@ h1 {
     padding: 36px;
   }
 
+  .services-hero {
+    margin-bottom: 20px;
+    padding: 28px 32px;
+  }
+
+  .services-hero h1 {
+    max-width: 680px;
+    font-size: clamp(2.15rem, 6vw, 3.4rem);
+  }
+
+  .services-hero p:last-child {
+    max-width: 560px;
+    font-size: 1rem;
+  }
+
   .services-cta {
     align-items: flex-start;
     flex-direction: column;
@@ -1649,6 +1665,27 @@ h1 {
     padding: 28px 22px;
   }
 
+  .services-hero {
+    margin-bottom: 18px;
+    padding: 22px 20px;
+  }
+
+  .services-hero .eyebrow {
+    margin-bottom: 6px;
+  }
+
+  .services-hero h1 {
+    max-width: 100%;
+    margin-bottom: 8px;
+    font-size: clamp(2rem, 10vw, 2.75rem);
+    line-height: 1.02;
+  }
+
+  .services-hero p:last-child {
+    font-size: 0.98rem;
+    line-height: 1.38;
+  }
+
   .services-cta {
     padding: 24px 22px;
   }
@@ -1657,6 +1694,10 @@ h1 {
   .machines-hero h1,
   .about-hero h1 {
     font-size: clamp(2.35rem, 12vw, 3.4rem);
+  }
+
+  .services-hero h1 {
+    font-size: clamp(2rem, 10vw, 2.75rem);
   }
 
   .machine-card__details,
