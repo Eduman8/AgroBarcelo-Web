@@ -1,99 +1,161 @@
-AgroVentas Barceló
+# AgroVentas Barceló
 
-Agricultural business platform designed for AgroVentas Barceló, focused on machinery, spare parts, and customer inquiry management.
+Agricultural business platform developed for AgroVentas Barceló, focused on agricultural machinery, spare parts, and customer inquiry management.
 
-The project is being developed as a real-world business solution, integrating a modern web interface with the company's existing inventory infrastructure and future Microsoft SQL Server integration.
+This project is being built as a real-world business solution, combining a modern web application with the company's existing inventory infrastructure and future Microsoft SQL Server integration.
 
-Overview
+---
 
-AgroVentas Barceló provides agricultural machinery services, spare parts sales, and technical support for producers and contractors.
+## Overview
 
-This platform aims to centralize product information, simplify customer inquiries, and offer a scalable foundation for future digital operations.
+AgroVentas Barceló provides agricultural machinery sales, spare parts distribution, and technical support for producers and contractors.
 
-Main Features
-Spare Parts Catalog
-Searchable spare parts catalog
-Category filtering
-Pagination
-Product detail pages
-Availability indicators
-Inquiry-based workflow
-Machinery Section
-Machinery showcase
-Technical information
-Product galleries
-Contact-driven lead generation
-Services Section
-Company services presentation
-Agricultural equipment support information
-Customer contact options
-Customer Inquiries
-Product inquiry requests
-WhatsApp integration
-Email contact workflows
-Administration
-Product management
-Machinery management
-Image management
-Content administration
+The objective of this platform is to centralize product information, simplify customer communication, and create a scalable digital foundation for future business operations.
 
+---
 
-Technology Stack
-Frontend
-React
-Vite
-JavaScript
-React Router
+## Features
 
-Backend
-Node.js
-Express
-Database
-Microsoft SQL Server (planned integration)
-Tools
-Git
-GitHub
+### Spare Parts Catalog
 
+* Searchable spare parts catalog
+* Category-based filtering
+* Pagination system
+* Product detail pages
+* Availability indicators
+* Inquiry-based purchasing workflow
 
+### Machinery Section
 
-Current stage:
+* Machinery showcase
+* Technical specifications
+* Product image galleries
+* Contact-driven lead generation
 
-Core frontend structure completed
-Repuestos module implemented
-Search and pagination implemented
-Navigation structure completed
-Services section in progress
-SQL Server integration pending
+### Services Section
 
-Status:
+* Company services presentation
+* Agricultural equipment support information
+* Customer assistance channels
 
-🚧 Active Development
+### Customer Inquiries
 
-Business Requirements
+* Product inquiry requests
+* WhatsApp integration
+* Email contact workflows
+
+### Administration
+
+* Product management
+* Machinery management
+* Image management
+* Content administration
+
+---
+
+## Technology Stack
+
+### Frontend
+
+* React
+* Vite
+* JavaScript
+* React Router
+
+### Backend
+
+* Node.js
+* Express
+
+### Database
+
+* Microsoft SQL Server
+
+### Development Tools
+
+* Git
+* GitHub
+
+---
+
+## Project Structure
+
+Current development is focused on building the public-facing platform before integrating the company's inventory database.
+
+### Completed
+
+* Core frontend architecture
+* Navigation system
+* Spare parts catalog
+* Search functionality
+* Pagination system
+* Product detail pages
+
+### In Progress
+
+* Services section
+* Machinery module
+* Company information pages
+
+### Pending
+
+* SQL Server integration
+* Administrative dashboard
+* Production deployment
+
+---
+
+## Business Rules
 
 The platform follows specific client requirements:
 
-Machinery prices are not displayed publicly
-Spare parts prices are hidden
-Stock quantities are not exposed
-Availability is shown as "Disponible"
-Customer inquiries are handled directly by AgroVentas Barceló
-Product images can be managed by administrators
-Future Roadmap
-Services module
-Machinery module
-About page
-Contact page
-SQL Server integration
-Administrative dashboard
-Production deployment
+* Machinery prices are not displayed publicly.
+* Spare parts prices are hidden from customers.
+* Exact stock quantities are not exposed.
+* Product availability is shown only as **"Disponible"**.
+* Customer inquiries are handled directly by AgroVentas Barceló.
+* Product images can be managed through an administration panel.
 
-Author
+---
 
-Eduardo Gómez
+## Roadmap
+
+### Phase 1
+
+* Services page
+* Machinery page
+* About page
+* Contact page
+
+### Phase 2
+
+* Microsoft SQL Server integration
+* Inventory synchronization
+* Dynamic product management
+
+### Phase 3
+
+* Administrative dashboard
+* Production deployment
+* Performance optimizations
+
+---
+
+## Project Status
+
+🚧 **Active Development**
+
+This project is currently under active development and is being built in collaboration with AgroVentas Barceló as a real-world business solution.
+
+---
+
+## Author
+
+**Eduardo Gómez**
 
 Frontend / Full-Stack Developer
 
 GitHub: https://github.com/Eduman8
 
 LinkedIn: https://linkedin.com/in/eduardo-damián-gómez-89a432217
+
