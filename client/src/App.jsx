@@ -3,13 +3,13 @@ import Header from './components/layout/Header.jsx';
 import { useAppRoute } from './hooks/useAppRoute.js';
 
 function App() {
-  const { currentPath, Page } = useAppRoute();
+  const { currentPath, Page, routeParams } = useAppRoute();
 
   return (
     <>
       <Header currentPath={currentPath} />
       <main className="page">
-        <Page />
+        <Page routeParams={routeParams} />
       </main>
       <Footer currentPath={currentPath} />
     </>

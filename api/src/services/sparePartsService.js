@@ -43,6 +43,30 @@ OFFSET @offset ROWS
 FETCH NEXT @limit ROWS ONLY;
 `;
 
+const sparePartByIdQuery = `
+SELECT TOP (1)
+    p.ID_Articulo AS id,
+    p.Descripcion AS nombre,
+    p.CodigoAlternativo AS codigo,
+    r.Descripcion AS rubro,
+    sr.Descripcion AS subRubro,
+    m.Marca AS marca
+FROM dbo.Productos p
+LEFT JOIN dbo.Rubros r
+    ON r.ID_Rubro = p.ID_Rubro
+LEFT JOIN dbo.SubRubros sr
+    ON sr.ID_SubRubro = p.ID_SubRubro
+LEFT JOIN dbo.Marcas m
+    ON m.ID_Marca = p.ID_Marca
+LEFT JOIN (
+    SELECT DISTINCT ID_Articulo
+    FROM dbo.vwStockExistencia
+) se
+    ON se.ID_Articulo = p.ID_Articulo
+WHERE ${sparePartRubrosFilter}
+  AND p.ID_Articulo = @id;
+`;
+
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
@@ -126,4 +150,21 @@ export const getSpareParts = async (options = {}) => {
       totalPages: Math.ceil(total / paginationOptions.limit)
     }
   };
+};
+
+export const getSparePartById = async (id) => {
+  const sparePartId = parsePositiveInteger(id, null);
+
+  if (!sparePartId) {
+    return null;
+  }
+
+  const pool = await getSqlPool();
+  const result = await pool
+    .request()
+    .input('id', sql.Int, sparePartId)
+    .query(sparePartByIdQuery);
+  const sparePart = result.recordset?.[0];
+
+  return sparePart ? mapSparePart(sparePart) : null;
 };

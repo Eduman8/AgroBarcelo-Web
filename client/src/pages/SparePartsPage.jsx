@@ -134,6 +134,7 @@ function SparePartsPage() {
                   <th scope="col">Marca</th>
                   <th scope="col">SubRubro</th>
                   <th scope="col">Disponibilidad</th>
+                  <th scope="col">Detalle</th>
                 </tr>
               </thead>
               <tbody>
@@ -147,6 +148,11 @@ function SparePartsPage() {
                       <span className="availability">
                         {getDisplayValue(sparePart.disponibilidad)}
                       </span>
+                    </td>
+                    <td data-label="Detalle">
+                      <a className="spare-parts-table__detail-link" href={`/repuestos/${sparePart.id}`}>
+                        Ver detalle
+                      </a>
                     </td>
                   </tr>
                 ))}

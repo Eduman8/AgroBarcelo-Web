@@ -9,6 +9,47 @@ function normalizePath(pathname) {
   return pathname || '/';
 }
 
+function matchRoute(pathname) {
+  const currentPath = normalizePath(pathname);
+
+  if (routes[currentPath]) {
+    return {
+      currentPath,
+      Page: routes[currentPath],
+      routeParams: {}
+    };
+  }
+
+  for (const [routePattern, Page] of Object.entries(routes)) {
+    const routeParts = routePattern.split('/').filter(Boolean);
+    const pathParts = currentPath.split('/').filter(Boolean);
+
+    if (routeParts.length !== pathParts.length) {
+      continue;
+    }
+
+    const routeParams = {};
+    const isMatch = routeParts.every((routePart, index) => {
+      if (routePart.startsWith(':')) {
+        routeParams[routePart.slice(1)] = decodeURIComponent(pathParts[index]);
+        return true;
+      }
+
+      return routePart === pathParts[index];
+    });
+
+    if (isMatch) {
+      return { currentPath, Page, routeParams };
+    }
+  }
+
+  return {
+    currentPath,
+    Page: fallbackRoute,
+    routeParams: {}
+  };
+}
+
 export function useAppRoute() {
   const [currentPath, setCurrentPath] = useState(() => normalizePath(window.location.pathname));
 
@@ -25,17 +66,18 @@ export function useAppRoute() {
       }
 
       const nextPath = normalizePath(link.pathname);
+      const nextRoute = matchRoute(nextPath);
 
-      if (link.hash && nextPath === currentPath) {
+      if (link.hash && nextPath === currentPath && link.search === window.location.search) {
         return;
       }
 
-      if (!routes[nextPath]) {
+      if (nextRoute.Page === fallbackRoute && !routes[nextPath]) {
         return;
       }
 
       event.preventDefault();
-      window.history.pushState({}, '', `${nextPath}${link.hash}`);
+      window.history.pushState({}, '', `${nextPath}${link.search}${link.hash}`);
       setCurrentPath(nextPath);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -53,7 +95,7 @@ export function useAppRoute() {
     };
   }, [currentPath]);
 
-  const Page = useMemo(() => routes[currentPath] || fallbackRoute, [currentPath]);
+  const route = useMemo(() => matchRoute(currentPath), [currentPath]);
 
-  return { currentPath, Page };
+  return route;
 }
