@@ -55,7 +55,6 @@ Git
 GitHub
 
 
-Project Status
 
 Current stage:
 
