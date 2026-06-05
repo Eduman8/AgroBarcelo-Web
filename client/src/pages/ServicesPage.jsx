@@ -5,32 +5,53 @@ const services = [
     icon: '🚜',
     title: 'Venta de maquinaria',
     description:
-      'Tractores, sembradoras, rastras e implementos agrícolas seleccionados para cada necesidad del campo.',
+      'Maquinaria agrícola seleccionada para responder a las necesidades reales de cada productor y tipo de trabajo.',
+    benefits: [
+      'Asesoramiento según la labor',
+      'Opciones para distintas escalas',
+      'Acompañamiento en la elección'
+    ],
     action: 'Ver maquinarias',
     href: '/maquinarias'
+  },
+  {
+    icon: '◎',
+    title: 'Venta de repuestos',
+    description:
+      'Repuestos agrícolas para mantener los equipos operativos y reducir tiempos de parada en plena campaña.',
+    benefits: [
+      'Búsqueda simple y ordenada',
+      'Consulta personalizada',
+      'Soluciones para mantenimiento'
+    ],
+    action: 'Buscar repuestos',
+    href: '/repuestos'
   },
   {
     icon: '☏',
     title: 'Servicio postventa',
     description:
-      'Asistencia técnica y acompañamiento especializado para mantener tu maquinaria trabajando.',
-    action: 'Consultar por WhatsApp',
-    href: 'https://wa.me/5490000000000',
-    isExternal: true
+      'Asistencia técnica y seguimiento para acompañar el rendimiento de la maquinaria después de la compra.',
+    benefits: [
+      'Soporte especializado',
+      'Orientación técnica',
+      'Respuesta cercana'
+    ],
+    action: 'Consultar postventa',
+    href: '/contacto?servicio=postventa'
   },
   {
     icon: '⚙',
-    title: 'Servicio de mecanizado CNC',
-    description: 'Fabricación y mecanizado de piezas especiales con precisión y tecnología.',
-    action: 'Solicitar cotización',
-    href: '#contacto'
-  },
-  {
-    icon: '◎',
-    title: 'Venta de repuestos',
-    description: 'Repuestos agrícolas para maquinaria, con búsqueda y consulta personalizada.',
-    action: 'Buscar repuestos',
-    href: '/repuestos'
+    title: 'Mecanizado CNC',
+    description:
+      'Fabricación y mecanizado de piezas con precisión para resolver necesidades específicas del sector agropecuario.',
+    benefits: [
+      'Piezas a medida',
+      'Terminación precisa',
+      'Soluciones para reparaciones'
+    ],
+    action: 'Consultar mecanizado',
+    href: '/contacto?servicio=mecanizado-cnc'
   }
 ];
 
@@ -39,10 +60,10 @@ function ServicesPage() {
     <section className="services-page" aria-labelledby="services-title">
       <div className="services-hero">
         <p className="eyebrow">Soluciones AgroBarceló</p>
-        <h1 id="services-title">Nuestros servicios</h1>
+        <h1 id="services-title">Servicios para acompañar el trabajo del campo</h1>
         <p>
-          Acompañamos al productor con maquinarias, repuestos y soporte especializado para el
-          trabajo diario en el campo.
+          AgroBarceló combina venta de maquinaria, repuestos, asistencia técnica y mecanizado para
+          brindar soluciones concretas al sector agropecuario.
         </p>
       </div>
 
@@ -55,18 +76,28 @@ function ServicesPage() {
             <div className="service-card__content">
               <h2>{service.title}</h2>
               <p>{service.description}</p>
+              <ul className="service-card__benefits" aria-label={`Beneficios de ${service.title}`}>
+                {service.benefits.map((benefit) => (
+                  <li key={benefit}>{benefit}</li>
+                ))}
+              </ul>
             </div>
-            <Button
-              href={service.href}
-              variant="primary"
-              className="service-card__button"
-              target={service.isExternal ? '_blank' : undefined}
-              rel={service.isExternal ? 'noreferrer' : undefined}
-            >
+            <Button href={service.href} variant="primary" className="service-card__button">
               {service.action}
             </Button>
           </article>
         ))}
+      </div>
+
+      <div className="services-cta" aria-labelledby="services-cta-title">
+        <div>
+          <p className="eyebrow">Asesoramiento</p>
+          <h2 id="services-cta-title">¿Necesitás asesoramiento?</h2>
+          <p>Contanos qué necesitás y te orientamos con la mejor solución disponible.</p>
+        </div>
+        <Button href="/contacto" variant="primary" className="services-cta__button">
+          Contactar ahora
+        </Button>
       </div>
     </section>
   );
