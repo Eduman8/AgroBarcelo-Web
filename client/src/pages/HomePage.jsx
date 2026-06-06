@@ -1,9 +1,6 @@
-import { useEffect, useState } from 'react';
 import Button from '../components/ui/Button.jsx';
 import CategoriesSection from '../components/home/CategoriesSection.jsx';
-import FeaturedProducts from '../components/home/FeaturedProducts.jsx';
 import Hero from '../components/home/Hero.jsx';
-import { getProducts } from '../services/productService.js';
 
 const advantages = [
   {
@@ -21,25 +18,6 @@ const advantages = [
 ];
 
 function HomePage() {
-  const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    async function loadProducts() {
-      try {
-        const data = await getProducts();
-        setProducts(data);
-      } catch (currentError) {
-        setError(currentError.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadProducts();
-  }, []);
-
   return (
     <>
       <Hero />
@@ -72,8 +50,6 @@ function HomePage() {
           Consultar ahora
         </Button>
       </section>
-
-      <FeaturedProducts products={products} isLoading={isLoading} error={error} />
     </>
   );
 }

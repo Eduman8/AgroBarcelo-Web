@@ -1,5 +1,4 @@
 import { navigationItems } from '../../config/navigation.js';
-import Button from '../ui/Button.jsx';
 import Logo from '../ui/Logo.jsx';
 
 function Header({ currentPath = '/' }) {
@@ -21,10 +20,6 @@ function Header({ currentPath = '/' }) {
             </a>
           ))}
         </nav>
-
-        <Button href="/contacto" variant="header">
-          Consultanos
-        </Button>
       </div>
     </header>
   );
