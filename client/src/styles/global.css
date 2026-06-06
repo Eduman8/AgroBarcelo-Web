@@ -290,19 +290,12 @@ h1 {
   display: none;
 }
 
-.categories-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
-}
-
 .products-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
 
-.category-card,
 .product-card,
 .status-message {
   border: 1px solid var(--color-border);
@@ -310,105 +303,10 @@ h1 {
   box-shadow: var(--shadow-card);
 }
 
-.category-card {
-  position: relative;
-  display: grid;
-  grid-template-columns: 64px 1fr 22px;
-  align-items: center;
-  min-height: 150px;
-  overflow: hidden;
-  padding: 20px;
-  border-radius: 8px;
-  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+.home-advantages {
+  margin-top: 24px;
 }
 
-.category-card::after {
-  content: '›';
-  z-index: 1;
-  color: #161616;
-  font-size: 2rem;
-  font-weight: 500;
-  line-height: 1;
-}
-
-.category-card:hover {
-  border-color: rgba(201, 21, 28, 0.28);
-  box-shadow: var(--shadow-soft);
-  transform: translateY(-3px);
-}
-
-.category-card::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 0 auto;
-  width: 45%;
-  opacity: 0.16;
-  background-repeat: no-repeat;
-  background-size: 80% auto;
-  background-position: center right 8px;
-  filter: grayscale(1);
-}
-
-.category-card:nth-child(1)::before {
-  background-image: radial-gradient(circle at 50% 50%, transparent 28%, #9d9d9d 29% 41%, transparent 42%), radial-gradient(circle at 50% 50%, #a8a8a8 0 10%, transparent 11%);
-}
-
-.category-card:nth-child(2)::before,
-.category-card:nth-child(3)::before,
-.category-card:nth-child(4)::before {
-  background-image: url('../assets/images/hero-tractor.png');
-  background-size: cover;
-}
-
-.category-card__icon {
-  display: inline-grid;
-  width: 54px;
-  height: 54px;
-  place-items: center;
-  border-radius: 8px;
-  background: linear-gradient(180deg, #cf171e 0%, #ae1118 100%);
-  color: #ffffff;
-  font-size: 1.75rem;
-  box-shadow: 0 7px 14px rgba(174, 17, 24, 0.28);
-}
-
-.category-card__body {
-  position: relative;
-  z-index: 1;
-}
-
-.category-card h3 {
-  margin-bottom: 5px;
-  font-size: 1.1rem;
-  font-weight: 950;
-  line-height: 1.15;
-}
-
-.category-card p {
-  max-width: 250px;
-  margin-bottom: 12px;
-  color: #4f4f4f;
-  font-size: 0.88rem;
-  font-weight: 500;
-  line-height: 1.35;
-}
-
-.category-card__action {
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-primary-dark);
-  font-size: 0.82rem;
-  font-weight: 950;
-}
-
-.category-card__action::after {
-  content: '›';
-  margin-left: 8px;
-  font-size: 1.25rem;
-  line-height: 0.75;
-}
-
-.home-advantages,
 .home-cta {
   margin-top: 26px;
 }
@@ -1756,7 +1654,6 @@ h1 {
     gap: 12px;
   }
 
-  .categories-grid,
   .products-grid,
   .home-advantages__grid,
   .services-grid,
@@ -1862,10 +1759,6 @@ h1 {
     font-size: 1rem;
   }
 
-  .category-card {
-    grid-template-columns: 64px 1fr 20px;
-    padding: 18px;
-  }
 
   .section-heading--split {
     flex-direction: row;
