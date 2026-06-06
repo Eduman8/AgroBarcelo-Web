@@ -327,15 +327,14 @@ h1 {
   letter-spacing: -0.04em;
 }
 
-.categories-section .eyebrow,
 .products-section .eyebrow {
   display: none;
 }
 
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
 }
 
 .products-grid {
@@ -355,12 +354,13 @@ h1 {
 .category-card {
   position: relative;
   display: grid;
-  grid-template-columns: 74px 1fr 22px;
+  grid-template-columns: 64px 1fr 22px;
   align-items: center;
-  min-height: 108px;
+  min-height: 150px;
   overflow: hidden;
-  padding: 20px 22px;
+  padding: 20px;
   border-radius: 8px;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .category-card::after {
@@ -370,6 +370,12 @@ h1 {
   font-size: 2rem;
   font-weight: 500;
   line-height: 1;
+}
+
+.category-card:hover {
+  border-color: rgba(201, 21, 28, 0.28);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-3px);
 }
 
 .category-card::before {
@@ -389,15 +395,16 @@ h1 {
 }
 
 .category-card:nth-child(2)::before,
-.category-card:nth-child(3)::before {
+.category-card:nth-child(3)::before,
+.category-card:nth-child(4)::before {
   background-image: url('../assets/images/hero-tractor.png');
   background-size: cover;
 }
 
 .category-card__icon {
   display: inline-grid;
-  width: 58px;
-  height: 58px;
+  width: 54px;
+  height: 54px;
   place-items: center;
   border-radius: 8px;
   background: linear-gradient(180deg, #cf171e 0%, #ae1118 100%);
@@ -420,11 +427,119 @@ h1 {
 
 .category-card p {
   max-width: 250px;
-  margin-bottom: 0;
+  margin-bottom: 12px;
   color: #4f4f4f;
   font-size: 0.88rem;
   font-weight: 500;
   line-height: 1.35;
+}
+
+.category-card__action {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-primary-dark);
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.category-card__action::after {
+  content: '›';
+  margin-left: 8px;
+  font-size: 1.25rem;
+  line-height: 0.75;
+}
+
+.home-advantages,
+.home-cta {
+  margin-top: 26px;
+}
+
+.home-advantages .eyebrow,
+.home-cta .eyebrow {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.home-advantages__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.home-advantage-card {
+  min-height: 170px;
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(201, 21, 28, 0.08), transparent 9rem),
+    var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.home-advantage-card__marker {
+  display: block;
+  width: 42px;
+  height: 6px;
+  margin-bottom: 18px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #cf171e 0%, #ae1118 100%);
+  box-shadow: 0 8px 18px rgba(174, 17, 24, 0.22);
+}
+
+.home-advantage-card h3 {
+  margin-bottom: 10px;
+  color: var(--color-ink);
+  font-size: 1.12rem;
+  font-weight: 950;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+}
+
+.home-advantage-card p {
+  margin-bottom: 0;
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  font-weight: 550;
+  line-height: 1.5;
+}
+
+.home-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 30px 34px;
+  border: 1px solid rgba(201, 21, 28, 0.16);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 90% 20%, rgba(201, 21, 28, 0.13), transparent 15rem),
+    linear-gradient(135deg, #ffffff 0%, #f7f6f4 100%);
+  box-shadow: var(--shadow-card);
+}
+
+.home-cta h2 {
+  max-width: 800px;
+  margin-bottom: 10px;
+  color: var(--color-ink);
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.home-cta p:last-child {
+  max-width: 560px;
+  margin-bottom: 0;
+  color: var(--color-muted);
+  font-size: 1rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.home-cta__button {
+  flex: 0 0 auto;
+  min-height: 48px;
+  padding: 0 22px;
 }
 
 .featured-heading-button {
@@ -1692,6 +1807,7 @@ h1 {
 
   .categories-grid,
   .products-grid,
+  .home-advantages__grid,
   .services-grid,
   .machines-grid,
   .about-grid--work,
@@ -1726,14 +1842,16 @@ h1 {
   }
 
   .services-cta,
-  .about-cta {
+  .about-cta,
+  .home-cta {
     align-items: flex-start;
     flex-direction: column;
     padding: 28px;
   }
 
   .services-cta__button,
-  .about-cta__button {
+  .about-cta__button,
+  .home-cta__button {
     width: 100%;
   }
 
@@ -1743,7 +1861,8 @@ h1 {
 
   .service-card,
   .machine-card,
-  .about-card {
+  .about-card,
+  .home-advantage-card {
     min-height: auto;
   }
 
@@ -1837,7 +1956,8 @@ h1 {
 
   .about-story,
   .about-advantages,
-  .about-cta {
+  .about-cta,
+  .home-cta {
     padding: 24px 22px;
   }
 
