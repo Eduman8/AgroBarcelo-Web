@@ -1,5 +1,4 @@
 import Button from '../components/ui/Button.jsx';
-import CategoriesSection from '../components/home/CategoriesSection.jsx';
 import Hero from '../components/home/Hero.jsx';
 
 const advantages = [
@@ -21,8 +20,6 @@ function HomePage() {
   return (
     <>
       <Hero />
-      <CategoriesSection />
-
       <section className="section home-advantages" aria-labelledby="home-advantages-title">
         <div className="section-heading">
           <p className="eyebrow">Por qué elegir AgroBarceló</p>
