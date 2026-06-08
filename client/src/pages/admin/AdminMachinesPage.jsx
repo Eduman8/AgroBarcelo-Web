@@ -30,6 +30,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
   const [editingMachineId, setEditingMachineId] = useState(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [errors, setErrors] = useState({});
+  const [saveMessage, setSaveMessage] = useState('');
 
   const formTitle = useMemo(
     () => (editingMachineId ? 'Editar maquinaria' : 'Nueva maquinaria'),
@@ -40,6 +41,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
     setFormData(emptyMachineForm);
     setEditingMachineId(null);
     setErrors({});
+    setSaveMessage('');
     setIsFormVisible(true);
   }
 
@@ -54,11 +56,14 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
     });
     setEditingMachineId(machine.id);
     setErrors({});
+    setSaveMessage('');
     setIsFormVisible(true);
   }
 
   function handleDeleteMachine(machineId) {
     setMachines((currentMachines) => currentMachines.filter((machine) => machine.id !== machineId));
+
+    setSaveMessage('');
 
     if (editingMachineId === machineId) {
       handleCancelForm();
@@ -143,6 +148,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
     }
 
     handleCancelForm();
+    setSaveMessage('Maquinaria guardada en esta sesión.');
   }
 
   return (
@@ -161,6 +167,12 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
         </button>
       </section>
 
+      {saveMessage && (
+        <div className="admin-save-message" role="status">
+          {saveMessage}
+        </div>
+      )}
+
       {isFormVisible && (
         <section className="admin-card admin-machine-form-card" aria-labelledby="admin-machine-form-title">
           <div className="admin-section-heading">
@@ -171,7 +183,9 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
           <form className="admin-machine-form" onSubmit={handleSubmit} noValidate>
             <div className="admin-form-grid">
               <label>
-                Nombre <span aria-hidden="true">*</span>
+                <span className="admin-field-label">
+                  Nombre <span aria-hidden="true">*</span>
+                </span>
                 <input
                   name="nombre"
                   type="text"
@@ -183,7 +197,9 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
               </label>
 
               <label>
-                Categoría <span aria-hidden="true">*</span>
+                <span className="admin-field-label">
+                  Categoría <span aria-hidden="true">*</span>
+                </span>
                 <select
                   name="categoria"
                   value={formData.categoria}
@@ -201,7 +217,9 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
               </label>
 
               <label>
-                Estado <span aria-hidden="true">*</span>
+                <span className="admin-field-label">
+                  Estado <span aria-hidden="true">*</span>
+                </span>
                 <input
                   name="estado"
                   type="text"
@@ -220,11 +238,11 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
                   checked={formData.disponible}
                   onChange={handleInputChange}
                 />
-                Disponible para publicar/consultar
+                <span>Publicar esta maquinaria como disponible para consultas</span>
               </label>
 
               <label className="admin-form-field--wide">
-                Descripción corta
+                <span className="admin-field-label">Descripción corta</span>
                 <textarea
                   name="descripcionCorta"
                   rows="3"
@@ -234,7 +252,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
               </label>
 
               <label className="admin-form-field--wide">
-                Descripción larga
+                <span className="admin-field-label">Descripción larga</span>
                 <textarea
                   name="descripcionLarga"
                   rows="5"
@@ -244,11 +262,26 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
               </label>
             </div>
 
-            <p className="admin-image-placeholder">La carga de imágenes será implementada próximamente.</p>
+            <section className="admin-images-section" aria-labelledby="admin-machine-images-title">
+              <div className="admin-section-heading admin-section-heading--compact">
+                <p className="eyebrow">Imágenes</p>
+                <h3 id="admin-machine-images-title">Imágenes de la publicación</h3>
+                <p>La carga de imágenes será implementada próximamente.</p>
+              </div>
+
+              <div className="admin-image-placeholder-grid">
+                <div className="admin-image-placeholder">
+                  <span>Imagen principal</span>
+                </div>
+                <div className="admin-image-placeholder admin-image-placeholder--gallery">
+                  <span>Galería</span>
+                </div>
+              </div>
+            </section>
 
             <div className="admin-form-actions">
               <button className="admin-button admin-button--primary" type="submit">
-                Guardar
+                Guardar maquinaria
               </button>
               <button className="admin-button admin-button--secondary" type="button" onClick={handleCancelForm}>
                 Cancelar
