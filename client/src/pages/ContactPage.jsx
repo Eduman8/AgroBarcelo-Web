@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getMachineById } from '../data/machinesMock.js';
 import { getSparePartById } from '../services/sparePartsService.js';
-import { whatsappConfig } from '../config/contact.js';
+import { mapsConfig, whatsappConfig } from '../config/contact.js';
 
 const contactDetails = [
   {
@@ -23,7 +23,12 @@ const contactDetails = [
   {
     icon: '⌖',
     title: 'Ubicación',
-    value: 'Armstrong, Santa Fe'
+    value: ['San Luis 759', 'Armstrong, Santa Fe'],
+    href: mapsConfig.locationUrl,
+    target: '_blank',
+    rel: 'noreferrer',
+    actionLabel: 'Ver en Google Maps',
+    fullCardLink: true
   }
 ];
 
@@ -254,23 +259,47 @@ function ContactPage() {
             </div>
 
             <div className="contact-detail-grid">
-              {contactDetails.map((detail) => (
-                <article className="contact-detail-card" key={detail.title}>
-                  <span className="contact-detail-card__icon" aria-hidden="true">
-                    {detail.icon}
-                  </span>
-                  <div>
-                    <h3>{detail.title}</h3>
-                    {detail.href ? (
-                      <a className="contact-detail-card__value" href={detail.href}>
-                        {detail.value}
-                      </a>
-                    ) : (
-                      <p className="contact-detail-card__value">{detail.value}</p>
-                    )}
-                  </div>
-                </article>
-              ))}
+              {contactDetails.map((detail) => {
+                const CardTag = detail.fullCardLink ? 'a' : 'article';
+                const cardProps = detail.fullCardLink
+                  ? {
+                      href: detail.href,
+                      target: detail.target,
+                      rel: detail.rel,
+                      'aria-label': `${detail.actionLabel}: ${detail.value.join(', ')}`
+                    }
+                  : {};
+                const valueLines = Array.isArray(detail.value) ? detail.value : [detail.value];
+
+                return (
+                  <CardTag
+                    className={`contact-detail-card${detail.fullCardLink ? ' contact-detail-card--link' : ''}`}
+                    key={detail.title}
+                    {...cardProps}
+                  >
+                    <span className="contact-detail-card__icon" aria-hidden="true">
+                      {detail.icon}
+                    </span>
+                    <div>
+                      <h3>{detail.title}</h3>
+                      {detail.href && !detail.fullCardLink ? (
+                        <a className="contact-detail-card__value" href={detail.href}>
+                          {detail.value}
+                        </a>
+                      ) : (
+                        <p className="contact-detail-card__value">
+                          {valueLines.map((line) => (
+                            <span key={line}>{line}</span>
+                          ))}
+                        </p>
+                      )}
+                      {detail.actionLabel ? (
+                        <span className="contact-detail-card__action">{detail.actionLabel}</span>
+                      ) : null}
+                    </div>
+                  </CardTag>
+                );
+              })}
             </div>
           </section>
 
