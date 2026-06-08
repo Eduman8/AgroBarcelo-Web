@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-const defaultContactEmail = 'info@agrobarcelo.com.ar';
+const defaultContactEmail = 'eduman.000@gmail.com';
 
 function getBooleanEnv(value) {
   return String(value).toLowerCase() === 'true';
