@@ -3,34 +3,34 @@ import { getMachineById } from '../data/machinesMock.js';
 import { getSparePartById } from '../services/sparePartsService.js';
 import { whatsappConfig } from '../config/contact.js';
 
-const contactBlocks = [
+const contactDetails = [
   {
     icon: '◉',
     title: 'WhatsApp',
-    text: 'Consultas comerciales y atención rápida.',
-    action: {
-      label: 'Enviar consulta por WhatsApp'
-    }
+    value: 'A definir'
   },
   {
     icon: '✉',
     title: 'Email',
-    text: 'Enviá tu consulta y te responderemos a la brevedad.',
-    detail: 'info@agrobarcelo.com.ar',
+    value: 'info@agrobarcelo.com.ar',
     href: 'mailto:info@agrobarcelo.com.ar'
+  },
+  {
+    icon: '◎',
+    title: 'Instagram',
+    value: '@agrobarcelo'
   },
   {
     icon: '⌖',
     title: 'Ubicación',
-    text: 'Armstrong, Santa Fe',
-    detail: 'Dirección exacta a confirmar.'
-  },
-  {
-    icon: '◷',
-    title: 'Horarios',
-    text: 'Lunes a viernes de 8:00 a 12:00 y de 15:00 a 19:00',
-    detail: 'Sábados de 8:00 a 12:00'
+    value: 'Armstrong, Santa Fe'
   }
+];
+
+const businessHours = [
+  'Lunes a Viernes',
+  '08:00 a 12:00',
+  '14:00 a 18:00'
 ];
 
 const emptyValue = 'Sin informar';
@@ -245,36 +245,69 @@ function ContactPage() {
       </div>
 
       <div className="contact-layout">
-        <div className="contact-info" aria-label="Datos de contacto">
-          {contactBlocks.map((block) => (
-            <article className="contact-card" key={block.title}>
-              <span className="contact-card__icon" aria-hidden="true">
-                {block.icon}
-              </span>
-              <div className="contact-card__body">
-                <h2>{block.title}</h2>
-                <p>{block.text}</p>
-                {block.href ? (
-                  <a className="contact-card__detail" href={block.href}>
-                    {block.detail}
-                  </a>
-                ) : null}
-                {!block.href && block.detail ? (
-                  <span className="contact-card__detail">{block.detail}</span>
-                ) : null}
-                {block.action ? (
-                  <a
-                    className="button button--primary contact-card__button"
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {block.action.label}
-                  </a>
-                ) : null}
+        <div className="contact-overview">
+          <section className="contact-panel contact-panel--info" aria-labelledby="contact-info-title">
+            <div className="contact-panel__heading">
+              <p className="eyebrow">Datos de la empresa</p>
+              <h2 id="contact-info-title">Información de contacto</h2>
+              <p>Canales principales para recibir consultas comerciales y coordinar la atención.</p>
+            </div>
+
+            <div className="contact-detail-grid">
+              {contactDetails.map((detail) => (
+                <article className="contact-detail-card" key={detail.title}>
+                  <span className="contact-detail-card__icon" aria-hidden="true">
+                    {detail.icon}
+                  </span>
+                  <div>
+                    <h3>{detail.title}</h3>
+                    {detail.href ? (
+                      <a className="contact-detail-card__value" href={detail.href}>
+                        {detail.value}
+                      </a>
+                    ) : (
+                      <p className="contact-detail-card__value">{detail.value}</p>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <aside className="contact-side-stack">
+            <section className="contact-panel contact-panel--hours" aria-labelledby="contact-hours-title">
+              <div className="contact-panel__heading">
+                <p className="eyebrow">Atención comercial</p>
+                <h2 id="contact-hours-title">Horarios de atención</h2>
               </div>
-            </article>
-          ))}
+
+              <ul className="contact-hours-list">
+                {businessHours.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="contact-panel contact-panel--help" aria-labelledby="contact-help-title">
+              <div className="contact-panel__heading">
+                <p className="eyebrow">Asesoramiento</p>
+                <h2 id="contact-help-title">¿Necesitás ayuda?</h2>
+                <p>
+                  Nuestro equipo puede ayudarte a encontrar repuestos, maquinaria o la mejor solución
+                  para tu necesidad.
+                </p>
+              </div>
+
+              <a
+                className="button button--primary contact-help__button"
+                href={whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Enviar consulta por WhatsApp
+              </a>
+            </section>
+          </aside>
         </div>
 
         <div className="contact-form-column">
