@@ -7,6 +7,21 @@ function isBlank(value) {
   return typeof value !== 'string' || value.trim() === '';
 }
 
+function normalizeSelectedParts(selectedParts) {
+  if (!Array.isArray(selectedParts)) {
+    return [];
+  }
+
+  return selectedParts
+    .filter((selectedPart) => selectedPart && typeof selectedPart === 'object')
+    .map((selectedPart) => ({
+      id: selectedPart.id === null || selectedPart.id === undefined ? '' : String(selectedPart.id).trim(),
+      name: selectedPart.name === null || selectedPart.name === undefined ? '' : String(selectedPart.name).trim(),
+      code: selectedPart.code === null || selectedPart.code === undefined ? '' : String(selectedPart.code).trim()
+    }))
+    .filter((selectedPart) => selectedPart.id || selectedPart.name || selectedPart.code);
+}
+
 function normalizeContext(context) {
   if (!context || typeof context !== 'object') {
     return null;
@@ -33,7 +48,7 @@ function validateContactData({ name, phone, email, subject, message }) {
 }
 
 export async function createContactRequest(request, response) {
-  const { name, phone, email, subject, message, context } = request.body || {};
+  const { name, phone, email, subject, message, context, selectedParts } = request.body || {};
 
   if (!validateContactData({ name, phone, email, subject, message })) {
     return response.status(400).json({
@@ -48,7 +63,8 @@ export async function createContactRequest(request, response) {
     email: email.trim(),
     subject: subject.trim(),
     message: message.trim(),
-    context: normalizeContext(context)
+    context: normalizeContext(context),
+    selectedParts: normalizeSelectedParts(selectedParts)
   };
 
   try {

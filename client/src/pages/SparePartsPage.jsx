@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getSpareParts } from '../services/sparePartsService.js';
+import { addContactSelectedPart, getContactSelectedParts } from '../utils/contactSelectedParts.js';
 
 const emptyValue = 'Sin informar';
 const sparePartsLimit = 50;
@@ -28,6 +29,10 @@ function SparePartsPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedPartIds, setSelectedPartIds] = useState(() =>
+    getContactSelectedParts().map((sparePart) => String(sparePart.id))
+  );
+  const [selectionNotice, setSelectionNotice] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -90,6 +95,16 @@ function SparePartsPage() {
     setPage((currentPage) => Math.min(currentPage + 1, pagination.totalPages || currentPage));
   };
 
+  const handleAddToQuery = (sparePart) => {
+    const { selectedParts, wasAdded } = addContactSelectedPart(sparePart);
+    setSelectedPartIds(selectedParts.map((selectedPart) => String(selectedPart.id)));
+    setSelectionNotice(
+      wasAdded
+        ? `${getDisplayValue(sparePart.nombre)} se agregó a la consulta.`
+        : `${getDisplayValue(sparePart.nombre)} ya estaba agregado a la consulta.`
+    );
+  };
+
   const currentPage = pagination.page || page;
   const totalPages = pagination.totalPages || 1;
   const isPreviousDisabled = isLoading || currentPage === 1;
@@ -125,6 +140,12 @@ function SparePartsPage() {
             Mostrando {spareParts.length} de {pagination.total} repuestos
           </p>
 
+          {selectionNotice ? (
+            <p className="spare-parts-selection-notice" aria-live="polite">
+              {selectionNotice} <a href="/contacto">Ver consulta</a>
+            </p>
+          ) : null}
+
           <div className="spare-parts-table-wrapper">
             <table className="spare-parts-table">
               <thead>
@@ -134,7 +155,7 @@ function SparePartsPage() {
                   <th scope="col">Marca</th>
                   <th scope="col">SubRubro</th>
                   <th scope="col">Disponibilidad</th>
-                  <th scope="col">Detalle</th>
+                  <th scope="col">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -149,10 +170,19 @@ function SparePartsPage() {
                         {getDisplayValue(sparePart.disponibilidad)}
                       </span>
                     </td>
-                    <td data-label="Detalle">
-                      <a className="spare-parts-table__detail-link" href={`/repuestos/${sparePart.id}`}>
-                        Ver detalle
-                      </a>
+                    <td data-label="Acciones">
+                      <div className="spare-parts-table__actions">
+                        <a className="spare-parts-table__detail-link" href={`/repuestos/${sparePart.id}`}>
+                          Ver detalle
+                        </a>
+                        <button
+                          className="spare-parts-table__add-button"
+                          type="button"
+                          onClick={() => handleAddToQuery(sparePart)}
+                        >
+                          {selectedPartIds.includes(String(sparePart.id)) ? 'Agregado' : 'Agregar a consulta'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

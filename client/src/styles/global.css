@@ -2821,3 +2821,107 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+.selected-query-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.selected-query-card__clear,
+.selected-parts-list button,
+.spare-parts-table__add-button {
+  border: 1px solid rgba(201, 21, 28, 0.24);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 950;
+  cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.selected-query-card__clear {
+  min-height: 38px;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
+.selected-query-card__clear:hover,
+.selected-parts-list button:hover,
+.spare-parts-table__add-button:hover {
+  border-color: rgba(201, 21, 28, 0.52);
+  box-shadow: 0 10px 24px rgba(201, 21, 28, 0.12);
+  transform: translateY(-1px);
+}
+
+.selected-parts-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.selected-parts-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(20, 20, 20, 0.08);
+  border-radius: 8px;
+  background: #fbfbfa;
+  color: var(--color-ink);
+  font-size: 0.96rem;
+  font-weight: 850;
+}
+
+.selected-parts-list button {
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+.spare-parts-selection-notice {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(28, 122, 62, 0.22);
+  border-radius: 8px;
+  background: rgba(28, 122, 62, 0.1);
+  color: #1c6f3b;
+  font-size: 0.92rem;
+  font-weight: 850;
+}
+
+.spare-parts-selection-notice a {
+  color: inherit;
+  font-weight: 950;
+  text-decoration: underline;
+}
+
+.spare-parts-table__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.spare-parts-table__add-button {
+  min-height: 38px;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .selected-query-card__header,
+  .selected-parts-list li {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .selected-query-card__clear,
+  .selected-parts-list button {
+    width: 100%;
+  }
+}
