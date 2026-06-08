@@ -2242,6 +2242,11 @@ h1 {
   cursor: pointer;
 }
 
+.contact-form__submit:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .contact-form__notice {
   margin: 16px 0 0;
   padding: 14px 16px;
@@ -2251,6 +2256,16 @@ h1 {
   color: var(--color-primary-dark);
   font-size: 0.94rem;
   font-weight: 850;
+}
+
+.contact-form__notice--success {
+  border-color: rgba(28, 122, 62, 0.22);
+  background: rgba(28, 122, 62, 0.1);
+  color: #1c6f3b;
+}
+
+.contact-form__notice--error {
+  border-color: rgba(201, 21, 28, 0.22);
 }
 
 @media (max-width: 920px) {
