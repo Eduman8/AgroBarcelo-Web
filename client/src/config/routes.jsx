@@ -6,9 +6,19 @@ import MachinesDetailPage from '../pages/MachinesDetailPage.jsx';
 import ServicesPage from '../pages/ServicesPage.jsx';
 import SparePartDetailPage from '../pages/SparePartDetailPage.jsx';
 import SparePartsPage from '../pages/SparePartsPage.jsx';
+import AdminDashboardPage from '../pages/admin/AdminDashboardPage.jsx';
+import AdminInquiriesPage from '../pages/admin/AdminInquiriesPage.jsx';
+import AdminMachinesPage from '../pages/admin/AdminMachinesPage.jsx';
+import AdminSettingsPage from '../pages/admin/AdminSettingsPage.jsx';
+import AdminUsersPage from '../pages/admin/AdminUsersPage.jsx';
 
 export const routes = {
   '/': HomePage,
+  '/admin': AdminDashboardPage,
+  '/admin/maquinarias': AdminMachinesPage,
+  '/admin/usuarios': AdminUsersPage,
+  '/admin/consultas': AdminInquiriesPage,
+  '/admin/configuracion': AdminSettingsPage,
   '/repuestos': SparePartsPage,
   '/repuestos/:id': SparePartDetailPage,
   '/maquinarias': MachinesPage,
