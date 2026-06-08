@@ -1,3 +1,3 @@
 export const whatsappConfig = {
-  phoneNumber: '5490000000000'
+  phoneNumber: '5493471345613'
 };
