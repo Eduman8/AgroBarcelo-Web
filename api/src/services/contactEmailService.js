@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 const defaultContactEmail = 'info@agrobarcelo.com.ar';
 
