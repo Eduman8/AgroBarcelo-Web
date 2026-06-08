@@ -40,6 +40,13 @@ const businessHours = [
 
 const emptyValue = 'Sin informar';
 
+const initialFormValues = {
+  name: '',
+  phone: '',
+  email: '',
+  message: ''
+};
+
 function getDisplayValue(value) {
   if (value === null || value === undefined || value === '') {
     return emptyValue;
@@ -80,6 +87,8 @@ function ContactPage() {
   const sparePartId = searchParams.get('producto');
   const machineId = searchParams.get('maquinaria');
   const selectedQueryType = sparePartId ? 'producto' : machineId ? 'maquinaria' : '';
+  const [formValues, setFormValues] = useState(initialFormValues);
+  const [formStatus, setFormStatus] = useState('idle');
   const [notice, setNotice] = useState('');
   const [subject, setSubject] = useState('');
   const [sparePart, setSparePart] = useState(null);
@@ -154,9 +163,78 @@ function ContactPage() {
     };
   }, [sparePartId]);
 
-  function handleSubmit(event) {
+  function buildContactContext() {
+    if (sparePartId) {
+      return {
+        type: 'repuesto',
+        id: sparePartId,
+        name: sparePart?.nombre || '',
+        code: sparePart?.codigo || '',
+        brand: sparePart?.marca || ''
+      };
+    }
+
+    if (machineId) {
+      return {
+        type: 'maquinaria',
+        id: machineId,
+        name: machine?.nombre || '',
+        code: '',
+        brand: ''
+      };
+    }
+
+    return {
+      type: 'general',
+      id: '',
+      name: '',
+      code: '',
+      brand: ''
+    };
+  }
+
+  function handleFieldChange(event) {
+    const { name, value } = event.target;
+
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      [name]: value
+    }));
+  }
+
+  async function handleSubmit(event) {
     event.preventDefault();
-    setNotice('El envío del formulario será habilitado próximamente.');
+    setFormStatus('sending');
+    setNotice('');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...formValues,
+          subject,
+          context: buildContactContext()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('No se pudo enviar la consulta.');
+      }
+
+      setFormStatus('success');
+      setNotice('Consulta enviada correctamente. Te responderemos a la brevedad.');
+      setFormValues(initialFormValues);
+
+      if (!selectedQueryType) {
+        setSubject('');
+      }
+    } catch (currentError) {
+      setFormStatus('error');
+      setNotice('No se pudo enviar la consulta. Intentá nuevamente o contactanos por WhatsApp.');
+    }
   }
 
   function renderSelectedQueryCard() {
@@ -346,21 +424,39 @@ function ContactPage() {
             <div className="contact-form__heading">
               <p className="eyebrow">Formulario de consulta</p>
               <h2>Dejanos tu mensaje</h2>
-              <p>Completá tus datos y prepararemos este canal para responderte próximamente.</p>
+              <p>Completá tus datos y te responderemos a la brevedad.</p>
             </div>
 
             <div className="contact-form__grid">
               <label>
                 Nombre
-                <input name="name" type="text" placeholder="Tu nombre" />
+                <input
+                  name="name"
+                  type="text"
+                  value={formValues.name}
+                  placeholder="Tu nombre"
+                  onChange={handleFieldChange}
+                />
               </label>
               <label>
                 Teléfono
-                <input name="phone" type="tel" placeholder="Tu teléfono" />
+                <input
+                  name="phone"
+                  type="tel"
+                  value={formValues.phone}
+                  placeholder="Tu teléfono"
+                  onChange={handleFieldChange}
+                />
               </label>
               <label>
                 Email
-                <input name="email" type="email" placeholder="tu@email.com" />
+                <input
+                  name="email"
+                  type="email"
+                  value={formValues.email}
+                  placeholder="tu@email.com"
+                  onChange={handleFieldChange}
+                />
               </label>
               <label>
                 Motivo de consulta
@@ -376,14 +472,28 @@ function ContactPage() {
 
             <label className="contact-form__message">
               Mensaje
-              <textarea name="message" rows="6" placeholder="Contanos cómo podemos ayudarte" />
+              <textarea
+                name="message"
+                rows="6"
+                value={formValues.message}
+                placeholder="Contanos cómo podemos ayudarte"
+                onChange={handleFieldChange}
+              />
             </label>
 
-            <button className="button button--primary contact-form__submit" type="submit">
-              Enviar consulta
+            <button
+              className="button button--primary contact-form__submit"
+              type="submit"
+              disabled={formStatus === 'sending'}
+            >
+              {formStatus === 'sending' ? 'Enviando consulta...' : 'Enviar consulta'}
             </button>
 
-            {notice ? <p className="contact-form__notice">{notice}</p> : null}
+            {notice ? (
+              <p className={`contact-form__notice contact-form__notice--${formStatus}`} aria-live="polite">
+                {notice}
+              </p>
+            ) : null}
           </form>
         </div>
       </div>
