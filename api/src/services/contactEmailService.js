@@ -23,6 +23,22 @@ function buildTransportConfig() {
   return config;
 }
 
+function getSelectedPartsLines(selectedParts) {
+  if (!Array.isArray(selectedParts) || selectedParts.length === 0) {
+    return [];
+  }
+
+  return [
+    'Repuestos consultados:',
+    '',
+    ...selectedParts.flatMap((selectedPart) => [
+      `* Código: ${selectedPart.code || 'Sin informar'}`,
+      `  Nombre: ${selectedPart.name || 'Sin informar'}`,
+      ''
+    ])
+  ];
+}
+
 function getContextLines(context) {
   if (!context) {
     return [];
@@ -39,10 +55,11 @@ function getContextLines(context) {
   ];
 }
 
-export function buildContactEmailText({ name, phone, email, subject, message, context }) {
+export function buildContactEmailText({ name, phone, email, subject, message, context, selectedParts }) {
   return [
     'Nueva consulta recibida desde AgroBarceló Web.',
     '',
+    ...getSelectedPartsLines(selectedParts),
     `Nombre: ${name}`,
     `Teléfono: ${phone}`,
     `Email: ${email}`,

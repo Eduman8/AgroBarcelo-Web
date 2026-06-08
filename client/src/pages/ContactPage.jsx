@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getMachineById } from '../data/machinesMock.js';
 import { getSparePartById } from '../services/sparePartsService.js';
 import { mapsConfig, whatsappConfig } from '../config/contact.js';
+import { getContactSelectedParts, removeContactSelectedPart } from '../utils/contactSelectedParts.js';
 
 const contactDetails = [
   {
@@ -63,13 +64,17 @@ function normalizeWhatsAppPhoneNumber(phoneNumber) {
   return String(phoneNumber).replace(/\D/g, '');
 }
 
-function buildWhatsAppMessage({ sparePart, machine }) {
+function buildWhatsAppMessage({ sparePart, machine, selectedParts }) {
   if (sparePart) {
     return `Hola AgroBarceló, quiero consultar por el repuesto ${getDisplayValue(sparePart.nombre)} (código: ${getDisplayValue(sparePart.codigo)}).`;
   }
 
   if (machine) {
     return `Hola AgroBarceló, quiero consultar por la maquinaria ${machine.nombre}.`;
+  }
+
+  if (selectedParts.length > 0) {
+    return `Hola AgroBarceló, quiero consultar por ${selectedParts.length} repuesto${selectedParts.length === 1 ? '' : 's'}.`;
   }
 
   return 'Hola AgroBarceló, quiero hacer una consulta.';
@@ -95,10 +100,11 @@ function ContactPage() {
   const [isSparePartLoading, setIsSparePartLoading] = useState(false);
   const [sparePartError, setSparePartError] = useState('');
   const [wasSparePartNotFound, setWasSparePartNotFound] = useState(false);
+  const [selectedParts, setSelectedParts] = useState(() => getContactSelectedParts());
 
   const machine = machineId ? getMachineById(machineId) : null;
   const wasMachineNotFound = Boolean(machineId && !machine);
-  const whatsappUrl = buildWhatsAppUrl(buildWhatsAppMessage({ sparePart, machine }));
+  const whatsappUrl = buildWhatsAppUrl(buildWhatsAppMessage({ sparePart, machine, selectedParts }));
 
   useEffect(() => {
     if (selectedQueryType === 'producto') {
@@ -111,8 +117,13 @@ function ContactPage() {
       return;
     }
 
+    if (selectedParts.length > 0) {
+      setSubject('Consulta por repuesto');
+      return;
+    }
+
     setSubject('');
-  }, [selectedQueryType]);
+  }, [selectedQueryType, selectedParts.length]);
 
   useEffect(() => {
     if (!sparePartId) {
@@ -162,6 +173,14 @@ function ContactPage() {
       isMounted = false;
     };
   }, [sparePartId]);
+
+  function buildSelectedPartsPayload() {
+    return selectedParts.map((selectedPart) => ({
+      id: selectedPart.id,
+      name: selectedPart.nombre,
+      code: selectedPart.codigo
+    }));
+  }
 
   function buildContactContext() {
     if (sparePartId) {
@@ -216,7 +235,8 @@ function ContactPage() {
         body: JSON.stringify({
           ...formValues,
           subject,
-          context: buildContactContext()
+          context: buildContactContext(),
+          selectedParts: buildSelectedPartsPayload()
         })
       });
 
@@ -228,13 +248,29 @@ function ContactPage() {
       setNotice('Consulta enviada correctamente. Te responderemos a la brevedad.');
       setFormValues(initialFormValues);
 
-      if (!selectedQueryType) {
+      if (!selectedQueryType && selectedParts.length === 0) {
         setSubject('');
       }
     } catch (currentError) {
       setFormStatus('error');
       setNotice('No se pudo enviar la consulta. Intentá nuevamente o contactanos por WhatsApp.');
     }
+  }
+
+  function handleClearSelectedQuery() {
+    window.location.href = '/contacto';
+  }
+
+  function handleRemoveSelectedPart(partId) {
+    setSelectedParts(removeContactSelectedPart(partId));
+  }
+
+  function renderClearSelectedQueryButton() {
+    return (
+      <button className="selected-query-card__clear" type="button" onClick={handleClearSelectedQuery}>
+        Limpiar consulta
+      </button>
+    );
   }
 
   function renderSelectedQueryCard() {
@@ -246,8 +282,11 @@ function ContactPage() {
       return (
         <article className="selected-query-card" aria-live="polite">
           <div className="selected-query-card__header">
-            <p className="eyebrow">Consulta seleccionada</p>
-            <h2>Consulta sobre repuesto</h2>
+            <div>
+              <p className="eyebrow">Consulta seleccionada</p>
+              <h2>Consulta sobre repuesto</h2>
+            </div>
+            {renderClearSelectedQueryButton()}
           </div>
 
           {isSparePartLoading && <p className="status-message">Cargando repuesto seleccionado...</p>}
@@ -285,8 +324,11 @@ function ContactPage() {
     return (
       <article className="selected-query-card" aria-live="polite">
         <div className="selected-query-card__header">
-          <p className="eyebrow">Consulta seleccionada</p>
-          <h2>Consulta sobre maquinaria</h2>
+          <div>
+            <p className="eyebrow">Consulta seleccionada</p>
+            <h2>Consulta sobre maquinaria</h2>
+          </div>
+          {renderClearSelectedQueryButton()}
         </div>
 
         {wasMachineNotFound ? (
@@ -315,6 +357,36 @@ function ContactPage() {
             </div>
           </dl>
         ) : null}
+      </article>
+    );
+  }
+
+  function renderSelectedParts() {
+    if (selectedParts.length === 0) {
+      return null;
+    }
+
+    return (
+      <article className="selected-query-card selected-parts-card" aria-labelledby="selected-parts-title">
+        <div className="selected-query-card__header">
+          <div>
+            <p className="eyebrow">Repuestos seleccionados</p>
+            <h2 id="selected-parts-title">Repuestos seleccionados</h2>
+          </div>
+        </div>
+
+        <ul className="selected-parts-list">
+          {selectedParts.map((selectedPart) => (
+            <li key={selectedPart.id}>
+              <span>
+                <span aria-hidden="true">✓</span> {getDisplayValue(selectedPart.nombre)}
+              </span>
+              <button type="button" onClick={() => handleRemoveSelectedPart(selectedPart.id)}>
+                Eliminar
+              </button>
+            </li>
+          ))}
+        </ul>
       </article>
     );
   }
@@ -419,6 +491,7 @@ function ContactPage() {
 
         <div className="contact-form-column">
           {renderSelectedQueryCard()}
+          {renderSelectedParts()}
 
           <form className="contact-form" onSubmit={handleSubmit}>
             <div className="contact-form__heading">
