@@ -6,7 +6,8 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "seed:repuestos-manuales": "node src/db/seeds/runRepuestosManualesSeed.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
