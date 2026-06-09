@@ -22,7 +22,7 @@ WHERE Activo = 1
 ORDER BY FechaAlta DESC, ID_WebMaquinaria DESC;
 `;
 
-const publicMachineBySlugQuery = `
+const publicMachineByIdentifierQuery = `
 SELECT TOP (1)
     ID_WebMaquinaria AS id,
     Slug AS slug,
@@ -37,7 +37,10 @@ SELECT TOP (1)
     Activo AS activo
 FROM dbo.WebMaquinarias
 WHERE Activo = 1
-  AND Slug = @slug;
+  AND (Slug = @identifier OR (@id IS NOT NULL AND ID_WebMaquinaria = @id))
+ORDER BY
+    CASE WHEN Slug = @identifier THEN 0 ELSE 1 END,
+    ID_WebMaquinaria DESC;
 `;
 
 export const parseGallery = (value) => {
@@ -102,7 +105,7 @@ export const isSoldMachine = (machine) => normalizeMachineStatus(machine?.estado
 
 export const mapMachine = (machine) => ({
   id: machine.id,
-  slug: machine.slug,
+  slug: String(machine.slug ?? '').trim() || String(machine.id ?? ''),
   nombre: machine.nombre,
   categoria: normalizeMachineCategory(machine.categoria),
   estado: normalizeMachineStatus(machine.estado, machine),
@@ -121,18 +124,29 @@ export const getMachines = async () => {
   return (result.recordset ?? []).map(mapMachine);
 };
 
-export const getMachineBySlug = async (slug) => {
-  const normalizedSlug = String(slug ?? '').trim().slice(0, 150);
+const parsePositiveInteger = (value) => {
+  if (!/^\d+$/.test(String(value ?? '').trim())) {
+    return null;
+  }
 
-  if (!normalizedSlug) {
+  const parsedValue = Number.parseInt(value, 10);
+
+  return Number.isInteger(parsedValue) && parsedValue > 0 ? parsedValue : null;
+};
+
+export const getMachineBySlug = async (identifier) => {
+  const normalizedIdentifier = String(identifier ?? '').trim().slice(0, 150);
+
+  if (!normalizedIdentifier) {
     return null;
   }
 
   const pool = await getSqlPool();
   const result = await pool
     .request()
-    .input('slug', sql.NVarChar(150), normalizedSlug)
-    .query(publicMachineBySlugQuery);
+    .input('identifier', sql.NVarChar(150), normalizedIdentifier)
+    .input('id', sql.Int, parsePositiveInteger(normalizedIdentifier))
+    .query(publicMachineByIdentifierQuery);
   const machine = result.recordset?.[0];
 
   return machine ? mapMachine(machine) : null;

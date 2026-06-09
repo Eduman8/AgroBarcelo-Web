@@ -9,7 +9,7 @@ function getMachineSlug(routeParams) {
 
 
 function getContactMachineValue(machine) {
-  return machine.slug ?? machine.id;
+  return String(machine?.slug ?? '').trim() || machine?.id;
 }
 
 function MachinesDetailPage({ routeParams }) {

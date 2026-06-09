@@ -51,7 +51,7 @@ export function getMachineStatus(machine) {
 }
 
 export function getMachineSlug(machine) {
-  return machine?.slug ?? machine?.id;
+  return String(machine?.slug ?? '').trim() || machine?.id;
 }
 
 export function isSoldMachine(machine) {

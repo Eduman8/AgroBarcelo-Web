@@ -12,7 +12,7 @@ function withFallbackFlag(data) {
 }
 
 function getMachineSlug(machine) {
-  return machine?.slug ?? machine?.id;
+  return String(machine?.slug ?? '').trim() || machine?.id;
 }
 
 function getFallbackMachineBySlug(slug) {
@@ -59,19 +59,23 @@ export async function getMachines() {
   }
 }
 
-export async function getMachineBySlug(slug) {
+export async function getMachineByIdentifier(identifier) {
   try {
     const machine = await fetchJson(
-      `/api/maquinarias/${encodeURIComponent(slug)}`,
+      `/api/maquinarias/${encodeURIComponent(identifier)}`,
       'No se pudo cargar el detalle de la maquinaria.'
     );
 
     return machine;
   } catch {
-    const fallbackMachine = getFallbackMachineBySlug(slug);
+    const fallbackMachine = getFallbackMachineBySlug(identifier);
 
     return fallbackMachine ? withFallbackFlag(fallbackMachine) : null;
   }
+}
+
+export async function getMachineBySlug(slug) {
+  return getMachineByIdentifier(slug);
 }
 
 export async function getAdminMachines() {

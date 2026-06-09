@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getMachineById } from '../data/machinesMock.js';
+import { getMachineByIdentifier } from '../services/machinesService.js';
 import { getSparePartById } from '../services/sparePartsService.js';
 import { mapsConfig, whatsappConfig } from '../config/contact.js';
 import { getContactSelectedParts, removeContactSelectedPart } from '../utils/contactSelectedParts.js';
@@ -97,10 +97,12 @@ function ContactPage() {
   const [isSparePartLoading, setIsSparePartLoading] = useState(false);
   const [sparePartError, setSparePartError] = useState('');
   const [wasSparePartNotFound, setWasSparePartNotFound] = useState(false);
+  const [machine, setMachine] = useState(null);
+  const [isMachineLoading, setIsMachineLoading] = useState(false);
+  const [machineError, setMachineError] = useState('');
+  const [wasMachineNotFound, setWasMachineNotFound] = useState(false);
   const [selectedParts, setSelectedParts] = useState(() => getContactSelectedParts());
 
-  const machine = machineId ? getMachineById(machineId) : null;
-  const wasMachineNotFound = Boolean(machineId && !machine);
   const whatsappUrl = buildWhatsAppUrl(buildWhatsAppMessage({ sparePart, machine, selectedParts }));
 
   useEffect(() => {
@@ -171,6 +173,56 @@ function ContactPage() {
     };
   }, [sparePartId]);
 
+  useEffect(() => {
+    if (!machineId) {
+      setMachine(null);
+      setMachineError('');
+      setWasMachineNotFound(false);
+      setIsMachineLoading(false);
+      return undefined;
+    }
+
+    let isMounted = true;
+
+    async function loadMachine() {
+      setIsMachineLoading(true);
+      setMachine(null);
+      setMachineError('');
+      setWasMachineNotFound(false);
+
+      try {
+        const response = await getMachineByIdentifier(machineId);
+
+        if (!isMounted) {
+          return;
+        }
+
+        if (!response) {
+          setMachine(null);
+          setWasMachineNotFound(true);
+          return;
+        }
+
+        setMachine(response);
+      } catch (currentError) {
+        if (isMounted) {
+          setMachine(null);
+          setMachineError(currentError.message);
+        }
+      } finally {
+        if (isMounted) {
+          setIsMachineLoading(false);
+        }
+      }
+    }
+
+    loadMachine();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [machineId]);
+
   function buildSelectedPartsPayload() {
     return selectedParts.map((selectedPart) => ({
       id: selectedPart.id,
@@ -193,9 +245,9 @@ function ContactPage() {
     if (machineId) {
       return {
         type: 'maquinaria',
-        id: machineId,
+        id: machine?.id ?? machineId,
         name: machine?.nombre || '',
-        code: '',
+        code: machine?.slug || machineId,
         brand: ''
       };
     }
@@ -328,13 +380,15 @@ function ContactPage() {
           {renderClearSelectedQueryButton()}
         </div>
 
+        {isMachineLoading && <p className="status-message">Cargando maquinaria seleccionada...</p>}
+        {machineError && <p className="status-message status-message--error">{machineError}</p>}
         {wasMachineNotFound ? (
           <p className="status-message status-message--error">
             No encontramos una maquinaria con el identificador solicitado.
           </p>
         ) : null}
 
-        {machine ? (
+        {!isMachineLoading && !machineError && machine ? (
           <dl className="selected-query-card__details">
             <div>
               <dt>Nombre</dt>
