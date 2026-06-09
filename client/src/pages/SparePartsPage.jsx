@@ -7,13 +7,19 @@ const sparePartsLimit = 50;
 
 const sparePartsManuals = [
   {
-    title: 'Manual de repuestos de rastras',
-    description: 'Despieces y códigos de repuestos para rastras CELE.',
+    name: 'Repuestos Rastras',
+    type: 'Manual de repuestos',
+    pages: 'Cantidad aproximada: 98 páginas',
+    description: 'Despieces, códigos y referencias para identificar repuestos de rastras.',
+    actionLabel: 'Ver manual',
     url: `${apiUrl}/pdfs/manual-repuestos-rastras.pdf`
   },
   {
-    title: 'Manual de repuestos grano fino 2019',
-    description: 'Despieces y códigos de repuestos para sembradoras de grano fino CELE.',
+    name: 'Grano Fino 2019',
+    type: 'Manual de repuestos',
+    pages: 'Cantidad aproximada: 104 páginas',
+    description: 'Referencias y códigos para repuestos de sembradoras de grano fino.',
+    actionLabel: 'Ver manual',
     url: `${apiUrl}/pdfs/manual-repuestos-grano-fino-2019.pdf`
   }
 ];
@@ -134,36 +140,53 @@ function SparePartsPage() {
       <section className="spare-parts-manuals" aria-labelledby="spare-parts-manuals-title">
         <div className="spare-parts-manuals__header">
           <p className="eyebrow">Ayuda para identificar piezas</p>
-          <h2 id="spare-parts-manuals-title">¿No sabés qué repuesto necesitás?</h2>
+          <h2 id="spare-parts-manuals-title">Manuales y Catálogos</h2>
           <p>
-            Consultá los manuales de repuestos para identificar la pieza correcta antes de enviar tu
-            consulta.
+            Encontrá despieces, códigos y referencias para identificar correctamente el repuesto que
+            necesitás.
           </p>
         </div>
 
         <div className="spare-parts-manuals__grid">
           {sparePartsManuals.map((manual) => (
             <article className="spare-parts-manual-card" key={manual.url}>
-              <div>
-                <h3>{manual.title}</h3>
-                <p>{manual.description}</p>
+              <div className="spare-parts-manual-card__top">
+                <span className="spare-parts-manual-card__icon" aria-hidden="true">
+                  PDF
+                </span>
+                <div>
+                  <p className="spare-parts-manual-card__type">{manual.type}</p>
+                  <h3>{manual.name}</h3>
+                </div>
               </div>
-              <a
-                className="spare-parts-manual-card__button"
-                href={manual.url}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Ver manual
-              </a>
+
+              <p>{manual.description}</p>
+
+              <div className="spare-parts-manual-card__footer">
+                <span className="spare-parts-manual-card__pages">{manual.pages}</span>
+                <a
+                  className="spare-parts-manual-card__button"
+                  href={manual.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`${manual.actionLabel}: ${manual.name}`}
+                >
+                  {manual.actionLabel}
+                </a>
+              </div>
             </article>
           ))}
         </div>
 
-        <p className="spare-parts-manuals__note">
-          Cuando encuentres el código o la página del manual, podés indicarlo en la consulta para que
-          AgroBarceló identifique el repuesto correcto.
-        </p>
+        <div className="spare-parts-manuals__note" aria-label="Datos para solicitar un repuesto">
+          <p>Para solicitar un repuesto indicá:</p>
+          <ul>
+            <li>Código de la pieza.</li>
+            <li>Página del manual.</li>
+            <li>Modelo de la máquina.</li>
+          </ul>
+          <p>Esto permite identificar el repuesto con mayor precisión.</p>
+        </div>
       </section>
 
       <div className="spare-parts-search" role="search">
