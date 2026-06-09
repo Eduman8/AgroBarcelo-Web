@@ -27,6 +27,15 @@ const buildManualSelectedPart = (sparePart) => ({
   source: 'manual'
 });
 
+const buildCatalogSelectedPartFromManual = (sparePart) => ({
+  id: sparePart.catalogoId,
+  nombre: getDisplayValue(sparePart.catalogoNombre, sparePart.descripcion),
+  codigo: getDisplayValue(sparePart.catalogoCodigo, sparePart.codigo),
+  marca: getDisplayValue(sparePart.catalogoMarca),
+  disponibilidad: getDisplayValue(sparePart.catalogoDisponible, 'Disponible'),
+  source: 'catalog'
+});
+
 function ManualSparePartsSearchPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [submittedSearch, setSubmittedSearch] = useState('');
@@ -114,6 +123,17 @@ function ManualSparePartsSearchPage() {
       wasAdded
         ? `${selectedManualPart.nombre} se agregó a la consulta desde manual.`
         : `${selectedManualPart.nombre} ya estaba agregado a la consulta.`
+    );
+  };
+
+  const handleAddCatalogMatchToQuery = (sparePart) => {
+    const selectedCatalogPart = buildCatalogSelectedPartFromManual(sparePart);
+    const { selectedParts, wasAdded } = addContactSelectedPart(selectedCatalogPart);
+    setSelectedPartIds(selectedParts.map((selectedPart) => String(selectedPart.id)));
+    setSelectionNotice(
+      wasAdded
+        ? `${selectedCatalogPart.nombre} se agregó a la consulta desde catálogo.`
+        : `${selectedCatalogPart.nombre} ya estaba agregado a la consulta.`
     );
   };
 
@@ -253,12 +273,14 @@ function ManualSparePartsSearchPage() {
                         <th scope="col">Manual</th>
                         <th scope="col">Página</th>
                         <th scope="col">Categoría</th>
+                        <th scope="col">Catálogo</th>
                         <th scope="col">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
                       {manualResults.map((sparePart) => {
                         const selectedManualPartId = getManualSelectedPartId(sparePart);
+                        const catalogPartId = sparePart.catalogoId ? String(sparePart.catalogoId) : '';
 
                         return (
                           <tr key={getManualPartKey(sparePart)}>
@@ -267,16 +289,50 @@ function ManualSparePartsSearchPage() {
                             <td data-label="Manual">{getDisplayValue(sparePart.manualNombre)}</td>
                             <td data-label="Página">{getDisplayValue(sparePart.pagina)}</td>
                             <td data-label="Categoría">{getDisplayValue(sparePart.categoria)}</td>
+                            <td data-label="Catálogo">
+                              {sparePart.existeEnCatalogo ? (
+                                <div className="manual-catalog-match">
+                                  <span className="manual-catalog-match__badge manual-catalog-match__badge--available">
+                                    También disponible en catálogo
+                                  </span>
+                                  <span className="manual-catalog-match__detail">
+                                    {getDisplayValue(sparePart.catalogoCodigo, sparePart.codigo)} ·{' '}
+                                    {getDisplayValue(sparePart.catalogoNombre, sparePart.descripcion)}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="manual-catalog-match__badge manual-catalog-match__badge--manual-only">
+                                  Solo encontrado en manual
+                                </span>
+                              )}
+                            </td>
                             <td data-label="Acciones">
-                              <button
-                                className="spare-parts-table__add-button"
-                                type="button"
-                                onClick={() => handleAddManualToQuery(sparePart)}
-                              >
-                                {selectedPartIds.includes(String(selectedManualPartId))
-                                  ? 'Agregado'
-                                  : 'Agregar a consulta desde manual'}
-                              </button>
+                              {sparePart.existeEnCatalogo ? (
+                                <div className="spare-parts-table__actions">
+                                  <a className="spare-parts-table__detail-link" href={`/repuestos/${sparePart.catalogoId}`}>
+                                    Ver detalle
+                                  </a>
+                                  <button
+                                    className="spare-parts-table__add-button"
+                                    type="button"
+                                    onClick={() => handleAddCatalogMatchToQuery(sparePart)}
+                                  >
+                                    {selectedPartIds.includes(catalogPartId)
+                                      ? 'Agregado'
+                                      : 'Agregar repuesto del catálogo a consulta'}
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  className="spare-parts-table__add-button"
+                                  type="button"
+                                  onClick={() => handleAddManualToQuery(sparePart)}
+                                >
+                                  {selectedPartIds.includes(String(selectedManualPartId))
+                                    ? 'Agregado'
+                                    : 'Agregar a consulta desde manual'}
+                                </button>
+                              )}
                             </td>
                           </tr>
                         );

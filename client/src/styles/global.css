@@ -4251,6 +4251,42 @@ h1 {
   border-bottom: 0;
 }
 
+
+.manual-catalog-match {
+  display: grid;
+  gap: 6px;
+  max-width: 280px;
+}
+
+.manual-catalog-match__badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.manual-catalog-match__badge--available {
+  background: rgba(28, 122, 62, 0.12);
+  color: #1c6f3b;
+}
+
+.manual-catalog-match__badge--manual-only {
+  background: rgba(20, 20, 20, 0.08);
+  color: var(--color-muted);
+}
+
+.manual-catalog-match__detail {
+  color: var(--color-ink);
+  font-size: 0.86rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
 .manual-spare-parts-empty {
   margin-bottom: 0;
 }
