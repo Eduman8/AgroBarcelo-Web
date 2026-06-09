@@ -25,7 +25,7 @@ const PDFS_TO_IMPORT = [
 ];
 
 const pdfsDirectory = path.resolve(__dirname, '../../public/pdfs');
-const codePattern = /\b(?:[CP]\d{4}|[A-Z]\d{3,5}|\d{2}-\d{4})\b/g;
+const codePattern = /\b(?:[CP]\d{4}|[A-Z]\d{3,5}|\d{2}\s*[-–—]\s*\d{4})\b/g;
 const leadingElementNumberPattern = /^\s*(\d{1,4})(?:[.)-])?\s+/;
 const repeatedWhitespacePattern = /\s+/g;
 const objectPattern = /(\d+)\s+0\s+obj\s*([\s\S]*?)\s*endobj/g;
@@ -364,6 +364,8 @@ const extractPdfPages = async (pdfPath) => {
 
 const inferCategory = (description) => categoryRules.find((rule) => rule.pattern.test(description))?.category ?? null;
 
+const normalizeCode = (value) => value.replace(/\s*[-–—]\s*/g, '-').trim();
+
 const detectReferenciaDespiece = (value) => {
   const match = value.match(leadingElementNumberPattern);
 
@@ -404,11 +406,12 @@ const detectSparePartsInLine = ({ line, pageNumber, manualNombre, archivoOrigen 
   const matches = [...line.matchAll(codePattern)];
 
   for (const match of matches) {
-    const codigo = match[0];
+    const rawCodigo = match[0];
+    const codigo = normalizeCode(rawCodigo);
     const rawBefore = line.slice(0, match.index);
     const referenciaDespiece = detectReferenciaDespiece(rawBefore);
     const before = cleanDescription(removeLeadingReferenciaDespiece(rawBefore, referenciaDespiece));
-    const after = cleanDescription(line.slice(match.index + codigo.length));
+    const after = cleanDescription(line.slice(match.index + rawCodigo.length));
     const descripcion = looksLikeUsefulDescription(after) ? after : before;
 
     if (!looksLikeUsefulDescription(descripcion)) {
