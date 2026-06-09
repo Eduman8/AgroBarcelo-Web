@@ -6,31 +6,24 @@ import {
   getMachineCategory,
   getMachineSlug,
   getMachineStatus,
-  isSoldMachine,
-  machineCategories,
-  machineStatuses
+  isSoldMachine
 } from '../utils/machines.js';
 
-const allCategoriesLabel = 'Todas';
-const allStatusesLabel = 'Todos';
+const allPublicationsLabel = 'Todas';
+const soldPublicationsLabel = 'Vendidas';
 
-const categoryFilterLabels = {
-  Nueva: 'Nuevas',
-  Usada: 'Usadas',
-  'Trabajo Realizado': 'Trabajos Realizados'
-};
-
-const statusFilterLabels = {
-  Disponible: 'Disponibles',
-  Vendida: 'Vendidas'
-};
-
+const publicationFilters = [
+  { label: allPublicationsLabel },
+  { label: 'Nuevas', category: 'Nueva' },
+  { label: 'Usadas', category: 'Usada' },
+  { label: 'Trabajos realizados', category: 'Trabajo Realizado' },
+  { label: soldPublicationsLabel, status: 'Vendida' }
+];
 
 function MachinesPage() {
   const [machines, setMachines] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(allCategoriesLabel);
-  const [selectedStatus, setSelectedStatus] = useState(allStatusesLabel);
+  const [selectedFilter, setSelectedFilter] = useState(allPublicationsLabel);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -76,15 +69,14 @@ function MachinesPage() {
     const normalizedSearchTerm = searchTerm.trim().toLocaleLowerCase('es-AR');
 
     return machines.filter((machine) => {
-      const machineCategory = getMachineCategory(machine);
-      const machineStatus = getMachineStatus(machine);
-      const matchesCategory = selectedCategory === allCategoriesLabel || machineCategory === selectedCategory;
-      const matchesStatus = selectedStatus === allStatusesLabel || machineStatus === selectedStatus;
+      const selectedPublicationFilter = publicationFilters.find((filter) => filter.label === selectedFilter);
+      const matchesCategory = !selectedPublicationFilter?.category || getMachineCategory(machine) === selectedPublicationFilter.category;
+      const matchesStatus = !selectedPublicationFilter?.status || getMachineStatus(machine) === selectedPublicationFilter.status;
       const matchesSearch = machine.nombre.toLocaleLowerCase('es-AR').includes(normalizedSearchTerm);
 
       return matchesCategory && matchesStatus && matchesSearch;
     });
-  }, [machines, searchTerm, selectedCategory, selectedStatus]);
+  }, [machines, searchTerm, selectedFilter]);
 
   return (
     <section className="machines-page" aria-labelledby="machines-title">
@@ -112,41 +104,20 @@ function MachinesPage() {
         </div>
 
         <div className="machines-filter-group">
-          <p>Categoría</p>
-          <div className="machines-filter" aria-label="Filtrar por categoría">
-            {[allCategoriesLabel, ...machineCategories].map((category) => {
-              const isActive = selectedCategory === category;
+          <p>Filtros</p>
+          <div className="machines-filter" aria-label="Filtrar maquinarias">
+            {publicationFilters.map((filter) => {
+              const isActive = selectedFilter === filter.label;
 
               return (
                 <button
                   className={`machines-filter__item${isActive ? ' is-active' : ''}`}
-                  key={category}
+                  key={filter.label}
                   type="button"
                   aria-pressed={isActive}
-                  onClick={() => setSelectedCategory(category)}
+                  onClick={() => setSelectedFilter(filter.label)}
                 >
-                  {categoryFilterLabels[category] ?? category}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="machines-filter-group">
-          <p>Estado</p>
-          <div className="machines-filter" aria-label="Filtrar por estado">
-            {[allStatusesLabel, ...machineStatuses].map((status) => {
-              const isActive = selectedStatus === status;
-
-              return (
-                <button
-                  className={`machines-filter__item${isActive ? ' is-active' : ''}`}
-                  key={status}
-                  type="button"
-                  aria-pressed={isActive}
-                  onClick={() => setSelectedStatus(status)}
-                >
-                  {statusFilterLabels[status] ?? status}
+                  {filter.label}
                 </button>
               );
             })}
@@ -196,17 +167,13 @@ function MachinesPage() {
                   </span>
                 </div>
 
-                {isSoldMachine(machine) ? (
-                  <span className="machine-card__button machine-card__button--disabled">No disponible</span>
-                ) : (
-                  <Button
-                    href={`/maquinarias/${encodeURIComponent(getMachineSlug(machine))}`}
-                    variant="primary"
-                    className="machine-card__button"
-                  >
-                    Ver detalle
-                  </Button>
-                )}
+                <Button
+                  href={`/maquinarias/${encodeURIComponent(getMachineSlug(machine))}`}
+                  variant="primary"
+                  className="machine-card__button"
+                >
+                  Ver detalle
+                </Button>
               </article>
             ))}
           </div>
