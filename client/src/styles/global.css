@@ -4398,3 +4398,162 @@ h1 {
     width: 100%;
   }
 }
+
+.manual-spare-parts-diagnostics {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 24px;
+  padding: 22px;
+  border: 1px solid rgba(20, 20, 20, 0.08);
+  border-radius: 16px;
+  background: #fbfbfa;
+  box-shadow: 0 12px 32px rgba(20, 20, 20, 0.06);
+}
+
+.manual-spare-parts-diagnostics__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.manual-spare-parts-diagnostics__header h2 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+  font-weight: 950;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+}
+
+.manual-spare-parts-diagnostics__header span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+  font-size: 0.78rem;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.manual-spare-parts-diagnostics__content {
+  display: grid;
+  gap: 18px;
+}
+
+.manual-spare-parts-diagnostics__metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.manual-spare-parts-diagnostics__metrics div {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-height: 92px;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.manual-spare-parts-diagnostics__metrics dt {
+  color: var(--color-muted);
+  font-size: 0.76rem;
+  font-weight: 950;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.manual-spare-parts-diagnostics__metrics dd {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: clamp(1.05rem, 2vw, 1.5rem);
+  font-weight: 950;
+  line-height: 1.1;
+}
+
+.manual-spare-parts-diagnostics__lists {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.manual-spare-parts-diagnostics__lists section {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.manual-spare-parts-diagnostics__lists h3 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.manual-spare-parts-diagnostics__lists ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.manual-spare-parts-diagnostics__lists li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.manual-spare-parts-diagnostics__lists strong {
+  color: var(--color-ink);
+  font-weight: 950;
+}
+
+@media (max-width: 920px) {
+  .manual-spare-parts-diagnostics__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .manual-spare-parts-diagnostics__lists {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .manual-spare-parts-diagnostics {
+    padding: 18px;
+  }
+
+  .manual-spare-parts-diagnostics__header {
+    display: grid;
+  }
+
+  .manual-spare-parts-diagnostics__header span {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .manual-spare-parts-diagnostics__metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .manual-spare-parts-diagnostics__lists li {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+}
