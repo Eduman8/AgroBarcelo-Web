@@ -52,6 +52,14 @@ const buildCatalogSelectedPartFromManual = (sparePart) => ({
   source: 'catalog'
 });
 
+const buildGeneralSearchUrl = (sparePart) => {
+  const searchTerm = String(getDisplayValue(sparePart.catalogoCodigo || sparePart.codigo || sparePart.descripcion, '')).trim();
+
+  return searchTerm
+    ? `/buscador-repuestos?busqueda=${encodeURIComponent(searchTerm)}`
+    : '/buscador-repuestos';
+};
+
 function VisualSparePartsSearchPage() {
   const [manual, setManual] = useState(manualOptions[0].value);
   const [pagina, setPagina] = useState('');
@@ -135,6 +143,15 @@ function VisualSparePartsSearchPage() {
     );
   };
 
+  const handleAddResultToQuery = (sparePart) => {
+    if (sparePart.existeEnCatalogo) {
+      handleAddCatalogMatchToQuery(sparePart);
+      return;
+    }
+
+    handleAddManualToQuery(sparePart);
+  };
+
   return (
     <section className="manual-spare-parts-page visual-spare-parts-page" aria-labelledby="visual-spare-parts-title">
       <div className="manual-spare-parts-hero visual-spare-parts-hero">
@@ -148,8 +165,7 @@ function VisualSparePartsSearchPage() {
           <p className="eyebrow">Datos del despiece</p>
           <h2 id="visual-spare-parts-search-title">Buscar por manual, página y elemento</h2>
           <p>
-            Abrí el manual, ubicá el número del elemento en el despiece e ingresalo acá para
-            encontrar el código correspondiente.
+            Abrí el manual, buscá el número marcado en el despiece e ingresalo junto con la página.
           </p>
         </div>
 
@@ -197,8 +213,7 @@ function VisualSparePartsSearchPage() {
         </form>
 
         <p className="visual-spare-parts-help">
-          Abrí el manual, ubicá el número del elemento en el despiece e ingresalo acá para encontrar
-          el código correspondiente.
+          Abrí el manual, buscá el número marcado en el despiece e ingresalo junto con la página.
         </p>
       </section>
 
@@ -228,7 +243,7 @@ function VisualSparePartsSearchPage() {
 
         {hasSubmittedSearch && !isLoading && !error && results.length === 0 ? (
           <p className="status-message manual-spare-parts-empty">
-            No encontramos una coincidencia exacta. Probá buscar por código o descripción en el{' '}
+            No encontramos coincidencias para ese elemento. Probá revisar la página o usar el{' '}
             <a href="/buscador-repuestos">buscador general</a>.
           </p>
         ) : null}
@@ -238,11 +253,11 @@ function VisualSparePartsSearchPage() {
             <table className="manual-spare-parts-table visual-spare-parts-table">
               <thead>
                 <tr>
+                  <th scope="col">N.º de elemento</th>
                   <th scope="col">Código</th>
                   <th scope="col">Descripción</th>
                   <th scope="col">Manual</th>
                   <th scope="col">Página</th>
-                  <th scope="col">Categoría</th>
                   <th scope="col">Estado</th>
                   <th scope="col">Acciones</th>
                 </tr>
@@ -252,14 +267,24 @@ function VisualSparePartsSearchPage() {
                   const selectedManualPartId = getManualSelectedPartId(sparePart);
                   const catalogPartId = sparePart.catalogoId ? String(sparePart.catalogoId) : '';
                   const manualUrl = buildManualUrl(sparePart, manual);
+                  const generalSearchUrl = buildGeneralSearchUrl(sparePart);
+                  const selectedResultId = sparePart.existeEnCatalogo && catalogPartId
+                    ? catalogPartId
+                    : selectedManualPartId;
 
                   return (
                     <tr key={getManualPartKey(sparePart)}>
-                      <td data-label="Código">{getDisplayValue(sparePart.codigo, 'Sin código')}</td>
-                      <td data-label="Descripción">{getDisplayValue(sparePart.descripcion)}</td>
+                      <td data-label="N.º de elemento" className="visual-spare-parts-table__element">
+                        {getDisplayValue(sparePart.referenciaDespiece, submittedSearch.elemento)}
+                      </td>
+                      <td data-label="Código" className="visual-spare-parts-table__code">
+                        {getDisplayValue(sparePart.codigo, 'Sin código')}
+                      </td>
+                      <td data-label="Descripción" className="visual-spare-parts-table__description">
+                        {getDisplayValue(sparePart.descripcion)}
+                      </td>
                       <td data-label="Manual">{getDisplayValue(sparePart.manualNombre)}</td>
                       <td data-label="Página">{getDisplayValue(sparePart.pagina)}</td>
-                      <td data-label="Categoría">{getDisplayValue(sparePart.categoria)}</td>
                       <td data-label="Estado">
                         {sparePart.existeEnCatalogo ? (
                           <span className="manual-catalog-match__badge manual-catalog-match__badge--available">
@@ -283,26 +308,16 @@ function VisualSparePartsSearchPage() {
                               Ver manual
                             </a>
                           ) : null}
+                          <a className="spare-parts-table__detail-link" href={generalSearchUrl}>
+                            Buscar por código/descripción
+                          </a>
                           <button
                             className="spare-parts-table__add-button"
                             type="button"
-                            onClick={() => handleAddManualToQuery(sparePart)}
+                            onClick={() => handleAddResultToQuery(sparePart)}
                           >
-                            {selectedPartIds.includes(String(selectedManualPartId))
-                              ? 'Manual agregado'
-                              : 'Agregar desde manual'}
+                            {selectedPartIds.includes(String(selectedResultId)) ? 'Agregado' : 'Agregar a consulta'}
                           </button>
-                          {sparePart.existeEnCatalogo ? (
-                            <button
-                              className="spare-parts-table__add-button"
-                              type="button"
-                              onClick={() => handleAddCatalogMatchToQuery(sparePart)}
-                            >
-                              {selectedPartIds.includes(catalogPartId)
-                                ? 'Catálogo agregado'
-                                : 'Agregar repuesto real'}
-                            </button>
-                          ) : null}
                         </div>
                       </td>
                     </tr>

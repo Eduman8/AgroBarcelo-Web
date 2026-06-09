@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { getSpareParts } from '../services/sparePartsService.js';
 import {
   getManualSparePartsDiagnostics,
@@ -45,6 +45,14 @@ const getCatalogPartKey = (sparePart) => sparePart.id ?? `${sparePart.codigo}-${
 const getManualPartKey = (sparePart) => `manual-${sparePart.id ?? `${sparePart.codigo}-${sparePart.manualNombre}`}`;
 const getManualSelectedPartId = (sparePart) => getManualPartKey(sparePart);
 
+const getInitialSearchTerm = () => {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  return new URLSearchParams(window.location.search).get('busqueda')?.trim() || '';
+};
+
 const buildManualSelectedPart = (sparePart) => ({
   id: getManualSelectedPartId(sparePart),
   nombre: getDisplayValue(sparePart.descripcion, 'Repuesto de manual'),
@@ -65,7 +73,7 @@ const buildCatalogSelectedPartFromManual = (sparePart) => ({
 });
 
 function ManualSparePartsSearchPage() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(() => getInitialSearchTerm());
   const [submittedSearch, setSubmittedSearch] = useState('');
   const [catalogResults, setCatalogResults] = useState([]);
   const [catalogTotal, setCatalogTotal] = useState(0);
@@ -80,6 +88,62 @@ function ManualSparePartsSearchPage() {
   const [diagnostics, setDiagnostics] = useState(null);
   const [diagnosticsError, setDiagnosticsError] = useState('');
   const [isLoadingDiagnostics, setIsLoadingDiagnostics] = useState(true);
+  const didRunInitialSearch = useRef(false);
+
+  const executeSearch = async (normalizedSearch) => {
+    setSubmittedSearch(normalizedSearch);
+    setSelectionNotice('');
+
+    if (!normalizedSearch) {
+      setCatalogResults([]);
+      setCatalogTotal(0);
+      setManualResults([]);
+      setCatalogError('');
+      setManualError('');
+      return;
+    }
+
+    setIsLoading(true);
+    setCatalogError('');
+    setManualError('');
+
+    const [catalogResponse, manualResponse] = await Promise.allSettled([
+      getSpareParts({ page: 1, limit: searchLimit, search: normalizedSearch }),
+      searchManualSpareParts({ search: normalizedSearch, limit: searchLimit })
+    ]);
+
+    if (catalogResponse.status === 'fulfilled') {
+      setCatalogResults(Array.isArray(catalogResponse.value.data) ? catalogResponse.value.data : []);
+      setCatalogTotal(catalogResponse.value.pagination?.total ?? 0);
+    } else {
+      setCatalogResults([]);
+      setCatalogTotal(0);
+      setCatalogError(catalogResponse.reason?.message || 'No se pudo buscar en el catálogo.');
+    }
+
+    if (manualResponse.status === 'fulfilled') {
+      setManualResults(Array.isArray(manualResponse.value.data) ? manualResponse.value.data : []);
+    } else {
+      setManualResults([]);
+      setManualError(manualResponse.reason?.message || 'No se pudo buscar en los manuales.');
+    }
+
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    if (didRunInitialSearch.current) {
+      return;
+    }
+
+    didRunInitialSearch.current = true;
+
+    const initialSearchTerm = getInitialSearchTerm();
+
+    if (initialSearchTerm) {
+      executeSearch(initialSearchTerm);
+    }
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -124,46 +188,7 @@ function ManualSparePartsSearchPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    const normalizedSearch = searchTerm.trim();
-    setSubmittedSearch(normalizedSearch);
-    setSelectionNotice('');
-
-    if (!normalizedSearch) {
-      setCatalogResults([]);
-      setCatalogTotal(0);
-      setManualResults([]);
-      setCatalogError('');
-      setManualError('');
-      return;
-    }
-
-    setIsLoading(true);
-    setCatalogError('');
-    setManualError('');
-
-    const [catalogResponse, manualResponse] = await Promise.allSettled([
-      getSpareParts({ page: 1, limit: searchLimit, search: normalizedSearch }),
-      searchManualSpareParts({ search: normalizedSearch, limit: searchLimit })
-    ]);
-
-    if (catalogResponse.status === 'fulfilled') {
-      setCatalogResults(Array.isArray(catalogResponse.value.data) ? catalogResponse.value.data : []);
-      setCatalogTotal(catalogResponse.value.pagination?.total ?? 0);
-    } else {
-      setCatalogResults([]);
-      setCatalogTotal(0);
-      setCatalogError(catalogResponse.reason?.message || 'No se pudo buscar en el catálogo.');
-    }
-
-    if (manualResponse.status === 'fulfilled') {
-      setManualResults(Array.isArray(manualResponse.value.data) ? manualResponse.value.data : []);
-    } else {
-      setManualResults([]);
-      setManualError(manualResponse.reason?.message || 'No se pudo buscar en los manuales.');
-    }
-
-    setIsLoading(false);
+    await executeSearch(searchTerm.trim());
   };
 
   const handleAddToQuery = (sparePart) => {
