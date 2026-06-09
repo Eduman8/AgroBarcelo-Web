@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Button from '../components/ui/Button.jsx';
-import { machineCategories, machinesMock } from '../data/machinesMock.js';
+import { machineCategories } from '../data/machinesMock.js';
+import { getMachines } from '../services/machinesService.js';
 
 const allCategoriesLabel = 'Todas';
 
@@ -8,21 +9,66 @@ function getAvailabilityLabel(isAvailable) {
   return isAvailable ? 'Disponible' : 'Trabajo realizado';
 }
 
+function getMachineSlug(machine) {
+  return machine.slug ?? machine.id;
+}
+
 function MachinesPage() {
+  const [machines, setMachines] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(allCategoriesLabel);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadMachines() {
+      setIsLoading(true);
+      setError('');
+
+      try {
+        const response = await getMachines();
+
+        if (!isMounted) {
+          return;
+        }
+
+        setMachines(Array.isArray(response) ? response : []);
+
+        if (response?.isFallback) {
+          setError('No se pudo conectar con la API real. Se muestran maquinarias mock temporalmente.');
+        }
+      } catch (currentError) {
+        if (isMounted) {
+          setMachines([]);
+          setError(currentError.message);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadMachines();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const filteredMachines = useMemo(() => {
     const normalizedSearchTerm = searchTerm.trim().toLocaleLowerCase('es-AR');
 
-    return machinesMock.filter((machine) => {
+    return machines.filter((machine) => {
       const matchesCategory =
         selectedCategory === allCategoriesLabel || machine.categoria === selectedCategory;
       const matchesSearch = machine.nombre.toLocaleLowerCase('es-AR').includes(normalizedSearchTerm);
 
       return matchesCategory && matchesSearch;
     });
-  }, [searchTerm, selectedCategory]);
+  }, [machines, searchTerm, selectedCategory]);
 
   return (
     <section className="machines-page" aria-labelledby="machines-title">
@@ -68,55 +114,62 @@ function MachinesPage() {
         </div>
       </div>
 
-      <p className="machines-results-count">
-        Mostrando {filteredMachines.length} de {machinesMock.length} publicaciones
-      </p>
+      {isLoading && <p className="status-message">Cargando maquinarias...</p>}
+      {error && <p className="status-message status-message--error">{error}</p>}
 
-      <div className="machines-grid">
-        {filteredMachines.map((machine) => (
-          <article className="machine-card" key={machine.id}>
-            {machine.imagenPrincipal ? (
-              <img
-                className="machine-card__image"
-                src={machine.imagenPrincipal}
-                alt={`Imagen principal de ${machine.nombre}`}
-              />
-            ) : (
-              <div className="machine-card__placeholder" aria-hidden="true">
-                <span>Imagen próximamente</span>
-              </div>
-            )}
+      {!isLoading && (
+        <>
+          <p className="machines-results-count">
+            Mostrando {filteredMachines.length} de {machines.length} publicaciones
+          </p>
 
-            <div className="machine-card__topline">
-              <span className="machine-card__type">{machine.categoria}</span>
-              <span className="machine-card__status">{machine.estado}</span>
-            </div>
+          <div className="machines-grid">
+            {filteredMachines.map((machine) => (
+              <article className="machine-card" key={machine.id}>
+                {machine.imagenPrincipal ? (
+                  <img
+                    className="machine-card__image"
+                    src={machine.imagenPrincipal}
+                    alt={`Imagen principal de ${machine.nombre}`}
+                  />
+                ) : (
+                  <div className="machine-card__placeholder" aria-hidden="true">
+                    <span>Imagen próximamente</span>
+                  </div>
+                )}
 
-            <div className="machine-card__content">
-              <h2>{machine.nombre}</h2>
-              <p>{machine.descripcionCorta}</p>
-            </div>
+                <div className="machine-card__topline">
+                  <span className="machine-card__type">{machine.categoria}</span>
+                  <span className="machine-card__status">{machine.estado}</span>
+                </div>
 
-            <div className="machine-card__details">
-              <span className="availability">{getAvailabilityLabel(machine.disponible)}</span>
-            </div>
+                <div className="machine-card__content">
+                  <h2>{machine.nombre}</h2>
+                  <p>{machine.descripcionCorta}</p>
+                </div>
 
-            <Button
-              href={`/maquinarias/${encodeURIComponent(machine.id)}`}
-              variant="primary"
-              className="machine-card__button"
-            >
-              Ver detalle
-            </Button>
-          </article>
-        ))}
-      </div>
+                <div className="machine-card__details">
+                  <span className="availability">{getAvailabilityLabel(machine.disponible)}</span>
+                </div>
 
-      {filteredMachines.length === 0 ? (
-        <p className="status-message machines-empty">
-          No se encontraron maquinarias con ese nombre o categoría.
-        </p>
-      ) : null}
+                <Button
+                  href={`/maquinarias/${encodeURIComponent(getMachineSlug(machine))}`}
+                  variant="primary"
+                  className="machine-card__button"
+                >
+                  Ver detalle
+                </Button>
+              </article>
+            ))}
+          </div>
+
+          {filteredMachines.length === 0 ? (
+            <p className="status-message machines-empty">
+              No se encontraron maquinarias con ese nombre o categoría.
+            </p>
+          ) : null}
+        </>
+      )}
     </section>
   );
 }

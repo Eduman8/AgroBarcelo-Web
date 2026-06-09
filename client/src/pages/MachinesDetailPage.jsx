@@ -1,19 +1,72 @@
+import { useEffect, useState } from 'react';
 import Button from '../components/ui/Button.jsx';
-import { getMachineById } from '../data/machinesMock.js';
+import { getMachineBySlug } from '../services/machinesService.js';
 
-function getMachineId(routeParams) {
-  return routeParams?.id ?? window.location.pathname.split('/').filter(Boolean).at(-1);
+function getMachineSlug(routeParams) {
+  return routeParams?.slug ?? routeParams?.id ?? window.location.pathname.split('/').filter(Boolean).at(-1);
 }
 
 function getAvailabilityLabel(isAvailable) {
   return isAvailable ? 'Disponible' : 'No disponible';
 }
 
+function getContactMachineValue(machine) {
+  return machine.slug ?? machine.id;
+}
+
 function MachinesDetailPage({ routeParams }) {
-  const machineId = getMachineId(routeParams);
-  const machine = getMachineById(machineId);
+  const machineSlug = getMachineSlug(routeParams);
+  const [machine, setMachine] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [wasNotFound, setWasNotFound] = useState(false);
   const galleryImages = machine?.galeria ?? [];
   const hasGalleryImages = galleryImages.length > 0;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadMachine() {
+      setIsLoading(true);
+      setError('');
+      setWasNotFound(false);
+
+      try {
+        const response = await getMachineBySlug(machineSlug);
+
+        if (!isMounted) {
+          return;
+        }
+
+        if (!response) {
+          setMachine(null);
+          setWasNotFound(true);
+          return;
+        }
+
+        setMachine(response);
+
+        if (response.isFallback) {
+          setError('No se pudo conectar con la API real. Se muestra una maquinaria mock temporalmente.');
+        }
+      } catch (currentError) {
+        if (isMounted) {
+          setMachine(null);
+          setError(currentError.message);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadMachine();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [machineSlug]);
 
   return (
     <section className="machine-detail-page" aria-labelledby="machine-detail-title">
@@ -21,7 +74,10 @@ function MachinesDetailPage({ routeParams }) {
         ← Volver a maquinarias
       </a>
 
-      {!machine ? (
+      {isLoading && <p className="status-message">Cargando detalle de la maquinaria...</p>}
+      {error && <p className="status-message status-message--error">{error}</p>}
+
+      {wasNotFound && (
         <div className="machine-detail-card machine-detail-card--empty">
           <p className="eyebrow">Detalle de maquinaria</p>
           <h1 id="machine-detail-title">Maquinaria no encontrada</h1>
@@ -30,7 +86,9 @@ function MachinesDetailPage({ routeParams }) {
             Volver a maquinarias
           </a>
         </div>
-      ) : (
+      )}
+
+      {!isLoading && machine && (
         <article className="machine-detail-card">
           <div className="machine-detail-gallery" aria-labelledby="machine-gallery-title">
             <div className="machine-detail-card__media">
@@ -94,7 +152,7 @@ function MachinesDetailPage({ routeParams }) {
             </div>
 
             <div className="machine-detail-actions">
-              <Button href={`/contacto?maquinaria=${encodeURIComponent(machine.id)}`} variant="primary">
+              <Button href={`/contacto?maquinaria=${encodeURIComponent(getContactMachineValue(machine))}`} variant="primary">
                 Consultar
               </Button>
               <a className="machine-detail-actions__secondary" href="/maquinarias">

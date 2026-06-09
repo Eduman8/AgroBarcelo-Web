@@ -22,7 +22,7 @@ export const routes = {
   '/repuestos': SparePartsPage,
   '/repuestos/:id': SparePartDetailPage,
   '/maquinarias': MachinesPage,
-  '/maquinarias/:id': MachinesDetailPage,
+  '/maquinarias/:slug': MachinesDetailPage,
   '/servicios': ServicesPage,
   '/acerca-de': AboutPage,
   '/contacto': ContactPage
