@@ -1,6 +1,7 @@
 import {
   getManualSparePartsDiagnostics,
-  searchManualSpareParts
+  searchManualSpareParts,
+  searchVisualSpareParts
 } from '../services/manualSparePartsSearchService.js';
 
 const sanitizeLogValue = (value) => {
@@ -38,6 +39,33 @@ export const searchManualSparePartsController = async (request, response) => {
     response.status(500).json({
       status: 'error',
       message: 'No se pudo buscar en los repuestos manuales.'
+    });
+  }
+};
+
+export const searchVisualSparePartsController = async (request, response) => {
+  try {
+    const searchResults = await searchVisualSpareParts({
+      manual: request.query.manual,
+      pagina: request.query.pagina,
+      elemento: request.query.elemento,
+      limit: request.query.limit
+    });
+
+    response.json(searchResults);
+  } catch (error) {
+    const diagnosticError = error?.cause || error;
+
+    console.error('[visual-spare-parts-search] SQL Server query error', {
+      message: sanitizeLogValue(diagnosticError?.message),
+      code: sanitizeLogValue(diagnosticError?.code),
+      originalErrorMessage: sanitizeLogValue(diagnosticError?.originalError?.message),
+      originalErrorCode: sanitizeLogValue(diagnosticError?.originalError?.code)
+    });
+
+    response.status(500).json({
+      status: 'error',
+      message: 'No se pudo buscar el repuesto visual en los manuales.'
     });
   }
 };

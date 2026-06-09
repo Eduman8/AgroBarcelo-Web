@@ -28,3 +28,20 @@ export async function getManualSparePartsDiagnostics() {
 
   return response.json();
 }
+
+export async function searchVisualSpareParts({ manual = '', pagina = '', elemento = '', limit = 25 } = {}) {
+  const params = new URLSearchParams({
+    manual: String(manual).trim(),
+    pagina: String(pagina).trim(),
+    elemento: String(elemento).trim(),
+    limit: String(limit)
+  });
+
+  const response = await fetch(`${apiUrl}/api/buscador-visual-repuestos?${params.toString()}`);
+
+  if (!response.ok) {
+    throw new Error('No se pudo buscar el repuesto visual en los manuales.');
+  }
+
+  return response.json();
+}

@@ -22,6 +22,22 @@ const normalizeSearchOptions = ({ search = '', limit = DEFAULT_LIMIT } = {}) => 
   };
 };
 
+const normalizeVisualSearchOptions = ({ manual = '', pagina, elemento = '', limit = DEFAULT_LIMIT } = {}) => {
+  const normalizedManual = String(manual ?? '').trim().slice(0, 200);
+  const normalizedElemento = String(elemento ?? '').trim().slice(0, 150);
+  const normalizedPagina = Number.parseInt(pagina, 10);
+  const normalizedLimit = Math.min(parsePositiveInteger(limit, DEFAULT_LIMIT), MAX_LIMIT);
+
+  return {
+    manual: normalizedManual,
+    manualTerm: `%${normalizedManual}%`,
+    elemento: normalizedElemento,
+    elementoTerm: `%${normalizedElemento}%`,
+    pagina: Number.isInteger(normalizedPagina) && normalizedPagina > 0 ? normalizedPagina : null,
+    limit: normalizedLimit
+  };
+};
+
 const getDisplayValue = (value, fallback = '') => {
   if (value === null || value === undefined || value === '') {
     return fallback;
@@ -133,6 +149,67 @@ ORDER BY
 `;
 };
 
+const buildVisualSparePartsSearchQuery = ({ idColumn, modelColumn }) => {
+  const modelSelect = modelColumn ? `rm.${modelColumn}` : 'NULL';
+
+  return `
+SELECT TOP (@limit)
+    rm.${idColumn} AS id,
+    rm.ManualNombre AS manual,
+    rm.ArchivoOrigen AS archivoOrigen,
+    rm.Pagina AS pagina,
+    rm.Codigo AS codigo,
+    rm.Descripcion AS descripcion,
+    rm.Marca AS marca,
+    ${modelSelect} AS modelo,
+    rm.Categoria AS categoria,
+    rm.ReferenciaDespiece AS referenciaDespiece,
+    rm.Observaciones AS observaciones,
+    catalogo.ID_Articulo AS catalogoId,
+    catalogo.CodigoAlternativo AS catalogoCodigo,
+    catalogo.Nombre AS catalogoNombre,
+    catalogo.Marca AS catalogoMarca
+FROM dbo.RepuestosManuales rm
+OUTER APPLY (
+    SELECT TOP (1)
+        p.ID_Articulo,
+        p.CodigoAlternativo,
+        p.Descripcion AS Nombre,
+        m.Marca
+    FROM dbo.Productos p
+    LEFT JOIN dbo.Marcas m
+        ON m.ID_Marca = p.ID_Marca
+    WHERE ${sparePartRubrosFilter}
+      AND NULLIF(LTRIM(RTRIM(rm.Codigo)), '') IS NOT NULL
+      AND UPPER(LTRIM(RTRIM(p.CodigoAlternativo))) = UPPER(LTRIM(RTRIM(rm.Codigo)))
+    ORDER BY p.Descripcion, p.ID_Articulo
+) catalogo
+WHERE rm.Activo = 1
+  AND rm.ManualNombre LIKE @manualTerm
+  AND rm.Pagina = @pagina
+  AND (
+    UPPER(LTRIM(RTRIM(COALESCE(rm.ReferenciaDespiece, '')))) = UPPER(LTRIM(RTRIM(@elemento)))
+    OR rm.ReferenciaDespiece LIKE @elementoTerm
+    OR (
+      NULLIF(LTRIM(RTRIM(COALESCE(rm.ReferenciaDespiece, ''))), '') IS NULL
+      AND (
+        rm.Observaciones LIKE @elementoTerm
+        OR rm.Descripcion LIKE @elementoTerm
+      )
+    )
+  )
+ORDER BY
+    CASE
+      WHEN UPPER(LTRIM(RTRIM(COALESCE(rm.ReferenciaDespiece, '')))) = UPPER(LTRIM(RTRIM(@elemento))) THEN 0
+      WHEN rm.ReferenciaDespiece LIKE @elementoTerm THEN 1
+      ELSE 2
+    END,
+    rm.ManualNombre,
+    rm.Pagina,
+    rm.Codigo;
+`;
+};
+
 const buildManualSparePartsDiagnosticsQuery = (importDateColumn) => {
   const importDateSelect = importDateColumn ? `MAX(${importDateColumn})` : 'MAX(CAST(NULL AS DATETIME))';
 
@@ -188,6 +265,43 @@ export const searchManualSpareParts = async (options = {}) => {
     data: (result.recordset ?? []).map(mapManualSparePart),
     meta: {
       search: searchOptions.search,
+      limit: searchOptions.limit
+    }
+  };
+};
+
+export const searchVisualSpareParts = async (options = {}) => {
+  const pool = await getSqlPool();
+  const searchOptions = normalizeVisualSearchOptions(options);
+
+  if (!searchOptions.manual || !searchOptions.pagina || !searchOptions.elemento) {
+    return {
+      data: [],
+      meta: {
+        manual: searchOptions.manual,
+        pagina: searchOptions.pagina,
+        elemento: searchOptions.elemento,
+        limit: searchOptions.limit
+      }
+    };
+  }
+
+  const schema = await getManualSparePartsSchema(pool);
+  const result = await pool
+    .request()
+    .input('limit', sql.Int, searchOptions.limit)
+    .input('manualTerm', sql.NVarChar(202), searchOptions.manualTerm)
+    .input('pagina', sql.Int, searchOptions.pagina)
+    .input('elemento', sql.NVarChar(150), searchOptions.elemento)
+    .input('elementoTerm', sql.NVarChar(152), searchOptions.elementoTerm)
+    .query(buildVisualSparePartsSearchQuery(schema));
+
+  return {
+    data: (result.recordset ?? []).map(mapManualSparePart),
+    meta: {
+      manual: searchOptions.manual,
+      pagina: searchOptions.pagina,
+      elemento: searchOptions.elemento,
       limit: searchOptions.limit
     }
   };
