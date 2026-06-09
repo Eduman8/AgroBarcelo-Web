@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getMachineByIdentifier } from '../services/machinesService.js';
 import { getSparePartById } from '../services/sparePartsService.js';
 import { mapsConfig, whatsappConfig } from '../config/contact.js';
-import { getContactSelectedParts, removeContactSelectedPart } from '../utils/contactSelectedParts.js';
+import { clearContactSelectedParts, getContactSelectedParts, removeContactSelectedPart } from '../utils/contactSelectedParts.js';
 import { getMachineAvailabilityLabel, getMachineCategory, getMachineStatus, isAvailableMachine } from '../utils/machines.js';
 
 const contactDetails = [
@@ -85,6 +85,9 @@ function buildWhatsAppUrl(message) {
 }
 
 function ContactPage() {
+  const clearCurrentQueryUrl = () => {
+    window.history.replaceState(null, '', '/contacto');
+  };
   const searchParams = new URLSearchParams(window.location.search);
   const sparePartId = searchParams.get('producto');
   const machineId = searchParams.get('maquinaria');
@@ -251,7 +254,7 @@ function ContactPage() {
         id: machine?.id ?? machineId,
         name: machine?.nombre || '',
         code: machine?.slug || machineId,
-        brand: ''
+        brand: machine?.marca || ''
       };
     }
 
@@ -303,13 +306,15 @@ function ContactPage() {
         throw new Error('No se pudo enviar la consulta.');
       }
 
+      clearCurrentQueryUrl();
+      clearContactSelectedParts();
+      setSelectedParts([]);
+      setSparePart(null);
+      setMachine(null);
       setFormStatus('success');
       setNotice('Consulta enviada correctamente. Te responderemos a la brevedad.');
       setFormValues(initialFormValues);
-
-      if (!selectedQueryType && selectedParts.length === 0) {
-        setSubject('');
-      }
+      setSubject('');
     } catch (currentError) {
       setFormStatus('error');
       setNotice('No se pudo enviar la consulta. Intentá nuevamente o contactanos por WhatsApp.');
@@ -317,7 +322,19 @@ function ContactPage() {
   }
 
   function handleClearSelectedQuery() {
-    window.location.href = '/contacto';
+    clearCurrentQueryUrl();
+    clearContactSelectedParts();
+    setSelectedParts([]);
+    setSparePart(null);
+    setSparePartError('');
+    setWasSparePartNotFound(false);
+    setMachine(null);
+    setMachineError('');
+    setWasMachineNotFound(false);
+    setFormValues(initialFormValues);
+    setSubject('');
+    setFormStatus('idle');
+    setNotice('');
   }
 
   function handleRemoveSelectedPart(partId) {
@@ -406,6 +423,10 @@ function ContactPage() {
                 <dd>{machine.nombre}</dd>
               </div>
               <div>
+                <dt>Marca</dt>
+                <dd>{getDisplayValue(machine.marca)}</dd>
+              </div>
+              <div>
                 <dt>Categoría</dt>
                 <dd>{getMachineCategory(machine)}</dd>
               </div>
@@ -441,6 +462,7 @@ function ContactPage() {
             <p className="eyebrow">Repuestos seleccionados</p>
             <h2 id="selected-parts-title">Repuestos seleccionados</h2>
           </div>
+          {renderClearSelectedQueryButton()}
         </div>
 
         <ul className="selected-parts-list">
