@@ -1209,6 +1209,20 @@ h1 {
   box-shadow: 0 0 0 4px rgba(201, 21, 28, 0.1);
 }
 
+.machines-filter-group {
+  display: grid;
+  gap: 8px;
+}
+
+.machines-filter-group p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .machines-filter {
   display: flex;
   flex-wrap: wrap;
@@ -1367,6 +1381,19 @@ h1 {
 .machine-card__button {
   width: 100%;
   min-height: 46px;
+}
+
+.machine-card__button--disabled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(20, 20, 20, 0.12);
+  border-radius: 6px;
+  background: #f2f2f0;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  font-weight: 950;
+  cursor: not-allowed;
 }
 
 .machines-empty {

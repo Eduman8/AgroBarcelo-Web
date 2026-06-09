@@ -1,16 +1,36 @@
 import { useEffect, useMemo, useState } from 'react';
 import Button from '../components/ui/Button.jsx';
-import { machineCategories } from '../data/machinesMock.js';
 import { getMachines } from '../services/machinesService.js';
-import { getMachineAvailabilityLabel, getMachineSlug, isSoldMachine } from '../utils/machines.js';
+import {
+  getMachineAvailabilityLabel,
+  getMachineCategory,
+  getMachineSlug,
+  getMachineStatus,
+  isSoldMachine,
+  machineCategories,
+  machineStatuses
+} from '../utils/machines.js';
 
 const allCategoriesLabel = 'Todas';
+const allStatusesLabel = 'Todos';
+
+const categoryFilterLabels = {
+  Nueva: 'Nuevas',
+  Usada: 'Usadas',
+  'Trabajo Realizado': 'Trabajos Realizados'
+};
+
+const statusFilterLabels = {
+  Disponible: 'Disponibles',
+  Vendida: 'Vendidas'
+};
 
 
 function MachinesPage() {
   const [machines, setMachines] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(allCategoriesLabel);
+  const [selectedStatus, setSelectedStatus] = useState(allStatusesLabel);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -56,13 +76,15 @@ function MachinesPage() {
     const normalizedSearchTerm = searchTerm.trim().toLocaleLowerCase('es-AR');
 
     return machines.filter((machine) => {
-      const matchesCategory =
-        selectedCategory === allCategoriesLabel || machine.categoria === selectedCategory;
+      const machineCategory = getMachineCategory(machine);
+      const machineStatus = getMachineStatus(machine);
+      const matchesCategory = selectedCategory === allCategoriesLabel || machineCategory === selectedCategory;
+      const matchesStatus = selectedStatus === allStatusesLabel || machineStatus === selectedStatus;
       const matchesSearch = machine.nombre.toLocaleLowerCase('es-AR').includes(normalizedSearchTerm);
 
-      return matchesCategory && matchesSearch;
+      return matchesCategory && matchesStatus && matchesSearch;
     });
-  }, [machines, searchTerm, selectedCategory]);
+  }, [machines, searchTerm, selectedCategory, selectedStatus]);
 
   return (
     <section className="machines-page" aria-labelledby="machines-title">
@@ -89,22 +111,46 @@ function MachinesPage() {
           />
         </div>
 
-        <div className="machines-filter" aria-label="Filtrar por categoría">
-          {[allCategoriesLabel, ...machineCategories].map((category) => {
-            const isActive = selectedCategory === category;
+        <div className="machines-filter-group">
+          <p>Categoría</p>
+          <div className="machines-filter" aria-label="Filtrar por categoría">
+            {[allCategoriesLabel, ...machineCategories].map((category) => {
+              const isActive = selectedCategory === category;
 
-            return (
-              <button
-                className={`machines-filter__item${isActive ? ' is-active' : ''}`}
-                key={category}
-                type="button"
-                aria-pressed={isActive}
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </button>
-            );
-          })}
+              return (
+                <button
+                  className={`machines-filter__item${isActive ? ' is-active' : ''}`}
+                  key={category}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {categoryFilterLabels[category] ?? category}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="machines-filter-group">
+          <p>Estado</p>
+          <div className="machines-filter" aria-label="Filtrar por estado">
+            {[allStatusesLabel, ...machineStatuses].map((status) => {
+              const isActive = selectedStatus === status;
+
+              return (
+                <button
+                  className={`machines-filter__item${isActive ? ' is-active' : ''}`}
+                  key={status}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() => setSelectedStatus(status)}
+                >
+                  {statusFilterLabels[status] ?? status}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -133,9 +179,9 @@ function MachinesPage() {
                 )}
 
                 <div className="machine-card__topline">
-                  <span className="machine-card__type">{machine.categoria}</span>
+                  <span className="machine-card__type">{getMachineCategory(machine)}</span>
                   <span className={`machine-card__status${isSoldMachine(machine) ? ' machine-card__status--sold' : ''}`}>
-                    {machine.estado}
+                    {getMachineStatus(machine)}
                   </span>
                 </div>
 
@@ -146,17 +192,21 @@ function MachinesPage() {
 
                 <div className="machine-card__details">
                   <span className={`availability${isSoldMachine(machine) ? ' availability--sold' : ''}`}>
-                    {getMachineAvailabilityLabel(machine, 'Trabajo realizado')}
+                    {getMachineAvailabilityLabel(machine)}
                   </span>
                 </div>
 
-                <Button
-                  href={`/maquinarias/${encodeURIComponent(getMachineSlug(machine))}`}
-                  variant="primary"
-                  className="machine-card__button"
-                >
-                  Ver detalle
-                </Button>
+                {isSoldMachine(machine) ? (
+                  <span className="machine-card__button machine-card__button--disabled">No disponible</span>
+                ) : (
+                  <Button
+                    href={`/maquinarias/${encodeURIComponent(getMachineSlug(machine))}`}
+                    variant="primary"
+                    className="machine-card__button"
+                  >
+                    Ver detalle
+                  </Button>
+                )}
               </article>
             ))}
           </div>

@@ -1,5 +1,5 @@
 import { getSqlPool, sql } from '../config/sqlServer.js';
-import { mapMachine, normalizeGalleryForStorage } from './machinesService.js';
+import { isSoldMachine, mapMachine, normalizeGalleryForStorage } from './machinesService.js';
 
 class MachineValidationError extends Error {
   constructor(message) {
@@ -138,6 +138,33 @@ const normalizeText = (value, maxLength) => {
   return String(value).trim().slice(0, maxLength);
 };
 
+const categoryAliases = new Map([
+  ['maquinaria nueva', 'Nueva'],
+  ['nueva', 'Nueva'],
+  ['maquinaria usada', 'Usada'],
+  ['usada', 'Usada'],
+  ['usado', 'Usada'],
+  ['trabajos realizados', 'Trabajo Realizado'],
+  ['trabajo realizado', 'Trabajo Realizado']
+]);
+
+const statusAliases = new Map([
+  ['disponible', 'Disponible'],
+  ['vendida', 'Vendida'],
+  ['vendido', 'Vendida'],
+  ['finalizado', 'Vendida'],
+  ['finalizada', 'Vendida'],
+  ['nueva', 'Disponible'],
+  ['usada', 'Disponible'],
+  ['usado', 'Disponible']
+]);
+
+const normalizeCatalogValue = (value, maxLength, aliases) => {
+  const normalizedValue = normalizeText(value, maxLength);
+
+  return aliases.get(normalizedValue.toLocaleLowerCase('es-AR')) ?? normalizedValue;
+};
+
 const normalizeNullableText = (value, maxLength) => {
   const normalizedValue = normalizeText(value, maxLength);
 
@@ -168,10 +195,13 @@ const normalizeBoolean = (value, defaultValue) => {
   return ['true', '1', 'yes', 'y', 'si', 'sí'].includes(String(value).trim().toLowerCase());
 };
 
+const allowedCategories = new Set(['Nueva', 'Usada', 'Trabajo Realizado']);
+const allowedStatuses = new Set(['Disponible', 'Vendida']);
+
 const normalizeMachinePayload = (payload) => {
   const nombre = normalizeText(payload?.nombre, 200);
-  const categoria = normalizeText(payload?.categoria, 100);
-  const estado = normalizeText(payload?.estado, 100);
+  const categoria = normalizeCatalogValue(payload?.categoria, 100, categoryAliases);
+  const estado = normalizeCatalogValue(payload?.estado, 100, statusAliases);
   const slug = normalizeText(payload?.slug, 150) || createSlugFromName(nombre);
 
   if (!nombre) {
@@ -182,8 +212,16 @@ const normalizeMachinePayload = (payload) => {
     throw new MachineValidationError('La categoría es requerida.');
   }
 
+  if (!allowedCategories.has(categoria)) {
+    throw new MachineValidationError('La categoría debe ser Nueva, Usada o Trabajo Realizado.');
+  }
+
   if (!estado) {
     throw new MachineValidationError('El estado es requerido.');
+  }
+
+  if (!allowedStatuses.has(estado)) {
+    throw new MachineValidationError('El estado debe ser Disponible o Vendida.');
   }
 
   if (!slug) {
@@ -199,7 +237,7 @@ const normalizeMachinePayload = (payload) => {
     descripcionLarga: payload?.descripcionLarga ? String(payload.descripcionLarga).trim() || null : null,
     imagenPrincipal: normalizeNullableText(payload?.imagenPrincipal, 500),
     galeria: normalizeGalleryForStorage(payload?.galeria),
-    disponible: normalizeBoolean(payload?.disponible, true),
+    disponible: estado === 'Disponible' && !isSoldMachine({ estado }),
     activo: normalizeBoolean(payload?.activo, true)
   };
 };

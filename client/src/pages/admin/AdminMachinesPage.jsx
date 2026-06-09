@@ -1,19 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import AdminLayout from '../../components/admin/AdminLayout.jsx';
-import { machineCategories } from '../../data/machinesMock.js';
 import {
   createMachine,
   deleteMachine,
   getAdminMachines,
   updateMachine
 } from '../../services/machinesService.js';
-import { isSoldMachine } from '../../utils/machines.js';
+import { getMachineCategory, getMachineStatus, machineCategories, machineStatuses } from '../../utils/machines.js';
 
 const emptyMachineForm = {
   nombre: '',
   categoria: '',
-  estado: '',
+  estado: 'Disponible',
   descripcionCorta: '',
   descripcionLarga: '',
   disponible: true
@@ -90,11 +89,11 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
   function handleEditMachine(machine) {
     setFormData({
       nombre: machine.nombre ?? '',
-      categoria: machine.categoria ?? '',
-      estado: machine.estado ?? '',
+      categoria: getMachineCategory(machine),
+      estado: getMachineStatus(machine),
       descripcionCorta: machine.descripcionCorta ?? '',
       descripcionLarga: machine.descripcionLarga ?? '',
-      disponible: Boolean(machine.disponible)
+      disponible: getMachineStatus(machine) === 'Disponible'
     });
     setEditingMachineId(machine.id);
     setErrors({});
@@ -192,7 +191,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
       descripcionLarga: formData.descripcionLarga.trim(),
       imagenPrincipal: null,
       galeria: [],
-      disponible: isSoldMachine(formData) ? false : formData.disponible,
+      disponible: formData.estado === 'Disponible',
       activo: true
     };
 
@@ -295,28 +294,30 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
                 <span className="admin-field-label">
                   Estado <span aria-hidden="true">*</span>
                 </span>
-                <input
+                <select
                   name="estado"
-                  type="text"
                   value={formData.estado}
                   onChange={handleInputChange}
                   aria-invalid={Boolean(errors.estado)}
-                  placeholder="Nueva, Usada, Vendido, Finalizado..."
                   disabled={isSaving}
-                />
+                >
+                  <option value="">Seleccionar estado</option>
+                  {machineStatuses.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
                 {errors.estado && <small className="admin-form-error">{errors.estado}</small>}
               </label>
 
-              <label className="admin-checkbox-field">
-                <input
-                  name="disponible"
-                  type="checkbox"
-                  checked={formData.disponible}
-                  onChange={handleInputChange}
-                  disabled={isSaving}
-                />
-                <span>Publicar esta maquinaria como disponible para consultas</span>
-              </label>
+              <div className="admin-checkbox-field" aria-live="polite">
+                <span>
+                  {formData.estado === 'Vendida'
+                    ? 'Las maquinarias vendidas se publican como historial y sin detalle público.'
+                    : 'Las maquinarias disponibles permiten consulta y acceso al detalle público.'}
+                </span>
+              </div>
 
               <label className="admin-form-field--wide">
                 <span className="admin-field-label">Descripción corta</span>
@@ -399,11 +400,17 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
                 {machines.map((machine) => (
                   <tr key={machine.id}>
                     <td data-label="Nombre">{machine.nombre}</td>
-                    <td data-label="Categoría">{machine.categoria}</td>
-                    <td data-label="Estado">{machine.estado}</td>
+                    <td data-label="Categoría">{getMachineCategory(machine)}</td>
+                    <td data-label="Estado">{getMachineStatus(machine)}</td>
                     <td data-label="Disponibilidad">
-                      <span className={machine.disponible ? 'admin-status-pill' : 'admin-status-pill is-muted'}>
-                        {machine.disponible ? 'Disponible' : 'No disponible'}
+                      <span
+                        className={
+                          getMachineStatus(machine) === 'Disponible'
+                            ? 'admin-status-pill'
+                            : 'admin-status-pill is-muted'
+                        }
+                      >
+                        {getMachineStatus(machine) === 'Disponible' ? 'Disponible' : 'No disponible'}
                       </span>
                     </td>
                     <td data-label="Acciones">

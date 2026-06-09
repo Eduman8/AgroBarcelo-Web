@@ -3,6 +3,7 @@ import { getMachineById } from '../data/machinesMock.js';
 import { getSparePartById } from '../services/sparePartsService.js';
 import { mapsConfig, whatsappConfig } from '../config/contact.js';
 import { getContactSelectedParts, removeContactSelectedPart } from '../utils/contactSelectedParts.js';
+import { getMachineAvailabilityLabel, getMachineCategory, getMachineStatus } from '../utils/machines.js';
 
 const contactDetails = [
   {
@@ -54,10 +55,6 @@ function getDisplayValue(value) {
   }
 
   return value;
-}
-
-function getAvailabilityLabel(isAvailable) {
-  return isAvailable ? 'Disponible' : 'Trabajo realizado';
 }
 
 function normalizeWhatsAppPhoneNumber(phoneNumber) {
@@ -345,15 +342,15 @@ function ContactPage() {
             </div>
             <div>
               <dt>Categoría</dt>
-              <dd>{machine.categoria}</dd>
+              <dd>{getMachineCategory(machine)}</dd>
             </div>
             <div>
               <dt>Estado</dt>
-              <dd>{machine.estado}</dd>
+              <dd>{getMachineStatus(machine)}</dd>
             </div>
             <div>
               <dt>Disponibilidad</dt>
-              <dd>{getAvailabilityLabel(machine.disponible)}</dd>
+              <dd>{getMachineAvailabilityLabel(machine)}</dd>
             </div>
           </dl>
         ) : null}
