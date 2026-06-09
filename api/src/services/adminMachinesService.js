@@ -1,0 +1,280 @@
+import { getSqlPool, sql } from '../config/sqlServer.js';
+import { mapMachine, normalizeGalleryForStorage } from './machinesService.js';
+
+class MachineValidationError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'MachineValidationError';
+  }
+}
+
+export { MachineValidationError };
+
+const machineFieldsSelect = `
+    ID_WebMaquinaria AS id,
+    Slug AS slug,
+    Nombre AS nombre,
+    Categoria AS categoria,
+    Estado AS estado,
+    DescripcionCorta AS descripcionCorta,
+    DescripcionLarga AS descripcionLarga,
+    ImagenPrincipal AS imagenPrincipal,
+    Galeria AS galeria,
+    Disponible AS disponible,
+    Activo AS activo
+`;
+
+const allMachinesQuery = `
+SELECT${machineFieldsSelect}
+FROM dbo.WebMaquinarias
+ORDER BY FechaAlta DESC, ID_WebMaquinaria DESC;
+`;
+
+const machineByIdQuery = `
+SELECT TOP (1)${machineFieldsSelect}
+FROM dbo.WebMaquinarias
+WHERE ID_WebMaquinaria = @id;
+`;
+
+const createMachineQuery = `
+INSERT INTO dbo.WebMaquinarias (
+    Slug,
+    Nombre,
+    Categoria,
+    Estado,
+    DescripcionCorta,
+    DescripcionLarga,
+    ImagenPrincipal,
+    Galeria,
+    Disponible,
+    Activo
+)
+OUTPUT
+    INSERTED.ID_WebMaquinaria AS id,
+    INSERTED.Slug AS slug,
+    INSERTED.Nombre AS nombre,
+    INSERTED.Categoria AS categoria,
+    INSERTED.Estado AS estado,
+    INSERTED.DescripcionCorta AS descripcionCorta,
+    INSERTED.DescripcionLarga AS descripcionLarga,
+    INSERTED.ImagenPrincipal AS imagenPrincipal,
+    INSERTED.Galeria AS galeria,
+    INSERTED.Disponible AS disponible,
+    INSERTED.Activo AS activo
+VALUES (
+    @slug,
+    @nombre,
+    @categoria,
+    @estado,
+    @descripcionCorta,
+    @descripcionLarga,
+    @imagenPrincipal,
+    @galeria,
+    @disponible,
+    @activo
+);
+`;
+
+const updateMachineQuery = `
+UPDATE dbo.WebMaquinarias
+SET
+    Slug = @slug,
+    Nombre = @nombre,
+    Categoria = @categoria,
+    Estado = @estado,
+    DescripcionCorta = @descripcionCorta,
+    DescripcionLarga = @descripcionLarga,
+    ImagenPrincipal = @imagenPrincipal,
+    Galeria = @galeria,
+    Disponible = @disponible,
+    Activo = @activo,
+    FechaModificacion = GETDATE()
+OUTPUT
+    INSERTED.ID_WebMaquinaria AS id,
+    INSERTED.Slug AS slug,
+    INSERTED.Nombre AS nombre,
+    INSERTED.Categoria AS categoria,
+    INSERTED.Estado AS estado,
+    INSERTED.DescripcionCorta AS descripcionCorta,
+    INSERTED.DescripcionLarga AS descripcionLarga,
+    INSERTED.ImagenPrincipal AS imagenPrincipal,
+    INSERTED.Galeria AS galeria,
+    INSERTED.Disponible AS disponible,
+    INSERTED.Activo AS activo
+WHERE ID_WebMaquinaria = @id;
+`;
+
+const softDeleteMachineQuery = `
+UPDATE dbo.WebMaquinarias
+SET
+    Activo = 0,
+    FechaModificacion = GETDATE()
+OUTPUT
+    INSERTED.ID_WebMaquinaria AS id,
+    INSERTED.Slug AS slug,
+    INSERTED.Nombre AS nombre,
+    INSERTED.Categoria AS categoria,
+    INSERTED.Estado AS estado,
+    INSERTED.DescripcionCorta AS descripcionCorta,
+    INSERTED.DescripcionLarga AS descripcionLarga,
+    INSERTED.ImagenPrincipal AS imagenPrincipal,
+    INSERTED.Galeria AS galeria,
+    INSERTED.Disponible AS disponible,
+    INSERTED.Activo AS activo
+WHERE ID_WebMaquinaria = @id;
+`;
+
+const parsePositiveInteger = (value) => {
+  const parsedValue = Number.parseInt(value, 10);
+
+  return Number.isInteger(parsedValue) && parsedValue > 0 ? parsedValue : null;
+};
+
+const normalizeText = (value, maxLength) => {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  return String(value).trim().slice(0, maxLength);
+};
+
+const normalizeNullableText = (value, maxLength) => {
+  const normalizedValue = normalizeText(value, maxLength);
+
+  return normalizedValue || null;
+};
+
+export const createSlugFromName = (name) => String(name ?? '')
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '')
+  .slice(0, 150);
+
+const normalizeBoolean = (value, defaultValue) => {
+  if (value === undefined || value === null || value === '') {
+    return defaultValue;
+  }
+
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'number') {
+    return value === 1;
+  }
+
+  return ['true', '1', 'yes', 'y', 'si', 'sí'].includes(String(value).trim().toLowerCase());
+};
+
+const normalizeMachinePayload = (payload) => {
+  const nombre = normalizeText(payload?.nombre, 200);
+  const categoria = normalizeText(payload?.categoria, 100);
+  const estado = normalizeText(payload?.estado, 100);
+  const slug = normalizeText(payload?.slug, 150) || createSlugFromName(nombre);
+
+  if (!nombre) {
+    throw new MachineValidationError('El nombre es requerido.');
+  }
+
+  if (!categoria) {
+    throw new MachineValidationError('La categoría es requerida.');
+  }
+
+  if (!estado) {
+    throw new MachineValidationError('El estado es requerido.');
+  }
+
+  if (!slug) {
+    throw new MachineValidationError('El slug es requerido.');
+  }
+
+  return {
+    slug,
+    nombre,
+    categoria,
+    estado,
+    descripcionCorta: normalizeNullableText(payload?.descripcionCorta, 500),
+    descripcionLarga: payload?.descripcionLarga ? String(payload.descripcionLarga).trim() || null : null,
+    imagenPrincipal: normalizeNullableText(payload?.imagenPrincipal, 500),
+    galeria: normalizeGalleryForStorage(payload?.galeria),
+    disponible: normalizeBoolean(payload?.disponible, true),
+    activo: normalizeBoolean(payload?.activo, true)
+  };
+};
+
+const addMachineInputs = (request, machine) => {
+  request.input('slug', sql.NVarChar(150), machine.slug);
+  request.input('nombre', sql.NVarChar(200), machine.nombre);
+  request.input('categoria', sql.NVarChar(100), machine.categoria);
+  request.input('estado', sql.NVarChar(100), machine.estado);
+  request.input('descripcionCorta', sql.NVarChar(500), machine.descripcionCorta);
+  request.input('descripcionLarga', sql.NVarChar(sql.MAX), machine.descripcionLarga);
+  request.input('imagenPrincipal', sql.NVarChar(500), machine.imagenPrincipal);
+  request.input('galeria', sql.NVarChar(sql.MAX), machine.galeria);
+  request.input('disponible', sql.Bit, machine.disponible);
+  request.input('activo', sql.Bit, machine.activo);
+
+  return request;
+};
+
+export const getAdminMachines = async () => {
+  const pool = await getSqlPool();
+  const result = await pool.request().query(allMachinesQuery);
+
+  return (result.recordset ?? []).map(mapMachine);
+};
+
+export const getAdminMachineById = async (id) => {
+  const machineId = parsePositiveInteger(id);
+
+  if (!machineId) {
+    return null;
+  }
+
+  const pool = await getSqlPool();
+  const result = await pool.request().input('id', sql.Int, machineId).query(machineByIdQuery);
+  const machine = result.recordset?.[0];
+
+  return machine ? mapMachine(machine) : null;
+};
+
+export const createAdminMachine = async (payload) => {
+  const machine = normalizeMachinePayload(payload);
+  const pool = await getSqlPool();
+  const result = await addMachineInputs(pool.request(), machine).query(createMachineQuery);
+
+  return mapMachine(result.recordset[0]);
+};
+
+export const updateAdminMachine = async (id, payload) => {
+  const machineId = parsePositiveInteger(id);
+
+  if (!machineId) {
+    return null;
+  }
+
+  const machine = normalizeMachinePayload(payload);
+  const pool = await getSqlPool();
+  const result = await addMachineInputs(pool.request(), machine)
+    .input('id', sql.Int, machineId)
+    .query(updateMachineQuery);
+  const updatedMachine = result.recordset?.[0];
+
+  return updatedMachine ? mapMachine(updatedMachine) : null;
+};
+
+export const softDeleteAdminMachine = async (id) => {
+  const machineId = parsePositiveInteger(id);
+
+  if (!machineId) {
+    return null;
+  }
+
+  const pool = await getSqlPool();
+  const result = await pool.request().input('id', sql.Int, machineId).query(softDeleteMachineQuery);
+  const deletedMachine = result.recordset?.[0];
+
+  return deletedMachine ? mapMachine(deletedMachine) : null;
+};
