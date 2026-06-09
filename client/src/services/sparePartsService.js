@@ -1,4 +1,4 @@
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+export const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export async function getSpareParts({ page = 1, limit = 50, search = '' } = {}) {
   const params = new URLSearchParams({

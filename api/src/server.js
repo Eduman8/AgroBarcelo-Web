@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { products } from './products.js';
 import contactRoutes from './routes/contactRoutes.js';
 import adminMachinesRoutes from './routes/adminMachinesRoutes.js';
@@ -11,9 +13,12 @@ import sparePartsRoutes from './routes/sparePartsRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
 app.use(cors({ origin: clientOrigin }));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use('/api', contactRoutes);
 app.use('/api', dbHealthRoutes);

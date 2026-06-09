@@ -1,9 +1,22 @@
 import { useEffect, useState } from 'react';
-import { getSpareParts } from '../services/sparePartsService.js';
+import { apiUrl, getSpareParts } from '../services/sparePartsService.js';
 import { addContactSelectedPart, getContactSelectedParts } from '../utils/contactSelectedParts.js';
 
 const emptyValue = 'Sin informar';
 const sparePartsLimit = 50;
+
+const sparePartsManuals = [
+  {
+    title: 'Manual de repuestos de rastras',
+    description: 'Despieces y códigos de repuestos para rastras CELE.',
+    url: `${apiUrl}/pdfs/manual-repuestos-rastras.pdf`
+  },
+  {
+    title: 'Manual de repuestos grano fino 2019',
+    description: 'Despieces y códigos de repuestos para sembradoras de grano fino CELE.',
+    url: `${apiUrl}/pdfs/manual-repuestos-grano-fino-2019.pdf`
+  }
+];
 
 function getDisplayValue(value) {
   if (value === null || value === undefined || value === '') {
@@ -117,6 +130,41 @@ function SparePartsPage() {
         <h1 id="spare-parts-title">Repuestos</h1>
         <p>Encontrá repuestos para tu maquinaria de forma rápida y sencilla.</p>
       </div>
+
+      <section className="spare-parts-manuals" aria-labelledby="spare-parts-manuals-title">
+        <div className="spare-parts-manuals__header">
+          <p className="eyebrow">Ayuda para identificar piezas</p>
+          <h2 id="spare-parts-manuals-title">¿No sabés qué repuesto necesitás?</h2>
+          <p>
+            Consultá los manuales de repuestos para identificar la pieza correcta antes de enviar tu
+            consulta.
+          </p>
+        </div>
+
+        <div className="spare-parts-manuals__grid">
+          {sparePartsManuals.map((manual) => (
+            <article className="spare-parts-manual-card" key={manual.url}>
+              <div>
+                <h3>{manual.title}</h3>
+                <p>{manual.description}</p>
+              </div>
+              <a
+                className="spare-parts-manual-card__button"
+                href={manual.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Ver manual
+              </a>
+            </article>
+          ))}
+        </div>
+
+        <p className="spare-parts-manuals__note">
+          Cuando encuentres el código o la página del manual, podés indicarlo en la consulta para que
+          AgroBarceló identifique el repuesto correcto.
+        </p>
+      </section>
 
       <div className="spare-parts-search" role="search">
         <label className="spare-parts-search__label" htmlFor="spare-parts-search-input">
