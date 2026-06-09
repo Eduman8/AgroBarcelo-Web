@@ -12,6 +12,10 @@ function getContactMachineValue(machine) {
   return String(machine?.slug ?? '').trim() || machine?.id;
 }
 
+function getDisplayValue(value) {
+  return value === null || value === undefined || value === '' ? 'Sin informar' : value;
+}
+
 function MachinesDetailPage({ routeParams }) {
   const machineSlug = getMachineSlug(routeParams);
   const [machine, setMachine] = useState(null);
@@ -134,6 +138,10 @@ function MachinesDetailPage({ routeParams }) {
             </div>
 
             <dl className="machine-detail-list">
+              <div>
+                <dt>Marca</dt>
+                <dd>{getDisplayValue(machine.marca)}</dd>
+              </div>
               <div>
                 <dt>Categoría</dt>
                 <dd>{getMachineCategory(machine)}</dd>

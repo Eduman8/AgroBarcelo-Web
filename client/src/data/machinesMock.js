@@ -4,6 +4,7 @@ export const machinesMock = [
   {
     id: 'tractor-massey-ferguson-292',
     nombre: 'Tractor Massey Ferguson 292',
+    marca: 'Massey Ferguson',
     categoria: 'Usada',
     estado: 'Disponible',
     descripcionCorta: 'Unidad seleccionada para tareas generales de campo, con potencia y confiabilidad.',
@@ -16,6 +17,7 @@ export const machinesMock = [
   {
     id: 'sembradora-cele-grano-fino',
     nombre: 'Sembradora CELE Grano Fino',
+    marca: 'CELE',
     categoria: 'Nueva',
     estado: 'Disponible',
     descripcionCorta: 'Equipo preparado para siembra eficiente y uniforme en distintas condiciones de trabajo.',
@@ -28,6 +30,7 @@ export const machinesMock = [
   {
     id: 'rastra-discos-reforzada',
     nombre: 'Rastra de Discos Reforzada',
+    marca: '',
     categoria: 'Usada',
     estado: 'Disponible',
     descripcionCorta: 'Implemento robusto para preparación de suelo y mantenimiento de lotes productivos.',
@@ -40,6 +43,7 @@ export const machinesMock = [
   {
     id: 'implemento-agricola-multiproposito',
     nombre: 'Implemento Agrícola Multipropósito',
+    marca: '',
     categoria: 'Nueva',
     estado: 'Disponible',
     descripcionCorta: 'Solución práctica para complementar labores agropecuarias durante todo el año.',
@@ -52,6 +56,7 @@ export const machinesMock = [
   {
     id: 'tractor-john-deere-730-vendido',
     nombre: 'Tractor John Deere 730',
+    marca: 'John Deere',
     categoria: 'Usada',
     estado: 'Vendida',
     descripcionCorta: 'Unidad usada que se conserva publicada como antecedente comercial de AgroBarceló.',
@@ -64,6 +69,7 @@ export const machinesMock = [
   {
     id: 'trabajo-reparacion-sembradora-cele',
     nombre: 'Reacondicionamiento de Sembradora CELE',
+    marca: 'CELE',
     categoria: 'Trabajo Realizado',
     estado: 'Vendida',
     descripcionCorta: 'Trabajo realizado sobre equipo de siembra para recuperar funcionamiento y confiabilidad.',
@@ -76,6 +82,7 @@ export const machinesMock = [
   {
     id: 'trabajo-mantenimiento-tractor',
     nombre: 'Mantenimiento Integral de Tractor',
+    marca: '',
     categoria: 'Trabajo Realizado',
     estado: 'Disponible',
     descripcionCorta: 'Intervención integral para sostener rendimiento y disponibilidad operativa del tractor.',

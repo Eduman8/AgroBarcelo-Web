@@ -40,6 +40,7 @@ function getCategoryPillClassName(category) {
 const emptyMachineForm = {
   nombre: '',
   slug: '',
+  marca: '',
   categoria: '',
   estado: 'Disponible',
   descripcionCorta: '',
@@ -122,6 +123,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
     setFormData({
       nombre: machine.nombre ?? '',
       slug: machine.slug ?? '',
+      marca: machine.marca ?? '',
       categoria: getMachineCategory(machine),
       estado: getMachineStatus(machine),
       descripcionCorta: machine.descripcionCorta ?? '',
@@ -222,6 +224,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
     const machinePayload = {
       nombre: formData.nombre.trim(),
       slug: formData.slug.trim(),
+      marca: formData.marca.trim(),
       categoria: formData.categoria.trim(),
       estado: formData.estado.trim(),
       descripcionCorta: formData.descripcionCorta.trim(),
@@ -305,6 +308,19 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
                 />
                 <small className="admin-form-help">Nombre principal visible en el listado y el detalle público.</small>
                 {errors.nombre && <small className="admin-form-error">{errors.nombre}</small>}
+              </label>
+
+              <label>
+                <span className="admin-field-label">Marca</span>
+                <input
+                  name="marca"
+                  type="text"
+                  value={formData.marca}
+                  onChange={handleInputChange}
+                  disabled={isSaving}
+                  placeholder="Ej: John Deere, Massey Ferguson"
+                />
+                <small className="admin-form-help">Marca visible en el detalle público y en el contexto de consulta.</small>
               </label>
 
               <label>
@@ -451,6 +467,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
               <thead>
                 <tr>
                   <th>Nombre</th>
+                  <th>Marca</th>
                   <th>Categoría</th>
                   <th>Estado</th>
                   <th>Disponibilidad</th>
@@ -464,6 +481,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
                       <strong>{machine.nombre}</strong>
                       {machine.slug ? <small className="admin-machine-slug">/{machine.slug}</small> : null}
                     </td>
+                    <td data-label="Marca">{machine.marca || 'Sin informar'}</td>
                     <td data-label="Categoría">
                       <span className={getCategoryPillClassName(getMachineCategory(machine))}>
                         {getMachineCategory(machine) || 'Sin categoría'}

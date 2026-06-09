@@ -14,6 +14,7 @@ BEGIN
         ID_WebMaquinaria INT IDENTITY(1,1) PRIMARY KEY,
         Slug NVARCHAR(150) NOT NULL UNIQUE,
         Nombre NVARCHAR(200) NOT NULL,
+        Marca NVARCHAR(100) NULL,
         Categoria NVARCHAR(100) NOT NULL,
         Estado NVARCHAR(100) NOT NULL,
         DescripcionCorta NVARCHAR(500) NULL,
@@ -25,6 +26,12 @@ BEGIN
         FechaAlta DATETIME NOT NULL DEFAULT GETDATE(),
         FechaModificacion DATETIME NULL
     );
+END;
+
+IF COL_LENGTH('dbo.WebMaquinarias', 'Marca') IS NULL
+BEGIN
+    ALTER TABLE dbo.WebMaquinarias
+    ADD Marca NVARCHAR(100) NULL;
 END;
 `;
 

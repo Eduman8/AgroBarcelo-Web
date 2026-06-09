@@ -14,6 +14,7 @@ const machineFieldsSelect = `
     ID_WebMaquinaria AS id,
     Slug AS slug,
     Nombre AS nombre,
+    Marca AS marca,
     Categoria AS categoria,
     Estado AS estado,
     DescripcionCorta AS descripcionCorta,
@@ -40,6 +41,7 @@ const createMachineQuery = `
 INSERT INTO dbo.WebMaquinarias (
     Slug,
     Nombre,
+    Marca,
     Categoria,
     Estado,
     DescripcionCorta,
@@ -53,6 +55,7 @@ OUTPUT
     INSERTED.ID_WebMaquinaria AS id,
     INSERTED.Slug AS slug,
     INSERTED.Nombre AS nombre,
+    INSERTED.Marca AS marca,
     INSERTED.Categoria AS categoria,
     INSERTED.Estado AS estado,
     INSERTED.DescripcionCorta AS descripcionCorta,
@@ -64,6 +67,7 @@ OUTPUT
 VALUES (
     @slug,
     @nombre,
+    @marca,
     @categoria,
     @estado,
     @descripcionCorta,
@@ -80,6 +84,7 @@ UPDATE dbo.WebMaquinarias
 SET
     Slug = @slug,
     Nombre = @nombre,
+    Marca = @marca,
     Categoria = @categoria,
     Estado = @estado,
     DescripcionCorta = @descripcionCorta,
@@ -93,6 +98,7 @@ OUTPUT
     INSERTED.ID_WebMaquinaria AS id,
     INSERTED.Slug AS slug,
     INSERTED.Nombre AS nombre,
+    INSERTED.Marca AS marca,
     INSERTED.Categoria AS categoria,
     INSERTED.Estado AS estado,
     INSERTED.DescripcionCorta AS descripcionCorta,
@@ -113,6 +119,7 @@ OUTPUT
     INSERTED.ID_WebMaquinaria AS id,
     INSERTED.Slug AS slug,
     INSERTED.Nombre AS nombre,
+    INSERTED.Marca AS marca,
     INSERTED.Categoria AS categoria,
     INSERTED.Estado AS estado,
     INSERTED.DescripcionCorta AS descripcionCorta,
@@ -247,6 +254,7 @@ const normalizeMachinePayload = (payload) => {
   return {
     slug,
     nombre,
+    marca: normalizeNullableText(payload?.marca, 100),
     categoria,
     estado,
     descripcionCorta: normalizeNullableText(payload?.descripcionCorta, 500),
@@ -261,6 +269,7 @@ const normalizeMachinePayload = (payload) => {
 const addMachineInputs = (request, machine) => {
   request.input('slug', sql.NVarChar(150), machine.slug);
   request.input('nombre', sql.NVarChar(200), machine.nombre);
+  request.input('marca', sql.NVarChar(100), machine.marca);
   request.input('categoria', sql.NVarChar(100), machine.categoria);
   request.input('estado', sql.NVarChar(100), machine.estado);
   request.input('descripcionCorta', sql.NVarChar(500), machine.descripcionCorta);
@@ -320,6 +329,7 @@ export const updateAdminMachine = async (id, payload) => {
     ...payload,
     nombre: payload?.nombre ?? currentMachine.nombre,
     slug: payload?.slug ?? currentMachine.slug,
+    marca: payload?.marca ?? currentMachine.marca,
     categoria: payload?.categoria ?? currentMachine.categoria,
     estado: payload?.estado ?? currentMachine.estado,
     descripcionCorta: payload?.descripcionCorta ?? currentMachine.descripcionCorta,

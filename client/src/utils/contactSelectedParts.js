@@ -73,3 +73,11 @@ export function removeContactSelectedPart(partId) {
 
   return saveContactSelectedParts(updatedParts);
 }
+
+export function clearContactSelectedParts() {
+  if (hasStorage()) {
+    window.localStorage.removeItem(contactSelectedPartsStorageKey);
+  }
+
+  return [];
+}
