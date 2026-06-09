@@ -256,7 +256,11 @@ function ContactPage() {
     return selectedParts.map((selectedPart) => ({
       id: selectedPart.id,
       name: selectedPart.nombre,
-      code: selectedPart.codigo
+      code: selectedPart.codigo,
+      manual: selectedPart.manual,
+      page: selectedPart.pagina,
+      category: selectedPart.categoria,
+      source: selectedPart.source
     }));
   }
 
@@ -526,6 +530,11 @@ function ContactPage() {
             <li key={selectedPart.id}>
               <span>
                 <span aria-hidden="true">✓</span> {getDisplayValue(selectedPart.nombre)}
+                {selectedPart.source === 'manual' ? (
+                  <small>
+                    Manual: {getDisplayValue(selectedPart.manual)} · Página: {getDisplayValue(selectedPart.pagina)}
+                  </small>
+                ) : null}
               </span>
               <button type="button" onClick={() => handleRemoveSelectedPart(selectedPart.id)}>
                 Eliminar

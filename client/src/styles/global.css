@@ -4213,3 +4213,77 @@ h1 {
     justify-content: center;
   }
 }
+
+.manual-spare-parts-panel {
+  margin-bottom: 24px;
+}
+
+.manual-spare-parts-search button:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.unified-spare-parts-results {
+  display: grid;
+  gap: 24px;
+}
+
+.unified-spare-parts-section {
+  display: grid;
+  gap: 14px;
+}
+
+.unified-spare-parts-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.unified-spare-parts-section__header h3 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: clamp(1.25rem, 2.4vw, 1.85rem);
+  font-weight: 950;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.unified-spare-parts-section__header span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #fbfbfa;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.selected-parts-list li > span {
+  display: grid;
+  gap: 4px;
+}
+
+.selected-parts-list small {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+@media (max-width: 700px) {
+  .unified-spare-parts-section__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .unified-spare-parts-section__header span {
+    justify-content: center;
+    width: 100%;
+  }
+}
