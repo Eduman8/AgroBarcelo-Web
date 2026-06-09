@@ -7,8 +7,7 @@ import {
   getMachineCategory,
   getMachineSlug,
   getMachineStatus,
-  isAvailableMachine,
-  isHistoricalWorkMachine
+  isAvailableMachine
 } from '../utils/machines.js';
 
 const allPublicationsLabel = 'Todas';
@@ -18,8 +17,8 @@ const publicationFilters = [
   { label: allPublicationsLabel },
   { label: 'Nuevas', category: 'Nueva' },
   { label: 'Usadas', category: 'Usada' },
-  { label: 'Trabajos realizados', category: 'Trabajo Realizado', isHistoricalWork: true },
-  { label: soldPublicationsLabel, status: 'Vendida', excludeHistoricalWork: true }
+  { label: 'Trabajos realizados', category: 'Trabajo Realizado' },
+  { label: soldPublicationsLabel, status: 'Vendida' }
 ];
 
 function MachinesPage() {
@@ -74,11 +73,9 @@ function MachinesPage() {
       const selectedPublicationFilter = publicationFilters.find((filter) => filter.label === selectedFilter);
       const matchesCategory = !selectedPublicationFilter?.category || getMachineCategory(machine) === selectedPublicationFilter.category;
       const matchesStatus = !selectedPublicationFilter?.status || getMachineStatus(machine) === selectedPublicationFilter.status;
-      const matchesWork = !selectedPublicationFilter?.isHistoricalWork || isHistoricalWorkMachine(machine);
-      const matchesHistoricalExclusion = !selectedPublicationFilter?.excludeHistoricalWork || !isHistoricalWorkMachine(machine);
       const matchesSearch = machine.nombre.toLocaleLowerCase('es-AR').includes(normalizedSearchTerm);
 
-      return matchesCategory && matchesStatus && matchesWork && matchesHistoricalExclusion && matchesSearch;
+      return matchesCategory && matchesStatus && matchesSearch;
     });
   }, [machines, searchTerm, selectedFilter]);
 
@@ -156,10 +153,10 @@ function MachinesPage() {
                 <div className="machine-card__topline">
                   {getMachineBadges(machine).map((badge) => (
                     <span
-                      className={`machine-card__status${!isAvailableMachine(machine) ? ' machine-card__status--sold' : ''}`}
-                      key={badge}
+                      className={`machine-card__status machine-card__status--${badge.type}${badge.label === 'Vendida' ? ' machine-card__status--sold' : ''}`}
+                      key={`${badge.type}-${badge.label}`}
                     >
-                      {badge}
+                      {badge.label}
                     </span>
                   ))}
                 </div>
