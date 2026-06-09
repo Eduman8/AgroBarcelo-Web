@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Button from '../components/ui/Button.jsx';
 import { getMachineBySlug } from '../services/machinesService.js';
-import { getMachineAvailabilityLabel, getMachineCategory, getMachineStatus, isSoldMachine } from '../utils/machines.js';
+import { getMachineAvailabilityLabel, getMachineCategory, getMachineStatus, isAvailableMachine, isHistoricalWorkMachine, isSoldMachine } from '../utils/machines.js';
 
 function getMachineSlug(routeParams) {
   return routeParams?.slug ?? routeParams?.id ?? window.location.pathname.split('/').filter(Boolean).at(-1);
@@ -21,6 +21,8 @@ function MachinesDetailPage({ routeParams }) {
   const galleryImages = machine?.galeria ?? [];
   const hasGalleryImages = galleryImages.length > 0;
   const isSold = isSoldMachine(machine);
+  const isHistoricalWork = isHistoricalWorkMachine(machine);
+  const isAvailable = isAvailableMachine(machine);
 
   useEffect(() => {
     let isMounted = true;
@@ -127,7 +129,7 @@ function MachinesDetailPage({ routeParams }) {
                 <p className="eyebrow">Ficha de maquinaria</p>
                 <h1 id="machine-detail-title">{machine.nombre}</h1>
               </div>
-              <span className={`availability${isSold ? ' availability--sold' : ''}`}>
+              <span className={`availability${!isAvailable ? ' availability--sold' : ''}`}>
                 {getMachineAvailabilityLabel(machine)}
               </span>
             </div>
@@ -152,14 +154,18 @@ function MachinesDetailPage({ routeParams }) {
               <p>{machine.descripcionLarga}</p>
             </div>
 
-            {isSold ? (
+            {!isAvailable ? (
               <p className="machine-detail-sold-message">
-                Esta maquinaria ya fue vendida. Podés consultar por opciones similares.
+                {isSold
+                  ? 'Esta maquinaria ya fue vendida. La ficha queda disponible como historial y no permite consulta directa sobre esta unidad.'
+                  : isHistoricalWork
+                    ? 'Este trabajo realizado se muestra como historial de AgroBarceló y no permite consulta comercial directa sobre la unidad.'
+                    : 'Esta publicación no está disponible para consulta comercial directa.'}
               </p>
             ) : null}
 
             <div className="machine-detail-actions">
-              {!isSold ? (
+              {isAvailable ? (
                 <Button href={`/contacto?maquinaria=${encodeURIComponent(getContactMachineValue(machine))}`} variant="primary">
                   Consultar
                 </Button>

@@ -3,10 +3,12 @@ import Button from '../components/ui/Button.jsx';
 import { getMachines } from '../services/machinesService.js';
 import {
   getMachineAvailabilityLabel,
+  getMachineBadges,
   getMachineCategory,
   getMachineSlug,
   getMachineStatus,
-  isSoldMachine
+  isAvailableMachine,
+  isHistoricalWorkMachine
 } from '../utils/machines.js';
 
 const allPublicationsLabel = 'Todas';
@@ -16,8 +18,8 @@ const publicationFilters = [
   { label: allPublicationsLabel },
   { label: 'Nuevas', category: 'Nueva' },
   { label: 'Usadas', category: 'Usada' },
-  { label: 'Trabajos realizados', category: 'Trabajo Realizado' },
-  { label: soldPublicationsLabel, status: 'Vendida' }
+  { label: 'Trabajos realizados', category: 'Trabajo Realizado', isHistoricalWork: true },
+  { label: soldPublicationsLabel, status: 'Vendida', excludeHistoricalWork: true }
 ];
 
 function MachinesPage() {
@@ -72,9 +74,11 @@ function MachinesPage() {
       const selectedPublicationFilter = publicationFilters.find((filter) => filter.label === selectedFilter);
       const matchesCategory = !selectedPublicationFilter?.category || getMachineCategory(machine) === selectedPublicationFilter.category;
       const matchesStatus = !selectedPublicationFilter?.status || getMachineStatus(machine) === selectedPublicationFilter.status;
+      const matchesWork = !selectedPublicationFilter?.isHistoricalWork || isHistoricalWorkMachine(machine);
+      const matchesHistoricalExclusion = !selectedPublicationFilter?.excludeHistoricalWork || !isHistoricalWorkMachine(machine);
       const matchesSearch = machine.nombre.toLocaleLowerCase('es-AR').includes(normalizedSearchTerm);
 
-      return matchesCategory && matchesStatus && matchesSearch;
+      return matchesCategory && matchesStatus && matchesWork && matchesHistoricalExclusion && matchesSearch;
     });
   }, [machines, searchTerm, selectedFilter]);
 
@@ -150,10 +154,14 @@ function MachinesPage() {
                 )}
 
                 <div className="machine-card__topline">
-                  <span className="machine-card__type">{getMachineCategory(machine)}</span>
-                  <span className={`machine-card__status${isSoldMachine(machine) ? ' machine-card__status--sold' : ''}`}>
-                    {getMachineStatus(machine)}
-                  </span>
+                  {getMachineBadges(machine).map((badge) => (
+                    <span
+                      className={`machine-card__status${!isAvailableMachine(machine) ? ' machine-card__status--sold' : ''}`}
+                      key={badge}
+                    >
+                      {badge}
+                    </span>
+                  ))}
                 </div>
 
                 <div className="machine-card__content">
@@ -162,7 +170,7 @@ function MachinesPage() {
                 </div>
 
                 <div className="machine-card__details">
-                  <span className={`availability${isSoldMachine(machine) ? ' availability--sold' : ''}`}>
+                  <span className={`availability${!isAvailableMachine(machine) ? ' availability--sold' : ''}`}>
                     {getMachineAvailabilityLabel(machine)}
                   </span>
                 </div>

@@ -65,7 +65,7 @@ export const machinesMock = [
     id: 'trabajo-reparacion-sembradora-cele',
     nombre: 'Reacondicionamiento de Sembradora CELE',
     categoria: 'Trabajo Realizado',
-    estado: 'Vendida',
+    estado: 'Trabajo Realizado',
     descripcionCorta: 'Trabajo realizado sobre equipo de siembra para recuperar funcionamiento y confiabilidad.',
     descripcionLarga:
       'Trabajo realizado de revisión y reacondicionamiento sobre una sembradora CELE. Esta ficha permite separar casos finalizados de la maquinaria disponible y preparar la sección para mostrar antecedentes con fotos en una etapa posterior.',
@@ -77,7 +77,7 @@ export const machinesMock = [
     id: 'trabajo-mantenimiento-tractor',
     nombre: 'Mantenimiento Integral de Tractor',
     categoria: 'Trabajo Realizado',
-    estado: 'Vendida',
+    estado: 'Trabajo Realizado',
     descripcionCorta: 'Intervención integral para sostener rendimiento y disponibilidad operativa del tractor.',
     descripcionLarga:
       'Trabajo realizado de mantenimiento integral sobre tractor agrícola. Se mantiene como contenido mock para validar cards, filtros y detalle sin conectar todavía con backend ni carga de imágenes.',
