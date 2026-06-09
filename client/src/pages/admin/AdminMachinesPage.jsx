@@ -9,13 +9,45 @@ import {
 } from '../../services/machinesService.js';
 import { getMachineCategory, getMachineStatus, isAvailableMachine, machineCategories, machineStatuses } from '../../utils/machines.js';
 
+
+const categoryHelpTexts = {
+  Nueva: 'Publicación de una maquinaria nueva.',
+  Usada: 'Publicación de una maquinaria usada.',
+  'Trabajo Realizado': 'Publicación institucional de un trabajo ya realizado; no significa que esté vendida.'
+};
+
+const statusHelpTexts = {
+  Disponible: 'Disponible comercialmente: puede recibir consultas desde el sitio público.',
+  Vendida: 'Vendida comercialmente: conserva el detalle visible, pero no permite consulta sobre esa unidad.'
+};
+
+function getCategoryHelpText(category) {
+  return categoryHelpTexts[category] ?? 'Define qué tipo de publicación se mostrará: Nueva, Usada o Trabajo Realizado.';
+}
+
+function getStatusHelpText(status) {
+  return statusHelpTexts[status] ?? 'Define si la unidad está comercialmente disponible o ya fue vendida.';
+}
+
+function getStatusPillClassName(status) {
+  return status === 'Disponible' ? 'admin-status-pill is-available' : 'admin-status-pill is-sold';
+}
+
+function getCategoryPillClassName(category) {
+  return category === 'Trabajo Realizado' ? 'admin-category-pill is-work' : 'admin-category-pill';
+}
+
 const emptyMachineForm = {
   nombre: '',
+  slug: '',
   categoria: '',
   estado: 'Disponible',
   descripcionCorta: '',
   descripcionLarga: '',
-  disponible: true
+  imagenPrincipal: '',
+  galeria: [],
+  disponible: true,
+  activo: true
 };
 
 function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
@@ -89,11 +121,15 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
   function handleEditMachine(machine) {
     setFormData({
       nombre: machine.nombre ?? '',
+      slug: machine.slug ?? '',
       categoria: getMachineCategory(machine),
       estado: getMachineStatus(machine),
       descripcionCorta: machine.descripcionCorta ?? '',
       descripcionLarga: machine.descripcionLarga ?? '',
-      disponible: isAvailableMachine(machine)
+      imagenPrincipal: machine.imagenPrincipal ?? '',
+      galeria: Array.isArray(machine.galeria) ? machine.galeria : [],
+      disponible: isAvailableMachine(machine),
+      activo: machine.activo ?? true
     });
     setEditingMachineId(machine.id);
     setErrors({});
@@ -156,15 +192,15 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
     const nextErrors = {};
 
     if (!formData.nombre.trim()) {
-      nextErrors.nombre = 'El nombre es requerido.';
+      nextErrors.nombre = 'Ingresá el nombre o título de la maquinaria.';
     }
 
     if (!formData.categoria.trim()) {
-      nextErrors.categoria = 'La categoría es requerida.';
+      nextErrors.categoria = 'Seleccioná si la publicación es Nueva, Usada o Trabajo Realizado.';
     }
 
     if (!formData.estado.trim()) {
-      nextErrors.estado = 'El estado es requerido.';
+      nextErrors.estado = 'Seleccioná si la maquinaria está Disponible o Vendida comercialmente.';
     }
 
     setErrors(nextErrors);
@@ -185,14 +221,15 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
 
     const machinePayload = {
       nombre: formData.nombre.trim(),
+      slug: formData.slug.trim(),
       categoria: formData.categoria.trim(),
       estado: formData.estado.trim(),
       descripcionCorta: formData.descripcionCorta.trim(),
       descripcionLarga: formData.descripcionLarga.trim(),
-      imagenPrincipal: null,
-      galeria: [],
+      imagenPrincipal: formData.imagenPrincipal.trim() || null,
+      galeria: formData.galeria,
       disponible: formData.estado === 'Disponible',
-      activo: true
+      activo: formData.activo
     };
 
     setIsSaving(true);
@@ -256,7 +293,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
             <div className="admin-form-grid">
               <label>
                 <span className="admin-field-label">
-                  Nombre <span aria-hidden="true">*</span>
+                  Nombre / título <span aria-hidden="true">*</span>
                 </span>
                 <input
                   name="nombre"
@@ -266,12 +303,28 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
                   aria-invalid={Boolean(errors.nombre)}
                   disabled={isSaving}
                 />
+                <small className="admin-form-help">Nombre principal visible en el listado y el detalle público.</small>
                 {errors.nombre && <small className="admin-form-error">{errors.nombre}</small>}
               </label>
 
               <label>
+                <span className="admin-field-label">Slug público</span>
+                <input
+                  name="slug"
+                  type="text"
+                  value={formData.slug}
+                  onChange={handleInputChange}
+                  disabled={isSaving}
+                  placeholder="Se genera desde el nombre si se deja vacío"
+                />
+                <small className="admin-form-help">
+                  Identificador de la URL. En edición se precarga para no cambiar el enlace existente por error.
+                </small>
+              </label>
+
+              <label>
                 <span className="admin-field-label">
-                  Categoría <span aria-hidden="true">*</span>
+                  Categoría de publicación <span aria-hidden="true">*</span>
                 </span>
                 <select
                   name="categoria"
@@ -287,12 +340,13 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
                     </option>
                   ))}
                 </select>
+                <small className="admin-form-help">{getCategoryHelpText(formData.categoria)}</small>
                 {errors.categoria && <small className="admin-form-error">{errors.categoria}</small>}
               </label>
 
               <label>
                 <span className="admin-field-label">
-                  Estado <span aria-hidden="true">*</span>
+                  Estado comercial <span aria-hidden="true">*</span>
                 </span>
                 <select
                   name="estado"
@@ -308,14 +362,14 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
                     </option>
                   ))}
                 </select>
+                <small className="admin-form-help">{getStatusHelpText(formData.estado)}</small>
                 {errors.estado && <small className="admin-form-error">{errors.estado}</small>}
               </label>
 
-              <div className="admin-checkbox-field" aria-live="polite">
+              <div className="admin-checkbox-field admin-form-field--wide" aria-live="polite">
                 <span>
-                  {formData.estado === 'Vendida'
-                    ? 'Las publicaciones vendidas mantienen el detalle visible y no permiten consulta directa sobre esa unidad.'
-                    : 'Las publicaciones disponibles permiten consulta y acceso al detalle público, sin importar su categoría.'}
+                  Categoría y estado son independientes: “Trabajo Realizado” describe el tipo de publicación;
+                  “Vendida” indica que no está comercialmente disponible.
                 </span>
               </div>
 
@@ -346,15 +400,22 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
               <div className="admin-section-heading admin-section-heading--compact">
                 <p className="eyebrow">Imágenes</p>
                 <h3 id="admin-machine-images-title">Imágenes de la publicación</h3>
-                <p>La carga de imágenes será implementada próximamente.</p>
+                <p>
+                  La carga de imágenes será implementada próximamente. Mientras tanto, al editar se precargan y
+                  preservan las imágenes existentes.
+                </p>
               </div>
 
               <div className="admin-image-placeholder-grid">
                 <div className="admin-image-placeholder">
-                  <span>Imagen principal</span>
+                  <span>{formData.imagenPrincipal ? 'Imagen principal precargada' : 'Sin imagen principal'}</span>
+                  {formData.imagenPrincipal ? <small>{formData.imagenPrincipal}</small> : null}
                 </div>
                 <div className="admin-image-placeholder admin-image-placeholder--gallery">
-                  <span>Galería</span>
+                  <span>{formData.galeria.length} imagen(es) de galería precargadas</span>
+                  {formData.galeria.length > 0 ? (
+                    <small>No se modificarán al guardar cambios de texto, categoría o estado.</small>
+                  ) : null}
                 </div>
               </div>
             </section>
@@ -399,19 +460,24 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
               <tbody>
                 {machines.map((machine) => (
                   <tr key={machine.id}>
-                    <td data-label="Nombre">{machine.nombre}</td>
-                    <td data-label="Categoría">{getMachineCategory(machine)}</td>
-                    <td data-label="Estado">{getMachineStatus(machine)}</td>
-                    <td data-label="Disponibilidad">
-                      <span
-                        className={
-                          isAvailableMachine(machine)
-                            ? 'admin-status-pill'
-                            : 'admin-status-pill is-muted'
-                        }
-                      >
-                        {isAvailableMachine(machine) ? 'Disponible' : 'No disponible'}
+                    <td data-label="Nombre">
+                      <strong>{machine.nombre}</strong>
+                      {machine.slug ? <small className="admin-machine-slug">/{machine.slug}</small> : null}
+                    </td>
+                    <td data-label="Categoría">
+                      <span className={getCategoryPillClassName(getMachineCategory(machine))}>
+                        {getMachineCategory(machine) || 'Sin categoría'}
                       </span>
+                    </td>
+                    <td data-label="Estado">
+                      <span className={getStatusPillClassName(getMachineStatus(machine))}>
+                        {getMachineStatus(machine) || 'Sin estado'}
+                      </span>
+                    </td>
+                    <td data-label="Disponibilidad">
+                      {isAvailableMachine(machine)
+                        ? 'Permite consultas comerciales'
+                        : 'Detalle visible sin consulta comercial'}
                     </td>
                     <td data-label="Acciones">
                       <div className="admin-table-actions">
