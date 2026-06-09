@@ -15,8 +15,26 @@ SELECT TOP (@limit)
     rm.Modelo AS modelo,
     rm.Categoria AS categoria,
     rm.ReferenciaDespiece AS referenciaDespiece,
-    rm.Observaciones AS observaciones
+    rm.Observaciones AS observaciones,
+    catalogo.ID_Articulo AS catalogoId,
+    catalogo.CodigoAlternativo AS catalogoCodigo,
+    catalogo.Nombre AS catalogoNombre,
+    catalogo.Marca AS catalogoMarca
 FROM dbo.RepuestosManuales rm
+OUTER APPLY (
+    SELECT TOP (1)
+        p.ID_Articulo,
+        p.CodigoAlternativo,
+        p.Descripcion AS Nombre,
+        m.Marca
+    FROM dbo.Productos p
+    LEFT JOIN dbo.Marcas m
+        ON m.ID_Marca = p.ID_Marca
+    WHERE p.ID_Rubro IN (3, 4, 8, 11, 13, 24, 26, 27)
+      AND NULLIF(LTRIM(RTRIM(rm.Codigo)), '') IS NOT NULL
+      AND UPPER(LTRIM(RTRIM(p.CodigoAlternativo))) = UPPER(LTRIM(RTRIM(rm.Codigo)))
+    ORDER BY p.Descripcion, p.ID_Articulo
+) catalogo
 WHERE rm.Activo = 1
   AND (
     @search = ''
@@ -76,7 +94,13 @@ const mapManualSparePart = (sparePart) => {
     modeloMaquina: modelo,
     categoria: getDisplayValue(sparePart.categoria, 'Sin categoría'),
     referenciaDespiece: getDisplayValue(sparePart.referenciaDespiece),
-    observaciones: getDisplayValue(sparePart.observaciones)
+    observaciones: getDisplayValue(sparePart.observaciones),
+    existeEnCatalogo: Boolean(sparePart.catalogoId),
+    catalogoId: sparePart.catalogoId ?? null,
+    catalogoCodigo: sparePart.catalogoCodigo ?? null,
+    catalogoNombre: sparePart.catalogoNombre ?? null,
+    catalogoMarca: sparePart.catalogoMarca ?? null,
+    catalogoDisponible: sparePart.catalogoId ? 'Disponible' : null
   };
 };
 
