@@ -309,7 +309,25 @@ export const updateAdminMachine = async (id, payload) => {
     return null;
   }
 
-  const machine = normalizeMachinePayload(payload);
+  const currentMachine = await getAdminMachineById(machineId);
+
+  if (!currentMachine) {
+    return null;
+  }
+
+  const machine = normalizeMachinePayload({
+    ...currentMachine,
+    ...payload,
+    nombre: payload?.nombre ?? currentMachine.nombre,
+    slug: payload?.slug ?? currentMachine.slug,
+    categoria: payload?.categoria ?? currentMachine.categoria,
+    estado: payload?.estado ?? currentMachine.estado,
+    descripcionCorta: payload?.descripcionCorta ?? currentMachine.descripcionCorta,
+    descripcionLarga: payload?.descripcionLarga ?? currentMachine.descripcionLarga,
+    imagenPrincipal: payload?.imagenPrincipal ?? currentMachine.imagenPrincipal,
+    galeria: payload?.galeria ?? currentMachine.galeria,
+    activo: payload?.activo ?? currentMachine.activo
+  });
   const pool = await getSqlPool();
   const result = await addMachineInputs(pool.request(), machine)
     .input('id', sql.Int, machineId)
