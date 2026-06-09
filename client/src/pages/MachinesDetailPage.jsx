@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
 import Button from '../components/ui/Button.jsx';
 import { getMachineBySlug } from '../services/machinesService.js';
+import { getMachineAvailabilityLabel, isSoldMachine } from '../utils/machines.js';
 
 function getMachineSlug(routeParams) {
   return routeParams?.slug ?? routeParams?.id ?? window.location.pathname.split('/').filter(Boolean).at(-1);
 }
 
-function getAvailabilityLabel(isAvailable) {
-  return isAvailable ? 'Disponible' : 'No disponible';
-}
 
 function getContactMachineValue(machine) {
   return machine.slug ?? machine.id;
@@ -22,6 +20,7 @@ function MachinesDetailPage({ routeParams }) {
   const [wasNotFound, setWasNotFound] = useState(false);
   const galleryImages = machine?.galeria ?? [];
   const hasGalleryImages = galleryImages.length > 0;
+  const isSold = isSoldMachine(machine);
 
   useEffect(() => {
     let isMounted = true;
@@ -128,7 +127,9 @@ function MachinesDetailPage({ routeParams }) {
                 <p className="eyebrow">Ficha de maquinaria</p>
                 <h1 id="machine-detail-title">{machine.nombre}</h1>
               </div>
-              <span className="availability">{getAvailabilityLabel(machine.disponible)}</span>
+              <span className={`availability${isSold ? ' availability--sold' : ''}`}>
+                {getMachineAvailabilityLabel(machine)}
+              </span>
             </div>
 
             <dl className="machine-detail-list">
@@ -142,7 +143,7 @@ function MachinesDetailPage({ routeParams }) {
               </div>
               <div>
                 <dt>Disponibilidad</dt>
-                <dd>{getAvailabilityLabel(machine.disponible)}</dd>
+                <dd>{getMachineAvailabilityLabel(machine)}</dd>
               </div>
             </dl>
 
@@ -151,9 +152,15 @@ function MachinesDetailPage({ routeParams }) {
               <p>{machine.descripcionLarga}</p>
             </div>
 
+            {isSold ? (
+              <p className="machine-detail-sold-message">
+                Esta maquinaria ya fue vendida, pero podés consultar por opciones similares.
+              </p>
+            ) : null}
+
             <div className="machine-detail-actions">
               <Button href={`/contacto?maquinaria=${encodeURIComponent(getContactMachineValue(machine))}`} variant="primary">
-                Consultar
+                {isSold ? 'Consultar opciones similares' : 'Consultar'}
               </Button>
               <a className="machine-detail-actions__secondary" href="/maquinarias">
                 Volver

@@ -535,6 +535,15 @@ h1 {
   transform: translateY(-50%);
 }
 
+.availability--sold {
+  color: #a60e14;
+  font-weight: 950;
+}
+
+.availability--sold::before {
+  background: #c9151c;
+}
+
 
 .services-page {
   padding: 34px 0 58px;
@@ -1323,6 +1332,12 @@ h1 {
   color: var(--color-ink);
 }
 
+.machine-card__status--sold {
+  border-color: rgba(201, 21, 28, 0.28);
+  background: #fde1e1;
+  color: #a60e14;
+}
+
 .machine-card__content {
   flex: 1;
   padding: 20px 0 18px;
@@ -1551,6 +1566,18 @@ h1 {
 
 .machine-detail-description {
   margin-bottom: 28px;
+}
+
+.machine-detail-sold-message {
+  margin: 0 0 22px;
+  padding: 14px 16px;
+  border: 1px solid rgba(201, 21, 28, 0.22);
+  border-radius: 9px;
+  background: rgba(253, 225, 225, 0.66);
+  color: #a60e14;
+  font-size: 0.98rem;
+  font-weight: 850;
+  line-height: 1.45;
 }
 
 .machine-detail-description h2 {

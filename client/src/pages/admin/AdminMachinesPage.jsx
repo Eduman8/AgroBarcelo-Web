@@ -8,6 +8,7 @@ import {
   getAdminMachines,
   updateMachine
 } from '../../services/machinesService.js';
+import { isSoldMachine } from '../../utils/machines.js';
 
 const emptyMachineForm = {
   nombre: '',
@@ -191,7 +192,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
       descripcionLarga: formData.descripcionLarga.trim(),
       imagenPrincipal: null,
       galeria: [],
-      disponible: formData.disponible,
+      disponible: isSoldMachine(formData) ? false : formData.disponible,
       activo: true
     };
 
@@ -300,7 +301,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
                   value={formData.estado}
                   onChange={handleInputChange}
                   aria-invalid={Boolean(errors.estado)}
-                  placeholder="Nueva, Usada, Finalizado..."
+                  placeholder="Nueva, Usada, Vendido, Finalizado..."
                   disabled={isSaving}
                 />
                 {errors.estado && <small className="admin-form-error">{errors.estado}</small>}

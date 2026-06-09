@@ -2,16 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import Button from '../components/ui/Button.jsx';
 import { machineCategories } from '../data/machinesMock.js';
 import { getMachines } from '../services/machinesService.js';
+import { getMachineAvailabilityLabel, getMachineSlug, isSoldMachine } from '../utils/machines.js';
 
 const allCategoriesLabel = 'Todas';
 
-function getAvailabilityLabel(isAvailable) {
-  return isAvailable ? 'Disponible' : 'Trabajo realizado';
-}
-
-function getMachineSlug(machine) {
-  return machine.slug ?? machine.id;
-}
 
 function MachinesPage() {
   const [machines, setMachines] = useState([]);
@@ -140,7 +134,9 @@ function MachinesPage() {
 
                 <div className="machine-card__topline">
                   <span className="machine-card__type">{machine.categoria}</span>
-                  <span className="machine-card__status">{machine.estado}</span>
+                  <span className={`machine-card__status${isSoldMachine(machine) ? ' machine-card__status--sold' : ''}`}>
+                    {machine.estado}
+                  </span>
                 </div>
 
                 <div className="machine-card__content">
@@ -149,7 +145,9 @@ function MachinesPage() {
                 </div>
 
                 <div className="machine-card__details">
-                  <span className="availability">{getAvailabilityLabel(machine.disponible)}</span>
+                  <span className={`availability${isSoldMachine(machine) ? ' availability--sold' : ''}`}>
+                    {getMachineAvailabilityLabel(machine, 'Trabajo realizado')}
+                  </span>
                 </div>
 
                 <Button

@@ -15,7 +15,7 @@ SELECT
     Activo AS activo
 FROM dbo.WebMaquinarias
 WHERE Activo = 1
-  AND Disponible = 1
+  AND (Disponible = 1 OR LOWER(LTRIM(RTRIM(Estado))) = N'vendido')
 ORDER BY FechaAlta DESC, ID_WebMaquinaria DESC;
 `;
 
