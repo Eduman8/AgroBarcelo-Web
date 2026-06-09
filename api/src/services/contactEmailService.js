@@ -34,6 +34,14 @@ function getSelectedPartsLines(selectedParts) {
     ...selectedParts.flatMap((selectedPart) => [
       `* Código: ${selectedPart.code || 'Sin informar'}`,
       `  Nombre: ${selectedPart.name || 'Sin informar'}`,
+      `  Origen: ${selectedPart.source === 'manual' ? 'Manual' : 'Catálogo'}`,
+      ...(selectedPart.source === 'manual'
+        ? [
+            `  Manual: ${selectedPart.manual || 'Sin informar'}`,
+            `  Página: ${selectedPart.page || 'Sin informar'}`,
+            `  Categoría: ${selectedPart.category || 'Sin informar'}`
+          ]
+        : []),
       ''
     ])
   ];

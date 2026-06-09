@@ -4,7 +4,11 @@ function normalizeSelectedPart(sparePart) {
   return {
     id: sparePart?.id ?? '',
     nombre: sparePart?.nombre ?? '',
-    codigo: sparePart?.codigo ?? ''
+    codigo: sparePart?.codigo ?? '',
+    manual: sparePart?.manual ?? '',
+    pagina: sparePart?.pagina ?? '',
+    categoria: sparePart?.categoria ?? '',
+    source: sparePart?.source ?? 'catalog'
   };
 }
 
