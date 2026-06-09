@@ -26,6 +26,7 @@ const PDFS_TO_IMPORT = [
 
 const pdfsDirectory = path.resolve(__dirname, '../../public/pdfs');
 const codePattern = /\b(?:[CP]\d{4}|[A-Z]\d{3,5}|\d{2}-\d{4})\b/g;
+const leadingElementNumberPattern = /^\s*(\d{1,4})(?:[.)-])?\s+/;
 const repeatedWhitespacePattern = /\s+/g;
 const objectPattern = /(\d+)\s+0\s+obj\s*([\s\S]*?)\s*endobj/g;
 const streamPattern = /stream\r?\n([\s\S]*?)\r?\nendstream/;
@@ -290,6 +291,23 @@ const normalizeText = (value) => value
   .replace(repeatedWhitespacePattern, ' ')
   .trim();
 
+const detectPrintedPageNumber = (lines, fallbackPageNumber) => {
+  const printedPageNumber = [...lines]
+    .reverse()
+    .map((line) => line.match(/^\d{1,4}$/)?.[0])
+    .find(Boolean);
+
+  if (!printedPageNumber) {
+    return fallbackPageNumber;
+  }
+
+  const parsedPageNumber = Number.parseInt(printedPageNumber, 10);
+
+  return Number.isInteger(parsedPageNumber) && parsedPageNumber > 0
+    ? parsedPageNumber
+    : fallbackPageNumber;
+};
+
 const buildLinesFromItems = (items) => {
   const lines = [];
   const sortedItems = [...items].sort((first, second) => {
@@ -335,15 +353,30 @@ const extractPdfPages = async (pdfPath) => {
       .map(getStreamContent)
       .join('\n');
     const items = extractTextItems(pageContent, page.fontReferences, fontMapsByObject);
+    const lines = buildLinesFromItems(items);
 
     return {
-      pageNumber: index + 1,
-      lines: buildLinesFromItems(items)
+      pageNumber: detectPrintedPageNumber(lines, index + 1),
+      lines
     };
   });
 };
 
 const inferCategory = (description) => categoryRules.find((rule) => rule.pattern.test(description))?.category ?? null;
+
+const detectReferenciaDespiece = (value) => {
+  const match = value.match(leadingElementNumberPattern);
+
+  return match?.[1] ?? null;
+};
+
+const removeLeadingReferenciaDespiece = (value, referenciaDespiece) => {
+  if (!referenciaDespiece) {
+    return value;
+  }
+
+  return value.replace(leadingElementNumberPattern, '');
+};
 
 const cleanDescription = (value) => normalizeText(value)
   .replace(/^[-–—:;.,\s]+/, '')
@@ -372,7 +405,9 @@ const detectSparePartsInLine = ({ line, pageNumber, manualNombre, archivoOrigen 
 
   for (const match of matches) {
     const codigo = match[0];
-    const before = cleanDescription(line.slice(0, match.index));
+    const rawBefore = line.slice(0, match.index);
+    const referenciaDespiece = detectReferenciaDespiece(rawBefore);
+    const before = cleanDescription(removeLeadingReferenciaDespiece(rawBefore, referenciaDespiece));
     const after = cleanDescription(line.slice(match.index + codigo.length));
     const descripcion = looksLikeUsefulDescription(after) ? after : before;
 
@@ -386,6 +421,7 @@ const detectSparePartsInLine = ({ line, pageNumber, manualNombre, archivoOrigen 
       pagina: pageNumber,
       codigo,
       descripcion,
+      referenciaDespiece,
       categoria: inferCategory(descripcion)
     });
   }
@@ -407,7 +443,7 @@ const detectSpareParts = ({ pages, manualNombre, archivoOrigen }) => {
       });
 
       for (const sparePart of detectedInLine) {
-        const key = `${sparePart.codigo}|${sparePart.manualNombre}|${sparePart.pagina}|${sparePart.descripcion}`;
+        const key = `${sparePart.codigo}|${sparePart.manualNombre}|${sparePart.pagina}|${sparePart.referenciaDespiece ?? ''}`;
 
         if (!seen.has(key)) {
           seen.add(key);
@@ -427,6 +463,7 @@ const insertSparePartIfMissing = async (pool, sparePart) => {
     .input('Pagina', sql.Int, sparePart.pagina)
     .input('Codigo', sql.NVarChar(100), sparePart.codigo)
     .input('Descripcion', sql.NVarChar(500), sparePart.descripcion)
+    .input('ReferenciaDespiece', sql.NVarChar(150), sparePart.referenciaDespiece)
     .input('Categoria', sql.NVarChar(150), sparePart.categoria)
     .query(`
 IF EXISTS (
@@ -435,6 +472,7 @@ IF EXISTS (
     WHERE Codigo = @Codigo
       AND ManualNombre = @ManualNombre
       AND Pagina = @Pagina
+      AND COALESCE(NULLIF(LTRIM(RTRIM(ReferenciaDespiece)), ''), '') = COALESCE(NULLIF(LTRIM(RTRIM(@ReferenciaDespiece)), ''), '')
 )
 BEGIN
     SELECT CAST(0 AS INT) AS inserted, CAST(1 AS INT) AS duplicated;
@@ -447,6 +485,7 @@ BEGIN
         Pagina,
         Codigo,
         Descripcion,
+        ReferenciaDespiece,
         Categoria,
         Activo
     )
@@ -456,6 +495,7 @@ BEGIN
         @Pagina,
         @Codigo,
         @Descripcion,
+        @ReferenciaDespiece,
         @Categoria,
         1
     );
@@ -488,7 +528,9 @@ const previewPdfImport = async (pdfConfig) => {
     pagesRead: pages.length,
     detected: spareParts.length,
     inserted: 0,
-    duplicated: 0
+    duplicated: 0,
+    withReferenciaDespiece: spareParts.filter((sparePart) => sparePart.referenciaDespiece).length,
+    withoutReferenciaDespiece: spareParts.filter((sparePart) => !sparePart.referenciaDespiece).length
   };
 };
 
@@ -499,7 +541,9 @@ const importPdf = async ({ pool, manualNombre, archivoOrigen }) => {
     pagesRead: pages.length,
     detected: spareParts.length,
     inserted: 0,
-    duplicated: 0
+    duplicated: 0,
+    withReferenciaDespiece: spareParts.filter((sparePart) => sparePart.referenciaDespiece).length,
+    withoutReferenciaDespiece: spareParts.filter((sparePart) => !sparePart.referenciaDespiece).length
   };
 
   for (const sparePart of spareParts) {
@@ -517,6 +561,8 @@ const printSummary = (summary) => {
   console.log(`  Registros detectados: ${summary.detected}`);
   console.log(`  Registros insertados: ${summary.inserted}`);
   console.log(`  Registros omitidos por duplicados: ${summary.duplicated}`);
+  console.log(`  Registros con ReferenciaDespiece detectada: ${summary.withReferenciaDespiece}`);
+  console.log(`  Registros sin ReferenciaDespiece: ${summary.withoutReferenciaDespiece}`);
 };
 
 async function runImporter() {
@@ -536,12 +582,16 @@ async function runImporter() {
     pagesRead: accumulator.pagesRead + summary.pagesRead,
     detected: accumulator.detected + summary.detected,
     inserted: accumulator.inserted + summary.inserted,
-    duplicated: accumulator.duplicated + summary.duplicated
+    duplicated: accumulator.duplicated + summary.duplicated,
+    withReferenciaDespiece: accumulator.withReferenciaDespiece + summary.withReferenciaDespiece,
+    withoutReferenciaDespiece: accumulator.withoutReferenciaDespiece + summary.withoutReferenciaDespiece
   }), {
     pagesRead: 0,
     detected: 0,
     inserted: 0,
-    duplicated: 0
+    duplicated: 0,
+    withReferenciaDespiece: 0,
+    withoutReferenciaDespiece: 0
   });
 
   console.log('Resumen total importación dbo.RepuestosManuales:');
@@ -550,6 +600,8 @@ async function runImporter() {
   console.log(`  Registros detectados: ${totals.detected}`);
   console.log(`  Registros insertados: ${totals.inserted}`);
   console.log(`  Registros omitidos por duplicados: ${totals.duplicated}`);
+  console.log(`  Registros con ReferenciaDespiece detectada: ${totals.withReferenciaDespiece}`);
+  console.log(`  Registros sin ReferenciaDespiece: ${totals.withoutReferenciaDespiece}`);
 }
 
 runImporter().catch((error) => {
