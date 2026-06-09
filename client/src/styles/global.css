@@ -4691,7 +4691,32 @@ h1 {
 }
 
 .visual-spare-parts-table {
-  min-width: 980px;
+  min-width: 1120px;
+}
+
+.visual-spare-parts-table__element {
+  color: var(--color-primary-dark);
+  font-size: 1rem;
+}
+
+.visual-spare-parts-table__code {
+  font-size: 1rem;
+}
+
+.visual-spare-parts-table__description {
+  min-width: 240px;
+  color: var(--color-ink);
+  line-height: 1.35;
+}
+
+.visual-spare-parts-table .spare-parts-table__actions {
+  align-items: stretch;
+  min-width: 260px;
+}
+
+.visual-spare-parts-table .spare-parts-table__detail-link,
+.visual-spare-parts-table .spare-parts-table__add-button {
+  flex: 1 1 100%;
 }
 
 @media (max-width: 920px) {
