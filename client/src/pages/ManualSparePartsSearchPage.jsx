@@ -232,6 +232,14 @@ function ManualSparePartsSearchPage() {
             <button type="submit" disabled={isLoading}>{isLoading ? 'Buscando...' : 'Buscar'}</button>
           </div>
         </form>
+
+        <div className="manual-spare-parts-panel__shortcut">
+          <div>
+            <strong>¿Tenés el número de elemento del despiece?</strong>
+            <span>Usá el buscador visual para indicar manual, página y N.º de elemento.</span>
+          </div>
+          <a href="/buscador-visual-repuestos">Abrir buscador visual</a>
+        </div>
       </section>
 
       <aside className="manual-spare-parts-diagnostics" aria-labelledby="manual-spare-parts-diagnostics-title">
