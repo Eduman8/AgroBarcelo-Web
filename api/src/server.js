@@ -3,7 +3,10 @@ import cors from 'cors';
 import express from 'express';
 import { products } from './products.js';
 import contactRoutes from './routes/contactRoutes.js';
+import adminMachinesRoutes from './routes/adminMachinesRoutes.js';
 import dbHealthRoutes from './routes/dbHealthRoutes.js';
+import machinesRoutes from './routes/machinesRoutes.js';
+import setupRoutes from './routes/setupRoutes.js';
 import sparePartsRoutes from './routes/sparePartsRoutes.js';
 
 const app = express();
@@ -14,6 +17,9 @@ app.use(cors({ origin: clientOrigin }));
 app.use(express.json());
 app.use('/api', contactRoutes);
 app.use('/api', dbHealthRoutes);
+app.use('/api', setupRoutes);
+app.use('/api', adminMachinesRoutes);
+app.use('/api', machinesRoutes);
 app.use('/api', sparePartsRoutes);
 
 app.get('/api/health', (request, response) => {
