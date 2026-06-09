@@ -137,6 +137,20 @@ function SparePartsPage() {
         <p>Encontrá repuestos para tu maquinaria de forma rápida y sencilla.</p>
       </div>
 
+      <section className="spare-parts-finder" aria-labelledby="spare-parts-finder-title">
+        <div>
+          <p className="eyebrow">Buscador de repuestos</p>
+          <h2 id="spare-parts-finder-title">¿No encontrás el repuesto que buscás?</h2>
+          <p>
+            Utilizá nuestro buscador para localizar repuestos por código, descripción o referencias
+            encontradas en manuales.
+          </p>
+        </div>
+        <a className="spare-parts-finder__button" href="/buscador-repuestos">
+          Abrir buscador de repuestos
+        </a>
+      </section>
+
       <section className="spare-parts-manuals" aria-labelledby="spare-parts-manuals-title">
         <div className="spare-parts-manuals__header">
           <p className="eyebrow">Ayuda para identificar piezas</p>
