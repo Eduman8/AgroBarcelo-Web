@@ -15,7 +15,10 @@ SELECT
     Activo AS activo
 FROM dbo.WebMaquinarias
 WHERE Activo = 1
-  AND (Disponible = 1 OR LOWER(LTRIM(RTRIM(Estado))) = N'vendido')
+  AND (
+    Disponible = 1
+    OR LOWER(LTRIM(RTRIM(Estado))) IN (N'vendido', N'vendida', N'finalizado', N'finalizada')
+  )
 ORDER BY FechaAlta DESC, ID_WebMaquinaria DESC;
 `;
 
@@ -34,6 +37,8 @@ SELECT TOP (1)
     Activo AS activo
 FROM dbo.WebMaquinarias
 WHERE Activo = 1
+  AND Disponible = 1
+  AND LOWER(LTRIM(RTRIM(Estado))) NOT IN (N'vendido', N'vendida', N'finalizado', N'finalizada')
   AND Slug = @slug;
 `;
 
@@ -57,17 +62,55 @@ export const parseGallery = (value) => {
 
 export const normalizeGalleryForStorage = (value) => JSON.stringify(parseGallery(value));
 
+const normalizeMachineTextKey = (value) => String(value ?? '').trim().toLocaleLowerCase('es-AR');
+
+const normalizeMachineCategory = (value) => {
+  const categoryAliases = new Map([
+    ['maquinaria nueva', 'Nueva'],
+    ['nueva', 'Nueva'],
+    ['maquinaria usada', 'Usada'],
+    ['usada', 'Usada'],
+    ['usado', 'Usada'],
+    ['trabajos realizados', 'Trabajo Realizado'],
+    ['trabajo realizado', 'Trabajo Realizado']
+  ]);
+
+  return categoryAliases.get(normalizeMachineTextKey(value)) ?? String(value ?? '').trim();
+};
+
+const normalizeMachineStatus = (value, machine) => {
+  const statusAliases = new Map([
+    ['disponible', 'Disponible'],
+    ['vendida', 'Vendida'],
+    ['vendido', 'Vendida'],
+    ['finalizado', 'Vendida'],
+    ['finalizada', 'Vendida'],
+    ['nueva', 'Disponible'],
+    ['usada', 'Disponible'],
+    ['usado', 'Disponible']
+  ]);
+  const normalizedStatus = statusAliases.get(normalizeMachineTextKey(value));
+
+  if (normalizedStatus) {
+    return normalizedStatus;
+  }
+
+  return machine?.disponible === false ? 'Vendida' : String(value ?? '').trim();
+};
+
+export const isSoldMachine = (machine) => normalizeMachineStatus(machine?.estado, machine) === 'Vendida';
+
 export const mapMachine = (machine) => ({
   id: machine.id,
   slug: machine.slug,
   nombre: machine.nombre,
-  categoria: machine.categoria,
-  estado: machine.estado,
+  categoria: normalizeMachineCategory(machine.categoria),
+  estado: normalizeMachineStatus(machine.estado, machine),
   descripcionCorta: machine.descripcionCorta ?? null,
   descripcionLarga: machine.descripcionLarga ?? null,
   imagenPrincipal: machine.imagenPrincipal ?? null,
   galeria: parseGallery(machine.galeria),
-  disponible: Boolean(machine.disponible),
+  disponible: !isSoldMachine(machine) && Boolean(machine.disponible),
   activo: Boolean(machine.activo)
 });
 

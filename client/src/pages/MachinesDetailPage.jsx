@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Button from '../components/ui/Button.jsx';
 import { getMachineBySlug } from '../services/machinesService.js';
-import { getMachineAvailabilityLabel, isSoldMachine } from '../utils/machines.js';
+import { getMachineAvailabilityLabel, getMachineCategory, getMachineStatus, isSoldMachine } from '../utils/machines.js';
 
 function getMachineSlug(routeParams) {
   return routeParams?.slug ?? routeParams?.id ?? window.location.pathname.split('/').filter(Boolean).at(-1);
@@ -18,6 +18,7 @@ function MachinesDetailPage({ routeParams }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [wasNotFound, setWasNotFound] = useState(false);
+  const [wasUnavailable, setWasUnavailable] = useState(false);
   const galleryImages = machine?.galeria ?? [];
   const hasGalleryImages = galleryImages.length > 0;
   const isSold = isSoldMachine(machine);
@@ -29,6 +30,7 @@ function MachinesDetailPage({ routeParams }) {
       setIsLoading(true);
       setError('');
       setWasNotFound(false);
+      setWasUnavailable(false);
 
       try {
         const response = await getMachineBySlug(machineSlug);
@@ -40,6 +42,12 @@ function MachinesDetailPage({ routeParams }) {
         if (!response) {
           setMachine(null);
           setWasNotFound(true);
+          return;
+        }
+
+        if (isSoldMachine(response)) {
+          setMachine(null);
+          setWasUnavailable(true);
           return;
         }
 
@@ -76,11 +84,15 @@ function MachinesDetailPage({ routeParams }) {
       {isLoading && <p className="status-message">Cargando detalle de la maquinaria...</p>}
       {error && <p className="status-message status-message--error">{error}</p>}
 
-      {wasNotFound && (
+      {(wasNotFound || wasUnavailable) && (
         <div className="machine-detail-card machine-detail-card--empty">
           <p className="eyebrow">Detalle de maquinaria</p>
-          <h1 id="machine-detail-title">Maquinaria no encontrada</h1>
-          <p>No encontramos una publicación de maquinarias con el identificador solicitado.</p>
+          <h1 id="machine-detail-title">{wasUnavailable ? 'Maquinaria no disponible' : 'Maquinaria no encontrada'}</h1>
+          <p>
+            {wasUnavailable
+              ? 'Esta maquinaria ya fue vendida y permanece publicada solamente como historial comercial.'
+              : 'No encontramos una publicación de maquinarias con el identificador solicitado.'}
+          </p>
           <a className="machine-detail-actions__secondary" href="/maquinarias">
             Volver a maquinarias
           </a>
@@ -135,11 +147,11 @@ function MachinesDetailPage({ routeParams }) {
             <dl className="machine-detail-list">
               <div>
                 <dt>Categoría</dt>
-                <dd>{machine.categoria}</dd>
+                <dd>{getMachineCategory(machine)}</dd>
               </div>
               <div>
                 <dt>Estado</dt>
-                <dd>{machine.estado}</dd>
+                <dd>{getMachineStatus(machine)}</dd>
               </div>
               <div>
                 <dt>Disponibilidad</dt>
