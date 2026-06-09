@@ -18,50 +18,81 @@ const categoryAliases = new Map([
 
 const statusAliases = new Map([
   ['disponible', availableStatus],
+  ['disponibles', availableStatus],
   ['vendida', soldStatus],
   ['vendido', soldStatus],
+  ['vendidas', soldStatus],
+  ['vendidos', soldStatus],
   ['finalizado', soldStatus],
-  ['finalizada', soldStatus],
-  ['nueva', 'Nueva'],
-  ['nuevo', 'Nueva'],
-  ['usada', 'Usada'],
-  ['usado', 'Usada'],
-  ['trabajos realizados', workCategory],
-  ['trabajo realizado', workCategory]
+  ['finalizada', soldStatus]
 ]);
 
 function normalizeKey(value) {
   return String(value ?? '').trim().toLocaleLowerCase('es-AR');
 }
 
-export function normalizeMachineCategory(value) {
-  return categoryAliases.get(normalizeKey(value)) ?? String(value ?? '').trim();
+function normalizeBoolean(value) {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'number') {
+    return value === 1;
+  }
+
+  return ['true', '1', 'yes', 'y', 'si', 'sí'].includes(normalizeKey(value));
+}
+
+function getLegacyCatalogValue(value) {
+  return categoryAliases.get(normalizeKey(value));
+}
+
+export function normalizeMachineCategory(value, machine) {
+  const normalizedCategory = categoryAliases.get(normalizeKey(value));
+
+  if (normalizedCategory) {
+    return normalizedCategory;
+  }
+
+  const legacyStatusCategory = getLegacyCatalogValue(machine?.estado);
+
+  if (legacyStatusCategory) {
+    return legacyStatusCategory;
+  }
+
+  const normalizedValue = String(value ?? '').trim();
+
+  return statusAliases.has(normalizeKey(normalizedValue)) ? '' : normalizedValue;
 }
 
 export function normalizeMachineStatus(value, machine) {
-  if (normalizeMachineCategory(machine?.categoria) === workCategory) {
-    return workCategory;
-  }
-
   const normalizedStatus = statusAliases.get(normalizeKey(value));
 
   if (normalizedStatus) {
     return normalizedStatus;
   }
 
-  return machine?.disponible === false ? soldStatus : String(value ?? '').trim();
+  const legacyCategoryStatus = statusAliases.get(normalizeKey(machine?.categoria));
+
+  if (legacyCategoryStatus) {
+    return legacyCategoryStatus;
+  }
+
+  const categoryValue = getLegacyCatalogValue(value);
+
+  if (categoryValue) {
+    return availableStatus;
+  }
+
+  if (machine?.disponible !== undefined && machine?.disponible !== null && machine?.disponible !== '') {
+    return normalizeBoolean(machine.disponible) ? availableStatus : soldStatus;
+  }
+
+  return String(value ?? '').trim() || availableStatus;
 }
 
 export function getMachineCategory(machine) {
-  const normalizedCategory = normalizeMachineCategory(machine?.categoria);
-
-  if (normalizedCategory) {
-    return normalizedCategory;
-  }
-
-  const normalizedStatus = normalizeMachineStatus(machine?.estado, machine);
-
-  return normalizedStatus === soldStatus || normalizedStatus === availableStatus ? '' : normalizedStatus;
+  return normalizeMachineCategory(machine?.categoria, machine);
 }
 
 export function getMachineStatus(machine) {
@@ -77,21 +108,20 @@ export function isSoldMachine(machine) {
 }
 
 export function isHistoricalWorkMachine(machine) {
-  return getMachineCategory(machine) === workCategory || getMachineStatus(machine) === workCategory;
+  return getMachineCategory(machine) === workCategory;
 }
 
 export function isAvailableMachine(machine) {
-  return !isSoldMachine(machine) && !isHistoricalWorkMachine(machine) && machine?.disponible !== false;
+  return getMachineStatus(machine) === availableStatus;
 }
 
-export function getMachineAvailabilityLabel(machine, unavailableLabel = 'No disponible para consulta') {
+export function getMachineAvailabilityLabel(machine, unavailableLabel = 'Vendida') {
   return isAvailableMachine(machine) ? availableStatus : unavailableLabel;
 }
 
 export function getMachineBadges(machine) {
-  const badges = [getMachineCategory(machine), getMachineStatus(machine)]
-    .filter(Boolean)
-    .filter((badge) => badge !== availableStatus);
-
-  return [...new Set(badges)];
+  return [
+    { label: getMachineCategory(machine), type: 'category' },
+    { label: getMachineStatus(machine), type: 'status' }
+  ].filter((badge) => badge.label);
 }

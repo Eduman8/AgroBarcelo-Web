@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Button from '../components/ui/Button.jsx';
 import { getMachineBySlug } from '../services/machinesService.js';
-import { getMachineAvailabilityLabel, getMachineCategory, getMachineStatus, isAvailableMachine, isHistoricalWorkMachine, isSoldMachine } from '../utils/machines.js';
+import { getMachineAvailabilityLabel, getMachineCategory, getMachineStatus, isAvailableMachine, isSoldMachine } from '../utils/machines.js';
 
 function getMachineSlug(routeParams) {
   return routeParams?.slug ?? routeParams?.id ?? window.location.pathname.split('/').filter(Boolean).at(-1);
@@ -21,7 +21,6 @@ function MachinesDetailPage({ routeParams }) {
   const galleryImages = machine?.galeria ?? [];
   const hasGalleryImages = galleryImages.length > 0;
   const isSold = isSoldMachine(machine);
-  const isHistoricalWork = isHistoricalWorkMachine(machine);
   const isAvailable = isAvailableMachine(machine);
 
   useEffect(() => {
@@ -154,13 +153,9 @@ function MachinesDetailPage({ routeParams }) {
               <p>{machine.descripcionLarga}</p>
             </div>
 
-            {!isAvailable ? (
+            {isSold ? (
               <p className="machine-detail-sold-message">
-                {isSold
-                  ? 'Esta maquinaria ya fue vendida. La ficha queda disponible como historial y no permite consulta directa sobre esta unidad.'
-                  : isHistoricalWork
-                    ? 'Este trabajo realizado se muestra como historial de AgroBarceló y no permite consulta comercial directa sobre la unidad.'
-                    : 'Esta publicación no está disponible para consulta comercial directa.'}
+                Esta maquinaria ya fue vendida. Podés consultar por opciones similares.
               </p>
             ) : null}
 

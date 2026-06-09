@@ -66,61 +66,95 @@ export const normalizeGalleryForStorage = (value) => JSON.stringify(parseGallery
 
 const normalizeMachineTextKey = (value) => String(value ?? '').trim().toLocaleLowerCase('es-AR');
 
-const normalizeMachineCategory = (value) => {
-  const categoryAliases = new Map([
-    ['maquinaria nueva', 'Nueva'],
-    ['nueva', 'Nueva'],
-    ['maquinaria usada', 'Usada'],
-    ['usada', 'Usada'],
-    ['usado', 'Usada'],
-    ['trabajos realizados', 'Trabajo Realizado'],
-    ['trabajo realizado', 'Trabajo Realizado']
-  ]);
+const normalizeBoolean = (value) => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
 
-  return categoryAliases.get(normalizeMachineTextKey(value)) ?? String(value ?? '').trim();
+  if (typeof value === 'number') {
+    return value === 1;
+  }
+
+  return ['true', '1', 'yes', 'y', 'si', 'sí'].includes(normalizeMachineTextKey(value));
+};
+
+const categoryAliases = new Map([
+  ['maquinaria nueva', 'Nueva'],
+  ['nueva', 'Nueva'],
+  ['nuevo', 'Nueva'],
+  ['maquinaria usada', 'Usada'],
+  ['usada', 'Usada'],
+  ['usado', 'Usada'],
+  ['trabajos realizados', 'Trabajo Realizado'],
+  ['trabajo realizado', 'Trabajo Realizado']
+]);
+
+const statusAliases = new Map([
+  ['disponible', 'Disponible'],
+  ['disponibles', 'Disponible'],
+  ['vendida', 'Vendida'],
+  ['vendido', 'Vendida'],
+  ['vendidas', 'Vendida'],
+  ['vendidos', 'Vendida'],
+  ['finalizado', 'Vendida'],
+  ['finalizada', 'Vendida']
+]);
+
+const getLegacyCatalogValue = (value) => categoryAliases.get(normalizeMachineTextKey(value));
+
+const normalizeMachineCategory = (value, machine) => {
+  const normalizedCategory = categoryAliases.get(normalizeMachineTextKey(value));
+
+  if (normalizedCategory) {
+    return normalizedCategory;
+  }
+
+  const legacyStatusCategory = getLegacyCatalogValue(machine?.estado);
+
+  if (legacyStatusCategory) {
+    return legacyStatusCategory;
+  }
+
+  const normalizedValue = String(value ?? '').trim();
+
+  return statusAliases.has(normalizeMachineTextKey(normalizedValue)) ? '' : normalizedValue;
 };
 
 const normalizeMachineStatus = (value, machine) => {
-  if (normalizeMachineCategory(machine?.categoria) === 'Trabajo Realizado') {
-    return 'Trabajo Realizado';
-  }
-
-  const statusAliases = new Map([
-    ['disponible', 'Disponible'],
-    ['vendida', 'Vendida'],
-    ['vendido', 'Vendida'],
-    ['finalizado', 'Vendida'],
-    ['finalizada', 'Vendida'],
-    ['trabajos realizados', 'Trabajo Realizado'],
-    ['trabajo realizado', 'Trabajo Realizado'],
-    ['nueva', 'Nueva'],
-    ['nuevo', 'Nueva'],
-    ['usada', 'Usada'],
-    ['usado', 'Usada']
-  ]);
   const normalizedStatus = statusAliases.get(normalizeMachineTextKey(value));
 
   if (normalizedStatus) {
     return normalizedStatus;
   }
 
-  return machine?.disponible === false ? 'Vendida' : String(value ?? '').trim();
+  const legacyCategoryStatus = statusAliases.get(normalizeMachineTextKey(machine?.categoria));
+
+  if (legacyCategoryStatus) {
+    return legacyCategoryStatus;
+  }
+
+  if (getLegacyCatalogValue(value)) {
+    return 'Disponible';
+  }
+
+  if (machine?.disponible !== undefined && machine?.disponible !== null && machine?.disponible !== '') {
+    return normalizeBoolean(machine.disponible) ? 'Disponible' : 'Vendida';
+  }
+
+  return String(value ?? '').trim() || 'Disponible';
 };
 
 export const isSoldMachine = (machine) => normalizeMachineStatus(machine?.estado, machine) === 'Vendida';
 
-export const isHistoricalWorkMachine = (machine) =>
-  normalizeMachineCategory(machine?.categoria) === 'Trabajo Realizado' ||
-  normalizeMachineStatus(machine?.estado, machine) === 'Trabajo Realizado';
+export const isHistoricalWorkMachine = (machine) => normalizeMachineCategory(machine?.categoria, machine) === 'Trabajo Realizado';
 
-export const isAvailableMachine = (machine) =>
-  !isSoldMachine(machine) && !isHistoricalWorkMachine(machine) && Boolean(machine?.disponible);
+export const isAvailableMachine = (machine) => normalizeMachineStatus(machine?.estado, machine) === 'Disponible';
 
 export const mapMachine = (machine) => ({
   id: machine.id,
   slug: String(machine.slug ?? '').trim() || String(machine.id ?? ''),
   nombre: machine.nombre,
-  categoria: normalizeMachineCategory(machine.categoria),
+  categoria: normalizeMachineCategory(machine.categoria, machine),
   estado: normalizeMachineStatus(machine.estado, machine),
   descripcionCorta: machine.descripcionCorta ?? null,
   descripcionLarga: machine.descripcionLarga ?? null,

@@ -141,6 +141,7 @@ const normalizeText = (value, maxLength) => {
 const categoryAliases = new Map([
   ['maquinaria nueva', 'Nueva'],
   ['nueva', 'Nueva'],
+  ['nuevo', 'Nueva'],
   ['maquinaria usada', 'Usada'],
   ['usada', 'Usada'],
   ['usado', 'Usada'],
@@ -154,12 +155,8 @@ const statusAliases = new Map([
   ['vendido', 'Vendida'],
   ['finalizado', 'Vendida'],
   ['finalizada', 'Vendida'],
-  ['nueva', 'Nueva'],
-  ['nuevo', 'Nueva'],
-  ['usada', 'Usada'],
-  ['usado', 'Usada'],
-  ['trabajos realizados', 'Trabajo Realizado'],
-  ['trabajo realizado', 'Trabajo Realizado']
+  ['vendidas', 'Vendida'],
+  ['vendidos', 'Vendida']
 ]);
 
 const normalizeCatalogValue = (value, maxLength, aliases) => {
@@ -199,12 +196,27 @@ const normalizeBoolean = (value, defaultValue) => {
 };
 
 const allowedCategories = new Set(['Nueva', 'Usada', 'Trabajo Realizado']);
-const allowedStatuses = new Set(['Disponible', 'Nueva', 'Usada', 'Trabajo Realizado', 'Vendida']);
+const allowedStatuses = new Set(['Disponible', 'Vendida']);
+
+const normalizeMachineStatusPayload = (value) => {
+  const normalizedValue = normalizeText(value, 100);
+  const normalizedKey = normalizedValue.toLocaleLowerCase('es-AR');
+
+  if (statusAliases.has(normalizedKey)) {
+    return statusAliases.get(normalizedKey);
+  }
+
+  if (categoryAliases.has(normalizedKey)) {
+    return 'Disponible';
+  }
+
+  return normalizedValue;
+};
 
 const normalizeMachinePayload = (payload) => {
   const nombre = normalizeText(payload?.nombre, 200);
   const categoria = normalizeCatalogValue(payload?.categoria, 100, categoryAliases);
-  const estado = normalizeCatalogValue(payload?.estado, 100, statusAliases);
+  const estado = normalizeMachineStatusPayload(payload?.estado);
   const slugSource = normalizeText(payload?.slug, 150) || nombre;
   const slug = createSlugFromName(slugSource);
 
@@ -225,7 +237,7 @@ const normalizeMachinePayload = (payload) => {
   }
 
   if (!allowedStatuses.has(estado)) {
-    throw new MachineValidationError('El estado debe ser Disponible, Nueva, Usada, Trabajo Realizado o Vendida.');
+    throw new MachineValidationError('El estado debe ser Disponible o Vendida.');
   }
 
   if (!slug) {
@@ -241,7 +253,7 @@ const normalizeMachinePayload = (payload) => {
     descripcionLarga: payload?.descripcionLarga ? String(payload.descripcionLarga).trim() || null : null,
     imagenPrincipal: normalizeNullableText(payload?.imagenPrincipal, 500),
     galeria: normalizeGalleryForStorage(payload?.galeria),
-    disponible: isAvailableMachine({ categoria, estado, disponible: true }),
+    disponible: isAvailableMachine({ categoria, estado, disponible: estado === 'Disponible' }),
     activo: normalizeBoolean(payload?.activo, true)
   };
 };

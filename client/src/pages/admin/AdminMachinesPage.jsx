@@ -191,7 +191,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
       descripcionLarga: formData.descripcionLarga.trim(),
       imagenPrincipal: null,
       galeria: [],
-      disponible: formData.estado === 'Disponible' && formData.categoria !== 'Trabajo Realizado',
+      disponible: formData.estado === 'Disponible',
       activo: true
     };
 
@@ -307,9 +307,6 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
                       {status}
                     </option>
                   ))}
-                  {formData.estado && !machineStatuses.includes(formData.estado) ? (
-                    <option value={formData.estado}>{formData.estado}</option>
-                  ) : null}
                 </select>
                 {errors.estado && <small className="admin-form-error">{errors.estado}</small>}
               </label>
@@ -317,10 +314,8 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
               <div className="admin-checkbox-field" aria-live="polite">
                 <span>
                   {formData.estado === 'Vendida'
-                    ? 'Las maquinarias vendidas se publican como historial, con detalle visible y sin consulta directa.'
-                    : formData.categoria === 'Trabajo Realizado' || formData.estado === 'Trabajo Realizado'
-                      ? 'Los trabajos realizados se publican como historial, con detalle visible y sin consulta comercial directa.'
-                      : 'Las maquinarias disponibles permiten consulta y acceso al detalle público.'}
+                    ? 'Las publicaciones vendidas mantienen el detalle visible y no permiten consulta directa sobre esa unidad.'
+                    : 'Las publicaciones disponibles permiten consulta y acceso al detalle público, sin importar su categoría.'}
                 </span>
               </div>
 
