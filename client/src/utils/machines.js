@@ -17,6 +17,8 @@ const statusAliases = new Map([
   ['vendido', 'Vendida'],
   ['finalizado', 'Vendida'],
   ['finalizada', 'Vendida'],
+  ['trabajos realizados', 'Vendida'],
+  ['trabajo realizado', 'Vendida'],
   ['nueva', 'Disponible'],
   ['usada', 'Disponible'],
   ['usado', 'Disponible']

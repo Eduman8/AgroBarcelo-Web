@@ -18,7 +18,6 @@ function MachinesDetailPage({ routeParams }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [wasNotFound, setWasNotFound] = useState(false);
-  const [wasUnavailable, setWasUnavailable] = useState(false);
   const galleryImages = machine?.galeria ?? [];
   const hasGalleryImages = galleryImages.length > 0;
   const isSold = isSoldMachine(machine);
@@ -30,7 +29,6 @@ function MachinesDetailPage({ routeParams }) {
       setIsLoading(true);
       setError('');
       setWasNotFound(false);
-      setWasUnavailable(false);
 
       try {
         const response = await getMachineBySlug(machineSlug);
@@ -42,12 +40,6 @@ function MachinesDetailPage({ routeParams }) {
         if (!response) {
           setMachine(null);
           setWasNotFound(true);
-          return;
-        }
-
-        if (isSoldMachine(response)) {
-          setMachine(null);
-          setWasUnavailable(true);
           return;
         }
 
@@ -84,15 +76,11 @@ function MachinesDetailPage({ routeParams }) {
       {isLoading && <p className="status-message">Cargando detalle de la maquinaria...</p>}
       {error && <p className="status-message status-message--error">{error}</p>}
 
-      {(wasNotFound || wasUnavailable) && (
+      {wasNotFound && (
         <div className="machine-detail-card machine-detail-card--empty">
           <p className="eyebrow">Detalle de maquinaria</p>
-          <h1 id="machine-detail-title">{wasUnavailable ? 'Maquinaria no disponible' : 'Maquinaria no encontrada'}</h1>
-          <p>
-            {wasUnavailable
-              ? 'Esta maquinaria ya fue vendida y permanece publicada solamente como historial comercial.'
-              : 'No encontramos una publicación de maquinarias con el identificador solicitado.'}
-          </p>
+          <h1 id="machine-detail-title">Maquinaria no encontrada</h1>
+          <p>No encontramos una publicación de maquinarias con el identificador solicitado.</p>
           <a className="machine-detail-actions__secondary" href="/maquinarias">
             Volver a maquinarias
           </a>
@@ -166,14 +154,16 @@ function MachinesDetailPage({ routeParams }) {
 
             {isSold ? (
               <p className="machine-detail-sold-message">
-                Esta maquinaria ya fue vendida, pero podés consultar por opciones similares.
+                Esta maquinaria ya fue vendida. Podés consultar por opciones similares.
               </p>
             ) : null}
 
             <div className="machine-detail-actions">
-              <Button href={`/contacto?maquinaria=${encodeURIComponent(getContactMachineValue(machine))}`} variant="primary">
-                {isSold ? 'Consultar opciones similares' : 'Consultar'}
-              </Button>
+              {!isSold ? (
+                <Button href={`/contacto?maquinaria=${encodeURIComponent(getContactMachineValue(machine))}`} variant="primary">
+                  Consultar
+                </Button>
+              ) : null}
               <a className="machine-detail-actions__secondary" href="/maquinarias">
                 Volver
               </a>

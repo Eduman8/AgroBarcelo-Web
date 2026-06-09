@@ -17,7 +17,7 @@ FROM dbo.WebMaquinarias
 WHERE Activo = 1
   AND (
     Disponible = 1
-    OR LOWER(LTRIM(RTRIM(Estado))) IN (N'vendido', N'vendida', N'finalizado', N'finalizada')
+    OR LOWER(LTRIM(RTRIM(Estado))) IN (N'vendido', N'vendida', N'finalizado', N'finalizada', N'trabajo realizado', N'trabajos realizados')
   )
 ORDER BY FechaAlta DESC, ID_WebMaquinaria DESC;
 `;
@@ -37,8 +37,6 @@ SELECT TOP (1)
     Activo AS activo
 FROM dbo.WebMaquinarias
 WHERE Activo = 1
-  AND Disponible = 1
-  AND LOWER(LTRIM(RTRIM(Estado))) NOT IN (N'vendido', N'vendida', N'finalizado', N'finalizada')
   AND Slug = @slug;
 `;
 
@@ -85,6 +83,8 @@ const normalizeMachineStatus = (value, machine) => {
     ['vendido', 'Vendida'],
     ['finalizado', 'Vendida'],
     ['finalizada', 'Vendida'],
+    ['trabajos realizados', 'Vendida'],
+    ['trabajo realizado', 'Vendida'],
     ['nueva', 'Disponible'],
     ['usada', 'Disponible'],
     ['usado', 'Disponible']
