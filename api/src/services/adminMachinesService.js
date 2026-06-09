@@ -202,7 +202,8 @@ const normalizeMachinePayload = (payload) => {
   const nombre = normalizeText(payload?.nombre, 200);
   const categoria = normalizeCatalogValue(payload?.categoria, 100, categoryAliases);
   const estado = normalizeCatalogValue(payload?.estado, 100, statusAliases);
-  const slug = normalizeText(payload?.slug, 150) || createSlugFromName(nombre);
+  const slugSource = normalizeText(payload?.slug, 150) || nombre;
+  const slug = createSlugFromName(slugSource);
 
   if (!nombre) {
     throw new MachineValidationError('El nombre es requerido.');
