@@ -46,8 +46,17 @@ const initialFormValues = {
   name: '',
   phone: '',
   email: '',
-  message: ''
+  message: '',
+  manual: '',
+  manualPage: '',
+  manualPartCode: ''
 };
+
+const manualOptions = [
+  { value: '', label: 'No especificado' },
+  { value: 'Repuestos Rastras', label: 'Repuestos Rastras' },
+  { value: 'Grano Fino 2019', label: 'Grano Fino 2019' }
+];
 
 function getDisplayValue(value) {
   if (value === null || value === undefined || value === '') {
@@ -84,6 +93,18 @@ function buildWhatsAppUrl(message) {
   return `https://wa.me/${phoneNumber}?${params.toString()}`;
 }
 
+function getManualInfoFromValues(values) {
+  return {
+    manual: values.manual.trim(),
+    page: values.manualPage.trim(),
+    code: values.manualPartCode.trim()
+  };
+}
+
+function hasManualInfo(manualInfo) {
+  return Boolean(manualInfo.manual || manualInfo.page || manualInfo.code);
+}
+
 function ContactPage() {
   const clearCurrentQueryUrl = () => {
     window.history.replaceState(null, '', '/contacto');
@@ -107,6 +128,8 @@ function ContactPage() {
   const [selectedParts, setSelectedParts] = useState(() => getContactSelectedParts());
 
   const hasUnavailableMachineSelected = selectedQueryType === 'maquinaria' && machine && !isAvailableMachine(machine);
+  const manualInfo = getManualInfoFromValues(formValues);
+  const shouldShowManualInfoSummary = hasManualInfo(manualInfo);
   const whatsappUrl = buildWhatsAppUrl(
     buildWhatsAppMessage({ sparePart, machine: hasUnavailableMachineSelected ? null : machine, selectedParts })
   );
@@ -298,7 +321,8 @@ function ContactPage() {
           ...formValues,
           subject,
           context: buildContactContext(),
-          selectedParts: buildSelectedPartsPayload()
+          selectedParts: buildSelectedPartsPayload(),
+          manualInfo
         })
       });
 
@@ -446,6 +470,38 @@ function ContactPage() {
             ) : null}
           </>
         ) : null}
+      </article>
+    );
+  }
+
+  function renderManualInfoSummary() {
+    if (!shouldShowManualInfoSummary) {
+      return null;
+    }
+
+    return (
+      <article className="manual-info-summary" aria-live="polite">
+        <h3>Información de manual</h3>
+        <dl>
+          {manualInfo.manual ? (
+            <div>
+              <dt>Manual</dt>
+              <dd>{manualInfo.manual}</dd>
+            </div>
+          ) : null}
+          {manualInfo.page ? (
+            <div>
+              <dt>Página</dt>
+              <dd>{manualInfo.page}</dd>
+            </div>
+          ) : null}
+          {manualInfo.code ? (
+            <div>
+              <dt>Código</dt>
+              <dd>{manualInfo.code}</dd>
+            </div>
+          ) : null}
+        </dl>
       </article>
     );
   }
@@ -643,6 +699,50 @@ function ContactPage() {
                 onChange={handleFieldChange}
               />
             </label>
+
+            <fieldset className="manual-info-fieldset">
+              <legend>Información obtenida del manual</legend>
+              <p>
+                Si encontraste el repuesto en uno de los manuales, podés indicar los siguientes datos.
+              </p>
+
+              <div className="contact-form__grid">
+                <label>
+                  Manual
+                  <select name="manual" value={formValues.manual} onChange={handleFieldChange}>
+                    {manualOptions.map((option) => (
+                      <option key={option.label} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Página del manual
+                  <input
+                    name="manualPage"
+                    type="number"
+                    min="1"
+                    inputMode="numeric"
+                    value={formValues.manualPage}
+                    placeholder="Ej: 46"
+                    onChange={handleFieldChange}
+                  />
+                </label>
+                <label>
+                  Código de repuesto
+                  <input
+                    name="manualPartCode"
+                    type="text"
+                    value={formValues.manualPartCode}
+                    placeholder="Ej: C1097"
+                    onChange={handleFieldChange}
+                  />
+                </label>
+              </div>
+            </fieldset>
+
+            {renderManualInfoSummary()}
 
             <button
               className="button button--primary contact-form__submit"

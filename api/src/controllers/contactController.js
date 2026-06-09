@@ -36,6 +36,22 @@ function normalizeContext(context) {
   };
 }
 
+function normalizeManualInfo(manualInfo) {
+  if (!manualInfo || typeof manualInfo !== 'object') {
+    return null;
+  }
+
+  const normalizedManualInfo = {
+    manual: manualInfo.manual === null || manualInfo.manual === undefined ? '' : String(manualInfo.manual).trim(),
+    page: manualInfo.page === null || manualInfo.page === undefined ? '' : String(manualInfo.page).trim(),
+    code: manualInfo.code === null || manualInfo.code === undefined ? '' : String(manualInfo.code).trim()
+  };
+
+  return normalizedManualInfo.manual || normalizedManualInfo.page || normalizedManualInfo.code
+    ? normalizedManualInfo
+    : null;
+}
+
 function validateContactData({ name, phone, email, subject, message }) {
   return !(
     isBlank(name) ||
@@ -48,7 +64,7 @@ function validateContactData({ name, phone, email, subject, message }) {
 }
 
 export async function createContactRequest(request, response) {
-  const { name, phone, email, subject, message, context, selectedParts } = request.body || {};
+  const { name, phone, email, subject, message, context, selectedParts, manualInfo } = request.body || {};
 
   if (!validateContactData({ name, phone, email, subject, message })) {
     return response.status(400).json({
@@ -64,7 +80,8 @@ export async function createContactRequest(request, response) {
     subject: subject.trim(),
     message: message.trim(),
     context: normalizeContext(context),
-    selectedParts: normalizeSelectedParts(selectedParts)
+    selectedParts: normalizeSelectedParts(selectedParts),
+    manualInfo: normalizeManualInfo(manualInfo)
   };
 
   try {
