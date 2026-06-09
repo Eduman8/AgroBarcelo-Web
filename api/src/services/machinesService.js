@@ -18,6 +18,7 @@ WHERE Activo = 1
   AND (
     Disponible = 1
     OR LOWER(LTRIM(RTRIM(Estado))) IN (N'vendido', N'vendida', N'finalizado', N'finalizada', N'trabajo realizado', N'trabajos realizados')
+    OR LOWER(LTRIM(RTRIM(Categoria))) IN (N'trabajo realizado', N'trabajos realizados')
   )
 ORDER BY FechaAlta DESC, ID_WebMaquinaria DESC;
 `;
@@ -80,17 +81,22 @@ const normalizeMachineCategory = (value) => {
 };
 
 const normalizeMachineStatus = (value, machine) => {
+  if (normalizeMachineCategory(machine?.categoria) === 'Trabajo Realizado') {
+    return 'Trabajo Realizado';
+  }
+
   const statusAliases = new Map([
     ['disponible', 'Disponible'],
     ['vendida', 'Vendida'],
     ['vendido', 'Vendida'],
     ['finalizado', 'Vendida'],
     ['finalizada', 'Vendida'],
-    ['trabajos realizados', 'Vendida'],
-    ['trabajo realizado', 'Vendida'],
-    ['nueva', 'Disponible'],
-    ['usada', 'Disponible'],
-    ['usado', 'Disponible']
+    ['trabajos realizados', 'Trabajo Realizado'],
+    ['trabajo realizado', 'Trabajo Realizado'],
+    ['nueva', 'Nueva'],
+    ['nuevo', 'Nueva'],
+    ['usada', 'Usada'],
+    ['usado', 'Usada']
   ]);
   const normalizedStatus = statusAliases.get(normalizeMachineTextKey(value));
 
@@ -103,6 +109,13 @@ const normalizeMachineStatus = (value, machine) => {
 
 export const isSoldMachine = (machine) => normalizeMachineStatus(machine?.estado, machine) === 'Vendida';
 
+export const isHistoricalWorkMachine = (machine) =>
+  normalizeMachineCategory(machine?.categoria) === 'Trabajo Realizado' ||
+  normalizeMachineStatus(machine?.estado, machine) === 'Trabajo Realizado';
+
+export const isAvailableMachine = (machine) =>
+  !isSoldMachine(machine) && !isHistoricalWorkMachine(machine) && Boolean(machine?.disponible);
+
 export const mapMachine = (machine) => ({
   id: machine.id,
   slug: String(machine.slug ?? '').trim() || String(machine.id ?? ''),
@@ -113,7 +126,7 @@ export const mapMachine = (machine) => ({
   descripcionLarga: machine.descripcionLarga ?? null,
   imagenPrincipal: machine.imagenPrincipal ?? null,
   galeria: parseGallery(machine.galeria),
-  disponible: !isSoldMachine(machine) && Boolean(machine.disponible),
+  disponible: isAvailableMachine(machine),
   activo: Boolean(machine.activo)
 });
 

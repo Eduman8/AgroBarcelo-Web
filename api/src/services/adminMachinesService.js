@@ -1,5 +1,5 @@
 import { getSqlPool, sql } from '../config/sqlServer.js';
-import { isSoldMachine, mapMachine, normalizeGalleryForStorage } from './machinesService.js';
+import { isAvailableMachine, mapMachine, normalizeGalleryForStorage } from './machinesService.js';
 
 class MachineValidationError extends Error {
   constructor(message) {
@@ -154,9 +154,12 @@ const statusAliases = new Map([
   ['vendido', 'Vendida'],
   ['finalizado', 'Vendida'],
   ['finalizada', 'Vendida'],
-  ['nueva', 'Disponible'],
-  ['usada', 'Disponible'],
-  ['usado', 'Disponible']
+  ['nueva', 'Nueva'],
+  ['nuevo', 'Nueva'],
+  ['usada', 'Usada'],
+  ['usado', 'Usada'],
+  ['trabajos realizados', 'Trabajo Realizado'],
+  ['trabajo realizado', 'Trabajo Realizado']
 ]);
 
 const normalizeCatalogValue = (value, maxLength, aliases) => {
@@ -196,7 +199,7 @@ const normalizeBoolean = (value, defaultValue) => {
 };
 
 const allowedCategories = new Set(['Nueva', 'Usada', 'Trabajo Realizado']);
-const allowedStatuses = new Set(['Disponible', 'Vendida']);
+const allowedStatuses = new Set(['Disponible', 'Nueva', 'Usada', 'Trabajo Realizado', 'Vendida']);
 
 const normalizeMachinePayload = (payload) => {
   const nombre = normalizeText(payload?.nombre, 200);
@@ -222,7 +225,7 @@ const normalizeMachinePayload = (payload) => {
   }
 
   if (!allowedStatuses.has(estado)) {
-    throw new MachineValidationError('El estado debe ser Disponible o Vendida.');
+    throw new MachineValidationError('El estado debe ser Disponible, Nueva, Usada, Trabajo Realizado o Vendida.');
   }
 
   if (!slug) {
@@ -238,7 +241,7 @@ const normalizeMachinePayload = (payload) => {
     descripcionLarga: payload?.descripcionLarga ? String(payload.descripcionLarga).trim() || null : null,
     imagenPrincipal: normalizeNullableText(payload?.imagenPrincipal, 500),
     galeria: normalizeGalleryForStorage(payload?.galeria),
-    disponible: estado === 'Disponible' && !isSoldMachine({ estado }),
+    disponible: isAvailableMachine({ categoria, estado, disponible: true }),
     activo: normalizeBoolean(payload?.activo, true)
   };
 };

@@ -3,7 +3,7 @@ import { getMachineByIdentifier } from '../services/machinesService.js';
 import { getSparePartById } from '../services/sparePartsService.js';
 import { mapsConfig, whatsappConfig } from '../config/contact.js';
 import { getContactSelectedParts, removeContactSelectedPart } from '../utils/contactSelectedParts.js';
-import { getMachineAvailabilityLabel, getMachineCategory, getMachineStatus } from '../utils/machines.js';
+import { getMachineAvailabilityLabel, getMachineCategory, getMachineStatus, isAvailableMachine } from '../utils/machines.js';
 
 const contactDetails = [
   {
@@ -103,7 +103,10 @@ function ContactPage() {
   const [wasMachineNotFound, setWasMachineNotFound] = useState(false);
   const [selectedParts, setSelectedParts] = useState(() => getContactSelectedParts());
 
-  const whatsappUrl = buildWhatsAppUrl(buildWhatsAppMessage({ sparePart, machine, selectedParts }));
+  const hasUnavailableMachineSelected = selectedQueryType === 'maquinaria' && machine && !isAvailableMachine(machine);
+  const whatsappUrl = buildWhatsAppUrl(
+    buildWhatsAppMessage({ sparePart, machine: hasUnavailableMachineSelected ? null : machine, selectedParts })
+  );
 
   useEffect(() => {
     if (selectedQueryType === 'producto') {
@@ -242,7 +245,7 @@ function ContactPage() {
       };
     }
 
-    if (machineId) {
+    if (machineId && !hasUnavailableMachineSelected) {
       return {
         type: 'maquinaria',
         id: machine?.id ?? machineId,
@@ -272,6 +275,13 @@ function ContactPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+
+    if (hasUnavailableMachineSelected) {
+      setFormStatus('error');
+      setNotice('Esta maquinaria no está disponible para consulta comercial directa. Podés limpiar la selección y hacer una consulta general.');
+      return;
+    }
+
     setFormStatus('sending');
     setNotice('');
 
@@ -389,24 +399,31 @@ function ContactPage() {
         ) : null}
 
         {!isMachineLoading && !machineError && machine ? (
-          <dl className="selected-query-card__details">
-            <div>
-              <dt>Nombre</dt>
-              <dd>{machine.nombre}</dd>
-            </div>
-            <div>
-              <dt>Categoría</dt>
-              <dd>{getMachineCategory(machine)}</dd>
-            </div>
-            <div>
-              <dt>Estado</dt>
-              <dd>{getMachineStatus(machine)}</dd>
-            </div>
-            <div>
-              <dt>Disponibilidad</dt>
-              <dd>{getMachineAvailabilityLabel(machine)}</dd>
-            </div>
-          </dl>
+          <>
+            <dl className="selected-query-card__details">
+              <div>
+                <dt>Nombre</dt>
+                <dd>{machine.nombre}</dd>
+              </div>
+              <div>
+                <dt>Categoría</dt>
+                <dd>{getMachineCategory(machine)}</dd>
+              </div>
+              <div>
+                <dt>Estado</dt>
+                <dd>{getMachineStatus(machine)}</dd>
+              </div>
+              <div>
+                <dt>Disponibilidad</dt>
+                <dd>{getMachineAvailabilityLabel(machine)}</dd>
+              </div>
+            </dl>
+            {hasUnavailableMachineSelected ? (
+              <p className="status-message status-message--error">
+                Esta publicación se muestra como historial y no permite consulta comercial directa sobre esta unidad.
+              </p>
+            ) : null}
+          </>
         ) : null}
       </article>
     );
@@ -608,7 +625,7 @@ function ContactPage() {
             <button
               className="button button--primary contact-form__submit"
               type="submit"
-              disabled={formStatus === 'sending'}
+              disabled={formStatus === 'sending' || hasUnavailableMachineSelected}
             >
               {formStatus === 'sending' ? 'Enviando consulta...' : 'Enviar consulta'}
             </button>

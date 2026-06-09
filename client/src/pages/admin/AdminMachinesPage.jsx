@@ -7,7 +7,7 @@ import {
   getAdminMachines,
   updateMachine
 } from '../../services/machinesService.js';
-import { getMachineCategory, getMachineStatus, machineCategories, machineStatuses } from '../../utils/machines.js';
+import { getMachineCategory, getMachineStatus, isAvailableMachine, machineCategories, machineStatuses } from '../../utils/machines.js';
 
 const emptyMachineForm = {
   nombre: '',
@@ -93,7 +93,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
       estado: getMachineStatus(machine),
       descripcionCorta: machine.descripcionCorta ?? '',
       descripcionLarga: machine.descripcionLarga ?? '',
-      disponible: getMachineStatus(machine) === 'Disponible'
+      disponible: isAvailableMachine(machine)
     });
     setEditingMachineId(machine.id);
     setErrors({});
@@ -191,7 +191,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
       descripcionLarga: formData.descripcionLarga.trim(),
       imagenPrincipal: null,
       galeria: [],
-      disponible: formData.estado === 'Disponible',
+      disponible: formData.estado === 'Disponible' && formData.categoria !== 'Trabajo Realizado',
       activo: true
     };
 
@@ -307,6 +307,9 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
                       {status}
                     </option>
                   ))}
+                  {formData.estado && !machineStatuses.includes(formData.estado) ? (
+                    <option value={formData.estado}>{formData.estado}</option>
+                  ) : null}
                 </select>
                 {errors.estado && <small className="admin-form-error">{errors.estado}</small>}
               </label>
@@ -314,8 +317,10 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
               <div className="admin-checkbox-field" aria-live="polite">
                 <span>
                   {formData.estado === 'Vendida'
-                    ? 'Las maquinarias vendidas se publican como historial y sin detalle público.'
-                    : 'Las maquinarias disponibles permiten consulta y acceso al detalle público.'}
+                    ? 'Las maquinarias vendidas se publican como historial, con detalle visible y sin consulta directa.'
+                    : formData.categoria === 'Trabajo Realizado' || formData.estado === 'Trabajo Realizado'
+                      ? 'Los trabajos realizados se publican como historial, con detalle visible y sin consulta comercial directa.'
+                      : 'Las maquinarias disponibles permiten consulta y acceso al detalle público.'}
                 </span>
               </div>
 
@@ -405,12 +410,12 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
                     <td data-label="Disponibilidad">
                       <span
                         className={
-                          getMachineStatus(machine) === 'Disponible'
+                          isAvailableMachine(machine)
                             ? 'admin-status-pill'
                             : 'admin-status-pill is-muted'
                         }
                       >
-                        {getMachineStatus(machine) === 'Disponible' ? 'Disponible' : 'No disponible'}
+                        {isAvailableMachine(machine) ? 'Disponible' : 'No disponible'}
                       </span>
                     </td>
                     <td data-label="Acciones">
