@@ -50,6 +50,18 @@ export const machinesMock = [
     disponible: true
   },
   {
+    id: 'tractor-john-deere-730-vendido',
+    nombre: 'Tractor John Deere 730',
+    categoria: 'Maquinaria Usada',
+    estado: 'Vendido',
+    descripcionCorta: 'Unidad usada que se conserva publicada como antecedente comercial de AgroBarceló.',
+    descripcionLarga:
+      'Tractor usado ya vendido. La publicación permanece visible como parte del historial de maquinarias comercializadas y permite orientar consultas hacia opciones similares disponibles.',
+    imagenPrincipal: null,
+    galeria: [],
+    disponible: false
+  },
+  {
     id: 'trabajo-reparacion-sembradora-cele',
     nombre: 'Reacondicionamiento de Sembradora CELE',
     categoria: 'Trabajos Realizados',
