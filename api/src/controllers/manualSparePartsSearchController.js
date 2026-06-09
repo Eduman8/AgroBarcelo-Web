@@ -1,4 +1,7 @@
-import { searchManualSpareParts } from '../services/manualSparePartsSearchService.js';
+import {
+  getManualSparePartsDiagnostics,
+  searchManualSpareParts
+} from '../services/manualSparePartsSearchService.js';
 
 const sanitizeLogValue = (value) => {
   if (value === undefined || value === null) {
@@ -35,6 +38,28 @@ export const searchManualSparePartsController = async (request, response) => {
     response.status(500).json({
       status: 'error',
       message: 'No se pudo buscar en los repuestos manuales.'
+    });
+  }
+};
+
+export const getManualSparePartsDiagnosticsController = async (request, response) => {
+  try {
+    const diagnostics = await getManualSparePartsDiagnostics();
+
+    response.json(diagnostics);
+  } catch (error) {
+    const diagnosticError = error?.cause || error;
+
+    console.error('[manual-spare-parts-diagnostics] SQL Server query error', {
+      message: sanitizeLogValue(diagnosticError?.message),
+      code: sanitizeLogValue(diagnosticError?.code),
+      originalErrorMessage: sanitizeLogValue(diagnosticError?.originalError?.message),
+      originalErrorCode: sanitizeLogValue(diagnosticError?.originalError?.code)
+    });
+
+    response.status(500).json({
+      status: 'error',
+      message: 'No se pudo obtener el diagnóstico de repuestos manuales.'
     });
   }
 };

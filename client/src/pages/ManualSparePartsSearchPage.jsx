@@ -1,9 +1,37 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getSpareParts } from '../services/sparePartsService.js';
-import { searchManualSpareParts } from '../services/manualSparePartsSearchService.js';
+import {
+  getManualSparePartsDiagnostics,
+  searchManualSpareParts
+} from '../services/manualSparePartsSearchService.js';
 import { addContactSelectedPart, getContactSelectedParts } from '../utils/contactSelectedParts.js';
 
 const searchLimit = 25;
+
+const numberFormatter = new Intl.NumberFormat('es-AR');
+const percentFormatter = new Intl.NumberFormat('es-AR', {
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 0
+});
+const dateFormatter = new Intl.DateTimeFormat('es-AR', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit'
+});
+
+const formatNumber = (value) => numberFormatter.format(Number(value ?? 0));
+const formatPercent = (value) => `${percentFormatter.format(Number(value ?? 0))}%`;
+const formatDate = (value) => {
+  if (!value) {
+    return 'Sin registros';
+  }
+
+  const date = new Date(value);
+
+  return Number.isNaN(date.getTime()) ? 'Sin registros' : dateFormatter.format(date);
+};
 
 const getDisplayValue = (value, fallback = 'Sin informar') => {
   if (value === null || value === undefined || value === '') {
@@ -49,6 +77,39 @@ function ManualSparePartsSearchPage() {
     getContactSelectedParts().map((sparePart) => String(sparePart.id))
   );
   const [selectionNotice, setSelectionNotice] = useState('');
+  const [diagnostics, setDiagnostics] = useState(null);
+  const [diagnosticsError, setDiagnosticsError] = useState('');
+  const [isLoadingDiagnostics, setIsLoadingDiagnostics] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadDiagnostics = async () => {
+      try {
+        const diagnosticsResponse = await getManualSparePartsDiagnostics();
+
+        if (isMounted) {
+          setDiagnostics(diagnosticsResponse);
+          setDiagnosticsError('');
+        }
+      } catch (error) {
+        if (isMounted) {
+          setDiagnostics(null);
+          setDiagnosticsError(error?.message || 'No se pudo cargar el estado de datos.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingDiagnostics(false);
+        }
+      }
+    };
+
+    loadDiagnostics();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const hasSearch = submittedSearch.trim().length > 0;
   const hasAnyError = Boolean(catalogError || manualError);
@@ -172,6 +233,73 @@ function ManualSparePartsSearchPage() {
           </div>
         </form>
       </section>
+
+      <aside className="manual-spare-parts-diagnostics" aria-labelledby="manual-spare-parts-diagnostics-title">
+        <div className="manual-spare-parts-diagnostics__header">
+          <div>
+            <p className="eyebrow">Estado de datos</p>
+            <h2 id="manual-spare-parts-diagnostics-title">Diagnóstico de manuales</h2>
+          </div>
+          {isLoadingDiagnostics ? <span>Cargando...</span> : null}
+        </div>
+
+        {diagnosticsError ? (
+          <p className="status-message status-message--error">{diagnosticsError}</p>
+        ) : null}
+
+        {!diagnosticsError && diagnostics ? (
+          <div className="manual-spare-parts-diagnostics__content">
+            <dl className="manual-spare-parts-diagnostics__metrics">
+              <div>
+                <dt>Total registros manuales</dt>
+                <dd>{formatNumber(diagnostics.totalRegistrosManuales)}</dd>
+              </div>
+              <div>
+                <dt>Con coincidencia en catálogo</dt>
+                <dd>{formatNumber(diagnostics.registrosConCoincidenciaCatalogo)}</dd>
+              </div>
+              <div>
+                <dt>Solo manual</dt>
+                <dd>{formatNumber(diagnostics.registrosSoloManual)}</dd>
+              </div>
+              <div>
+                <dt>% coincidencia</dt>
+                <dd>{formatPercent(diagnostics.porcentajeCoincidenciaCatalogo)}</dd>
+              </div>
+              <div>
+                <dt>Última importación</dt>
+                <dd>{formatDate(diagnostics.ultimaFechaImportacion)}</dd>
+              </div>
+            </dl>
+
+            <div className="manual-spare-parts-diagnostics__lists">
+              <section aria-labelledby="diagnostics-manuals-title">
+                <h3 id="diagnostics-manuals-title">Registros por manual</h3>
+                <ul>
+                  {(diagnostics.registrosPorManual ?? []).map((manual) => (
+                    <li key={manual.nombre}>
+                      <span>{manual.nombre}</span>
+                      <strong>{formatNumber(manual.total)}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <section aria-labelledby="diagnostics-categories-title">
+                <h3 id="diagnostics-categories-title">Categorías principales</h3>
+                <ul>
+                  {(diagnostics.topCategorias ?? []).map((categoria) => (
+                    <li key={categoria.nombre}>
+                      <span>{categoria.nombre}</span>
+                      <strong>{formatNumber(categoria.total)}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </div>
+          </div>
+        ) : null}
+      </aside>
 
       <section className="manual-spare-parts-results" aria-labelledby="unified-spare-parts-results-title">
         <div className="manual-spare-parts-results__header">
