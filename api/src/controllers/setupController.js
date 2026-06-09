@@ -69,3 +69,90 @@ export const setupWebMachinesController = async (request, response) => {
     });
   }
 };
+
+const manualSparePartsSetupQuery = `
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.tables t
+    INNER JOIN sys.schemas s
+        ON s.schema_id = t.schema_id
+    WHERE t.name = N'RepuestosManuales'
+      AND s.name = N'dbo'
+)
+BEGIN
+    CREATE TABLE dbo.RepuestosManuales (
+        ID_RepuestoManual INT IDENTITY(1,1) PRIMARY KEY,
+        ManualNombre NVARCHAR(200) NOT NULL,
+        ArchivoOrigen NVARCHAR(500) NULL,
+        Pagina INT NULL,
+        Codigo NVARCHAR(100) NULL,
+        Descripcion NVARCHAR(500) NOT NULL,
+        Marca NVARCHAR(120) NULL,
+        ModeloMaquina NVARCHAR(180) NULL,
+        Categoria NVARCHAR(150) NULL,
+        ReferenciaDespiece NVARCHAR(150) NULL,
+        Observaciones NVARCHAR(MAX) NULL,
+        Activo BIT NOT NULL DEFAULT 1,
+        FechaAlta DATETIME NOT NULL DEFAULT GETDATE(),
+        FechaModificacion DATETIME NULL
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'IX_RepuestosManuales_Busqueda'
+      AND object_id = OBJECT_ID(N'dbo.RepuestosManuales')
+)
+BEGIN
+    CREATE INDEX IX_RepuestosManuales_Busqueda
+    ON dbo.RepuestosManuales (Activo, Codigo, Descripcion)
+    INCLUDE (ManualNombre, Pagina, Marca, ModeloMaquina, Categoria, ReferenciaDespiece);
+END;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'IX_RepuestosManuales_Manual'
+      AND object_id = OBJECT_ID(N'dbo.RepuestosManuales')
+)
+BEGIN
+    CREATE INDEX IX_RepuestosManuales_Manual
+    ON dbo.RepuestosManuales (ManualNombre, Pagina);
+END;
+`;
+
+export const setupManualSparePartsController = async (request, response) => {
+  if (process.env.ALLOW_DB_SETUP !== 'true') {
+    response.status(403).json({
+      status: 'error',
+      message: 'Setup de base de datos no habilitado.'
+    });
+    return;
+  }
+
+  try {
+    const pool = await getSqlPool();
+
+    await pool.request().query(manualSparePartsSetupQuery);
+
+    response.json({
+      status: 'ok',
+      message: 'Tabla dbo.RepuestosManuales verificada o creada correctamente.'
+    });
+  } catch (error) {
+    const diagnosticError = error?.cause || error;
+
+    console.error('[setup-repuestos-manuales] SQL Server query error', {
+      message: diagnosticError?.message,
+      code: diagnosticError?.code,
+      originalErrorMessage: diagnosticError?.originalError?.message,
+      originalErrorCode: diagnosticError?.originalError?.code
+    });
+
+    response.status(500).json({
+      status: 'error',
+      message: 'No se pudo ejecutar el setup de dbo.RepuestosManuales.'
+    });
+  }
+};
