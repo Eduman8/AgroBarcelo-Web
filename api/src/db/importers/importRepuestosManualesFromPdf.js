@@ -32,18 +32,32 @@ const objectPattern = /(\d+)\s+0\s+obj\s*([\s\S]*?)\s*endobj/g;
 const streamPattern = /stream\r?\n([\s\S]*?)\r?\nendstream/;
 
 const categoryRules = [
-  { pattern: /\blanza\b/i, category: 'Lanza' },
-  { pattern: /\bbalanc[ií]n\b/i, category: 'Balancín' },
-  { pattern: /\bdisco\b/i, category: 'Disco' },
-  { pattern: /\bcilindro\b|\bhidr[aá]ul/i, category: 'Hidráulica' },
-  { pattern: /\bbancada\b/i, category: 'Bancada' },
-  { pattern: /\bmarcador\b/i, category: 'Marcador' },
-  { pattern: /\bcig[uü]eñ?a\b/i, category: 'Cigüeña' },
-  { pattern: /\bsoporte\b/i, category: 'Soporte' },
-  { pattern: /\beje\b/i, category: 'Eje' },
-  { pattern: /\bresorte\b/i, category: 'Resorte' },
-  { pattern: /\bmaza\b/i, category: 'Maza' },
-  { pattern: /\bbuje\b/i, category: 'Buje' }
+  { category: 'Rodamiento', keywords: ['rodamiento', 'rodamientos', 'bolilla', 'bolillas', 'bolas', 'rodillo', 'rodillos'] },
+  { category: 'Retén', keywords: ['reten', 'retenes'] },
+  { category: 'Tuerca', keywords: ['tuerca', 'tuercas'] },
+  { category: 'Bulón', keywords: ['bulon', 'bulones', 'tornillo', 'tornillos'] },
+  { category: 'Arandela', keywords: ['arandela', 'arandelas', 'grower'] },
+  { category: 'Chaveta', keywords: ['chaveta', 'chavetas'] },
+  { category: 'Resorte', keywords: ['resorte', 'resortes'] },
+  { category: 'Engranaje', keywords: ['engranaje', 'engranajes', 'engr.', 'pinon', 'pinones'] },
+  { category: 'Llanta', keywords: ['llanta', 'llantas'] },
+  { category: 'Cubierta', keywords: ['cubierta', 'cubiertas', 'neumatico', 'neumaticos'] },
+  { category: 'Maza', keywords: ['maza', 'mazas'] },
+  { category: 'Eje', keywords: ['eje', 'ejes', 'esparrago', 'esparragos'] },
+  { category: 'Buje', keywords: ['buje', 'bujes'] },
+  { category: 'Soporte', keywords: ['soporte', 'soportes'] },
+  { category: 'Lanza', keywords: ['lanza', 'lanzas'] },
+  { category: 'Bancada', keywords: ['bancada', 'bancadas'] },
+  { category: 'Hidráulica', keywords: ['hidraulico', 'hidraulica', 'cilindro', 'cilindros', 'manguera', 'mangueras'] },
+  { category: 'Disco', keywords: ['disco', 'discos'] },
+  { category: 'Marcador', keywords: ['marcador', 'marcadores'] },
+  { category: 'Tolva', keywords: ['tolva', 'tolvas'] },
+  { category: 'Dosificador', keywords: ['dosificador', 'dosificadores'] },
+  { category: 'Cuchilla', keywords: ['cuchilla', 'cuchillas'] },
+  { category: 'Rueda', keywords: ['rueda', 'ruedas'] },
+  { category: 'Grampa', keywords: ['grampa', 'grampas', 'abrazadera', 'abrazaderas'] },
+  { category: 'Balancín', keywords: ['balancin', 'balancines'] },
+  { category: 'Cigüeña', keywords: ['cigueña', 'cigueñas', 'ciguena', 'ciguenas'] }
 ];
 
 const parsePdfObjects = (buffer) => {
@@ -291,6 +305,19 @@ const normalizeText = (value) => value
   .replace(repeatedWhitespacePattern, ' ')
   .trim();
 
+const normalizeCategoryText = (value) => normalizeText(value)
+  .toLocaleLowerCase('es-AR')
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .trim();
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const categoryRulesWithPatterns = categoryRules.map((rule) => ({
+  ...rule,
+  patterns: rule.keywords.map((keyword) => new RegExp(`(^|[^a-z0-9])${escapeRegExp(normalizeCategoryText(keyword))}(?=$|[^a-z0-9])`, 'i'))
+}));
+
 const detectPrintedPageNumber = (lines, fallbackPageNumber) => {
   const printedPageNumber = [...lines]
     .reverse()
@@ -362,7 +389,13 @@ const extractPdfPages = async (pdfPath) => {
   });
 };
 
-const inferCategory = (description) => categoryRules.find((rule) => rule.pattern.test(description))?.category ?? null;
+const inferCategory = (description) => {
+  const normalizedDescription = normalizeCategoryText(description);
+
+  return categoryRulesWithPatterns.find((rule) => (
+    rule.patterns.some((pattern) => pattern.test(normalizedDescription))
+  ))?.category ?? null;
+};
 
 const normalizeCode = (value) => value.replace(/\s*[-–—]\s*/g, '-').trim();
 
@@ -478,7 +511,25 @@ IF EXISTS (
       AND COALESCE(NULLIF(LTRIM(RTRIM(ReferenciaDespiece)), ''), '') = COALESCE(NULLIF(LTRIM(RTRIM(@ReferenciaDespiece)), ''), '')
 )
 BEGIN
-    SELECT CAST(0 AS INT) AS inserted, CAST(1 AS INT) AS duplicated;
+    DECLARE @updatedCategory INT = 0;
+
+    IF NULLIF(LTRIM(RTRIM(@Categoria)), '') IS NOT NULL
+    BEGIN
+        UPDATE dbo.RepuestosManuales
+        SET Categoria = @Categoria
+        WHERE Codigo = @Codigo
+          AND ManualNombre = @ManualNombre
+          AND Pagina = @Pagina
+          AND COALESCE(NULLIF(LTRIM(RTRIM(ReferenciaDespiece)), ''), '') = COALESCE(NULLIF(LTRIM(RTRIM(@ReferenciaDespiece)), ''), '')
+          AND (
+            NULLIF(LTRIM(RTRIM(Categoria)), '') IS NULL
+            OR LTRIM(RTRIM(Categoria)) IN (N'Sin categoría', N'Sin categoria')
+          );
+
+        SET @updatedCategory = @@ROWCOUNT;
+    END;
+
+    SELECT CAST(0 AS INT) AS inserted, CAST(1 AS INT) AS duplicated, @updatedCategory AS updatedCategory;
 END
 ELSE
 BEGIN
@@ -503,15 +554,16 @@ BEGIN
         1
     );
 
-    SELECT CAST(1 AS INT) AS inserted, CAST(0 AS INT) AS duplicated;
+    SELECT CAST(1 AS INT) AS inserted, CAST(0 AS INT) AS duplicated, CAST(0 AS INT) AS updatedCategory;
 END;
 `);
 
-  const counters = result.recordset?.[0] ?? { inserted: 0, duplicated: 0 };
+  const counters = result.recordset?.[0] ?? { inserted: 0, duplicated: 0, updatedCategory: 0 };
 
   return {
     inserted: Number(counters.inserted) || 0,
-    duplicated: Number(counters.duplicated) || 0
+    duplicated: Number(counters.duplicated) || 0,
+    updatedCategory: Number(counters.updatedCategory) || 0
   };
 };
 
@@ -525,6 +577,7 @@ const buildImportPreview = async ({ manualNombre, archivoOrigen }) => {
 
 const previewPdfImport = async (pdfConfig) => {
   const { pages, spareParts } = await buildImportPreview(pdfConfig);
+  const categorizedDetected = spareParts.filter((sparePart) => sparePart.categoria).length;
 
   return {
     pdf: pdfConfig.archivoOrigen,
@@ -532,6 +585,9 @@ const previewPdfImport = async (pdfConfig) => {
     detected: spareParts.length,
     inserted: 0,
     duplicated: 0,
+    categorizedNew: 0,
+    updatedExistingWithCategory: 0,
+    uncategorized: spareParts.length - categorizedDetected,
     withReferenciaDespiece: spareParts.filter((sparePart) => sparePart.referenciaDespiece).length,
     withoutReferenciaDespiece: spareParts.filter((sparePart) => !sparePart.referenciaDespiece).length
   };
@@ -539,12 +595,16 @@ const previewPdfImport = async (pdfConfig) => {
 
 const importPdf = async ({ pool, manualNombre, archivoOrigen }) => {
   const { pages, spareParts } = await buildImportPreview({ manualNombre, archivoOrigen });
+  const categorizedDetected = spareParts.filter((sparePart) => sparePart.categoria).length;
   const summary = {
     pdf: archivoOrigen,
     pagesRead: pages.length,
     detected: spareParts.length,
     inserted: 0,
     duplicated: 0,
+    categorizedNew: 0,
+    updatedExistingWithCategory: 0,
+    uncategorized: spareParts.length - categorizedDetected,
     withReferenciaDespiece: spareParts.filter((sparePart) => sparePart.referenciaDespiece).length,
     withoutReferenciaDespiece: spareParts.filter((sparePart) => !sparePart.referenciaDespiece).length
   };
@@ -553,6 +613,11 @@ const importPdf = async ({ pool, manualNombre, archivoOrigen }) => {
     const counters = await insertSparePartIfMissing(pool, sparePart);
     summary.inserted += counters.inserted;
     summary.duplicated += counters.duplicated;
+    summary.updatedExistingWithCategory += counters.updatedCategory;
+
+    if (counters.inserted && sparePart.categoria) {
+      summary.categorizedNew += counters.inserted;
+    }
   }
 
   return summary;
@@ -563,6 +628,9 @@ const printSummary = (summary) => {
   console.log(`  Páginas leídas: ${summary.pagesRead}`);
   console.log(`  Registros detectados: ${summary.detected}`);
   console.log(`  Registros insertados: ${summary.inserted}`);
+  console.log(`  Registros categorizados nuevos: ${summary.categorizedNew}`);
+  console.log(`  Registros existentes actualizados con categoría: ${summary.updatedExistingWithCategory}`);
+  console.log(`  Registros que siguen sin categoría: ${summary.uncategorized}`);
   console.log(`  Registros omitidos por duplicados: ${summary.duplicated}`);
   console.log(`  Registros con ReferenciaDespiece detectada: ${summary.withReferenciaDespiece}`);
   console.log(`  Registros sin ReferenciaDespiece: ${summary.withoutReferenciaDespiece}`);
@@ -586,6 +654,9 @@ async function runImporter() {
     detected: accumulator.detected + summary.detected,
     inserted: accumulator.inserted + summary.inserted,
     duplicated: accumulator.duplicated + summary.duplicated,
+    categorizedNew: accumulator.categorizedNew + summary.categorizedNew,
+    updatedExistingWithCategory: accumulator.updatedExistingWithCategory + summary.updatedExistingWithCategory,
+    uncategorized: accumulator.uncategorized + summary.uncategorized,
     withReferenciaDespiece: accumulator.withReferenciaDespiece + summary.withReferenciaDespiece,
     withoutReferenciaDespiece: accumulator.withoutReferenciaDespiece + summary.withoutReferenciaDespiece
   }), {
@@ -593,6 +664,9 @@ async function runImporter() {
     detected: 0,
     inserted: 0,
     duplicated: 0,
+    categorizedNew: 0,
+    updatedExistingWithCategory: 0,
+    uncategorized: 0,
     withReferenciaDespiece: 0,
     withoutReferenciaDespiece: 0
   });
@@ -602,6 +676,9 @@ async function runImporter() {
   console.log(`  Páginas leídas: ${totals.pagesRead}`);
   console.log(`  Registros detectados: ${totals.detected}`);
   console.log(`  Registros insertados: ${totals.inserted}`);
+  console.log(`  Registros categorizados nuevos: ${totals.categorizedNew}`);
+  console.log(`  Registros existentes actualizados con categoría: ${totals.updatedExistingWithCategory}`);
+  console.log(`  Registros que siguen sin categoría: ${totals.uncategorized}`);
   console.log(`  Registros omitidos por duplicados: ${totals.duplicated}`);
   console.log(`  Registros con ReferenciaDespiece detectada: ${totals.withReferenciaDespiece}`);
   console.log(`  Registros sin ReferenciaDespiece: ${totals.withoutReferenciaDespiece}`);
