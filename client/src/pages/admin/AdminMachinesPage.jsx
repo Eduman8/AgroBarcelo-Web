@@ -13,12 +13,12 @@ import { getMachineCategory, getMachineStatus, isAvailableMachine, machineCatego
 const categoryHelpTexts = {
   Nueva: 'Publicación de una maquinaria nueva.',
   Usada: 'Publicación de una maquinaria usada.',
-  'Trabajo Realizado': 'Publicación institucional de un trabajo ya realizado; no significa que esté vendida.'
+  'Trabajo Realizado': 'Publicación institucional de un trabajo ya realizado; no significa que esté vendido.'
 };
 
 const statusHelpTexts = {
   Disponible: 'Disponible comercialmente: puede recibir consultas desde el sitio público.',
-  Vendida: 'Vendida comercialmente: conserva el detalle visible, pero no permite consulta sobre esa unidad.'
+  Vendido: 'Vendido comercialmente: conserva el detalle visible, pero no permite consulta sobre esa unidad.'
 };
 
 function getCategoryHelpText(category) {
@@ -26,7 +26,7 @@ function getCategoryHelpText(category) {
 }
 
 function getStatusHelpText(status) {
-  return statusHelpTexts[status] ?? 'Define si la unidad está comercialmente disponible o ya fue vendida.';
+  return statusHelpTexts[status] ?? 'Define si la unidad está comercialmente disponible o ya figura como Vendido.';
 }
 
 function getStatusPillClassName(status) {
@@ -202,7 +202,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
     }
 
     if (!formData.estado.trim()) {
-      nextErrors.estado = 'Seleccioná si la maquinaria está Disponible o Vendida comercialmente.';
+      nextErrors.estado = 'Seleccioná si la maquinaria está Disponible o Vendido comercialmente.';
     }
 
     setErrors(nextErrors);
@@ -385,7 +385,7 @@ function AdminMachinesPage({ currentPath = '/admin/maquinarias' }) {
               <div className="admin-checkbox-field admin-form-field--wide" aria-live="polite">
                 <span>
                   Categoría y estado son independientes: “Trabajo Realizado” describe el tipo de publicación;
-                  “Vendida” indica que no está comercialmente disponible.
+                  “Vendido” indica que no está comercialmente disponible.
                 </span>
               </div>
 

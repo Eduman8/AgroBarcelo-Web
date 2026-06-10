@@ -1,8 +1,8 @@
 export const machineCategories = ['Nueva', 'Usada', 'Trabajo Realizado'];
-export const machineStatuses = ['Disponible', 'Vendida'];
+export const machineStatuses = ['Disponible', 'Vendido'];
 
 const workCategory = 'Trabajo Realizado';
-const soldStatus = 'Vendida';
+const soldStatus = 'Vendido';
 const availableStatus = 'Disponible';
 
 const categoryAliases = new Map([
@@ -115,7 +115,16 @@ export function isAvailableMachine(machine) {
   return getMachineStatus(machine) === availableStatus;
 }
 
-export function getMachineAvailabilityLabel(machine, unavailableLabel = 'Vendida') {
+export function sortMachinesByAvailability(machines) {
+  return [...machines].sort((firstMachine, secondMachine) => {
+    const firstAvailabilityOrder = isSoldMachine(firstMachine) ? 1 : 0;
+    const secondAvailabilityOrder = isSoldMachine(secondMachine) ? 1 : 0;
+
+    return firstAvailabilityOrder - secondAvailabilityOrder;
+  });
+}
+
+export function getMachineAvailabilityLabel(machine, unavailableLabel = 'Vendido') {
   return isAvailableMachine(machine) ? availableStatus : unavailableLabel;
 }
 

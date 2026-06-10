@@ -158,12 +158,12 @@ const categoryAliases = new Map([
 
 const statusAliases = new Map([
   ['disponible', 'Disponible'],
-  ['vendida', 'Vendida'],
-  ['vendido', 'Vendida'],
-  ['finalizado', 'Vendida'],
-  ['finalizada', 'Vendida'],
-  ['vendidas', 'Vendida'],
-  ['vendidos', 'Vendida']
+  ['vendida', 'Vendido'],
+  ['vendido', 'Vendido'],
+  ['finalizado', 'Vendido'],
+  ['finalizada', 'Vendido'],
+  ['vendidas', 'Vendido'],
+  ['vendidos', 'Vendido']
 ]);
 
 const normalizeCatalogValue = (value, maxLength, aliases) => {
@@ -203,7 +203,7 @@ const normalizeBoolean = (value, defaultValue) => {
 };
 
 const allowedCategories = new Set(['Nueva', 'Usada', 'Trabajo Realizado']);
-const allowedStatuses = new Set(['Disponible', 'Vendida']);
+const allowedStatuses = new Set(['Disponible', 'Vendido']);
 
 const normalizeMachineStatusPayload = (value) => {
   const normalizedValue = normalizeText(value, 100);
@@ -244,7 +244,7 @@ const normalizeMachinePayload = (payload) => {
   }
 
   if (!allowedStatuses.has(estado)) {
-    throw new MachineValidationError('El estado debe ser Disponible o Vendida.');
+    throw new MachineValidationError('El estado debe ser Disponible o Vendido.');
   }
 
   if (!slug) {

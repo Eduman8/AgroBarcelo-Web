@@ -163,7 +163,7 @@ function MachinesDetailPage({ routeParams }) {
 
             {isSold ? (
               <p className="machine-detail-sold-message">
-                Esta maquinaria ya fue vendida. Podés consultar por opciones similares.
+                Trabajo realizado. Esta maquinaria ya fue comercializada. Consúltenos por equipos similares.
               </p>
             ) : null}
 

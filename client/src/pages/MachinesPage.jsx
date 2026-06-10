@@ -7,18 +7,19 @@ import {
   getMachineCategory,
   getMachineSlug,
   getMachineStatus,
-  isAvailableMachine
+  isAvailableMachine,
+  sortMachinesByAvailability
 } from '../utils/machines.js';
 
 const allPublicationsLabel = 'Todas';
-const soldPublicationsLabel = 'Vendidas';
+const soldPublicationsLabel = 'Vendidos';
 
 const publicationFilters = [
   { label: allPublicationsLabel },
   { label: 'Nuevas', category: 'Nueva' },
   { label: 'Usadas', category: 'Usada' },
   { label: 'Trabajos realizados', category: 'Trabajo Realizado' },
-  { label: soldPublicationsLabel, status: 'Vendida' }
+  { label: soldPublicationsLabel, status: 'Vendido' }
 ];
 
 function MachinesPage() {
@@ -69,14 +70,14 @@ function MachinesPage() {
   const filteredMachines = useMemo(() => {
     const normalizedSearchTerm = searchTerm.trim().toLocaleLowerCase('es-AR');
 
-    return machines.filter((machine) => {
+    return sortMachinesByAvailability(machines.filter((machine) => {
       const selectedPublicationFilter = publicationFilters.find((filter) => filter.label === selectedFilter);
       const matchesCategory = !selectedPublicationFilter?.category || getMachineCategory(machine) === selectedPublicationFilter.category;
       const matchesStatus = !selectedPublicationFilter?.status || getMachineStatus(machine) === selectedPublicationFilter.status;
       const matchesSearch = machine.nombre.toLocaleLowerCase('es-AR').includes(normalizedSearchTerm);
 
       return matchesCategory && matchesStatus && matchesSearch;
-    });
+    }));
   }, [machines, searchTerm, selectedFilter]);
 
   return (
@@ -153,7 +154,7 @@ function MachinesPage() {
                 <div className="machine-card__topline">
                   {getMachineBadges(machine).map((badge) => (
                     <span
-                      className={`machine-card__status machine-card__status--${badge.type}${badge.label === 'Vendida' ? ' machine-card__status--sold' : ''}`}
+                      className={`machine-card__status machine-card__status--${badge.type}${badge.label === 'Vendido' ? ' machine-card__status--sold' : ''}`}
                       key={`${badge.type}-${badge.label}`}
                     >
                       {badge.label}
