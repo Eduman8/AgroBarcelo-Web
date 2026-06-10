@@ -21,7 +21,14 @@ WHERE Activo = 1
     OR LOWER(LTRIM(RTRIM(Estado))) IN (N'vendido', N'vendida', N'finalizado', N'finalizada', N'trabajo realizado', N'trabajos realizados')
     OR LOWER(LTRIM(RTRIM(Categoria))) IN (N'trabajo realizado', N'trabajos realizados')
   )
-ORDER BY FechaAlta DESC, ID_WebMaquinaria DESC;
+ORDER BY
+    CASE
+      WHEN Disponible = 1
+        AND LOWER(LTRIM(RTRIM(Estado))) NOT IN (N'vendido', N'vendida', N'finalizado', N'finalizada') THEN 0
+      ELSE 1
+    END,
+    FechaAlta DESC,
+    ID_WebMaquinaria DESC;
 `;
 
 const publicMachineByIdentifierQuery = `
@@ -94,12 +101,12 @@ const categoryAliases = new Map([
 const statusAliases = new Map([
   ['disponible', 'Disponible'],
   ['disponibles', 'Disponible'],
-  ['vendida', 'Vendida'],
-  ['vendido', 'Vendida'],
-  ['vendidas', 'Vendida'],
-  ['vendidos', 'Vendida'],
-  ['finalizado', 'Vendida'],
-  ['finalizada', 'Vendida']
+  ['vendida', 'Vendido'],
+  ['vendido', 'Vendido'],
+  ['vendidas', 'Vendido'],
+  ['vendidos', 'Vendido'],
+  ['finalizado', 'Vendido'],
+  ['finalizada', 'Vendido']
 ]);
 
 const getLegacyCatalogValue = (value) => categoryAliases.get(normalizeMachineTextKey(value));
@@ -140,13 +147,13 @@ const normalizeMachineStatus = (value, machine) => {
   }
 
   if (machine?.disponible !== undefined && machine?.disponible !== null && machine?.disponible !== '') {
-    return normalizeBoolean(machine.disponible) ? 'Disponible' : 'Vendida';
+    return normalizeBoolean(machine.disponible) ? 'Disponible' : 'Vendido';
   }
 
   return String(value ?? '').trim() || 'Disponible';
 };
 
-export const isSoldMachine = (machine) => normalizeMachineStatus(machine?.estado, machine) === 'Vendida';
+export const isSoldMachine = (machine) => normalizeMachineStatus(machine?.estado, machine) === 'Vendido';
 
 export const isHistoricalWorkMachine = (machine) => normalizeMachineCategory(machine?.categoria, machine) === 'Trabajo Realizado';
 

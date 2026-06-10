@@ -58,7 +58,7 @@ export const machinesMock = [
     nombre: 'Tractor John Deere 730',
     marca: 'John Deere',
     categoria: 'Usada',
-    estado: 'Vendida',
+    estado: 'Vendido',
     descripcionCorta: 'Unidad usada que se conserva publicada como antecedente comercial de AgroBarceló.',
     descripcionLarga:
       'Tractor usado ya vendido. La publicación permanece visible como parte del historial de maquinarias comercializadas y permite orientar consultas hacia opciones similares disponibles.',
@@ -71,7 +71,7 @@ export const machinesMock = [
     nombre: 'Reacondicionamiento de Sembradora CELE',
     marca: 'CELE',
     categoria: 'Trabajo Realizado',
-    estado: 'Vendida',
+    estado: 'Vendido',
     descripcionCorta: 'Trabajo realizado sobre equipo de siembra para recuperar funcionamiento y confiabilidad.',
     descripcionLarga:
       'Trabajo realizado de revisión y reacondicionamiento sobre una sembradora CELE. Esta ficha permite separar casos finalizados de la maquinaria disponible y preparar la sección para mostrar antecedentes con fotos en una etapa posterior.',
