@@ -1,4 +1,5 @@
 import { sendContactEmail } from '../services/contactEmailService.js';
+import { createInquiry, InquiryValidationError } from '../services/adminInquiriesService.js';
 
 const requiredFieldsMessage = 'Completá todos los campos obligatorios.';
 const emailFormatRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -52,6 +53,26 @@ function normalizeManualInfo(manualInfo) {
     : null;
 }
 
+async function persistContactInquiry(contactData) {
+  try {
+    await createInquiry(contactData);
+  } catch (error) {
+    if (error instanceof InquiryValidationError) {
+      console.warn('Consulta de contacto no persistida por validación:', error.message);
+      return;
+    }
+
+    const diagnosticError = error?.cause || error;
+
+    console.error('No se pudo persistir la consulta de contacto:', {
+      message: diagnosticError?.message,
+      code: diagnosticError?.code,
+      number: diagnosticError?.number,
+      originalErrorMessage: diagnosticError?.originalError?.message
+    });
+  }
+}
+
 function validateContactData({ name, phone, email, subject, message }) {
   return !(
     isBlank(name) ||
@@ -86,6 +107,7 @@ export async function createContactRequest(request, response) {
 
   try {
     await sendContactEmail(contactData);
+    await persistContactInquiry(contactData);
 
     return response.json({
       status: 'ok',
