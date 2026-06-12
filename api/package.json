@@ -9,7 +9,8 @@
     "start": "node src/server.js",
     "seed:repuestos-manuales": "node src/db/seeds/runRepuestosManualesSeed.js",
     "import:repuestos-manuales": "node src/db/importers/importRepuestosManualesFromPdf.js",
-    "audit:catalog": "node src/db/audits/auditSparePartsCatalog.js"
+    "audit:catalog": "node src/db/audits/auditSparePartsCatalog.js",
+    "repair:catalog-encoding": "node src/db/maintenance/repairCatalogEncoding.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
