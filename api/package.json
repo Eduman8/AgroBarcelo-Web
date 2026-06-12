@@ -8,7 +8,8 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "seed:repuestos-manuales": "node src/db/seeds/runRepuestosManualesSeed.js",
-    "import:repuestos-manuales": "node src/db/importers/importRepuestosManualesFromPdf.js"
+    "import:repuestos-manuales": "node src/db/importers/importRepuestosManualesFromPdf.js",
+    "audit:catalog": "node src/db/audits/auditSparePartsCatalog.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
