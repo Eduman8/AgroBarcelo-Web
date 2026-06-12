@@ -70,6 +70,81 @@ export const setupWebMachinesController = async (request, response) => {
   }
 };
 
+
+const webInquiriesSetupQuery = `
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.tables t
+    INNER JOIN sys.schemas s
+        ON s.schema_id = t.schema_id
+    WHERE t.name = N'WebConsultas'
+      AND s.name = N'dbo'
+)
+BEGIN
+    CREATE TABLE dbo.WebConsultas (
+        ID_WebConsulta INT IDENTITY(1,1) PRIMARY KEY,
+        FechaAlta DATETIME NOT NULL DEFAULT GETDATE(),
+        Nombre NVARCHAR(200) NOT NULL,
+        Email NVARCHAR(200) NOT NULL,
+        Telefono NVARCHAR(80) NOT NULL,
+        TipoConsulta NVARCHAR(150) NOT NULL,
+        Estado NVARCHAR(50) NOT NULL DEFAULT N'Nueva',
+        Mensaje NVARCHAR(4000) NOT NULL,
+        Contexto NVARCHAR(MAX) NULL,
+        RepuestosSeleccionados NVARCHAR(MAX) NULL,
+        InformacionManual NVARCHAR(MAX) NULL,
+        FechaModificacion DATETIME NULL,
+        CONSTRAINT CK_WebConsultas_Estado CHECK (Estado IN (N'Nueva', N'En proceso', N'Respondida', N'Cerrada'))
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'IX_WebConsultas_Estado_FechaAlta'
+      AND object_id = OBJECT_ID(N'dbo.WebConsultas')
+)
+BEGIN
+    CREATE INDEX IX_WebConsultas_Estado_FechaAlta
+    ON dbo.WebConsultas (Estado, FechaAlta DESC);
+END;
+`;
+
+export const setupWebInquiriesController = async (request, response) => {
+  if (process.env.ALLOW_DB_SETUP !== 'true') {
+    response.status(403).json({
+      status: 'error',
+      message: 'Setup de base de datos no habilitado.'
+    });
+    return;
+  }
+
+  try {
+    const pool = await getSqlPool();
+
+    await pool.request().query(webInquiriesSetupQuery);
+
+    response.json({
+      status: 'ok',
+      message: 'Tabla dbo.WebConsultas verificada o creada correctamente.'
+    });
+  } catch (error) {
+    const diagnosticError = error?.cause || error;
+
+    console.error('[setup-web-consultas] SQL Server query error', {
+      message: diagnosticError?.message,
+      code: diagnosticError?.code,
+      originalErrorMessage: diagnosticError?.originalError?.message,
+      originalErrorCode: diagnosticError?.originalError?.code
+    });
+
+    response.status(500).json({
+      status: 'error',
+      message: 'No se pudo ejecutar el setup de dbo.WebConsultas.'
+    });
+  }
+};
+
 const manualSparePartsSetupQuery = `
 IF NOT EXISTS (
     SELECT 1

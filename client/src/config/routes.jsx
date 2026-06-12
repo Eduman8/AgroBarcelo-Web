@@ -9,7 +9,7 @@ import ServicesPage from '../pages/ServicesPage.jsx';
 import SparePartDetailPage from '../pages/SparePartDetailPage.jsx';
 import SparePartsPage from '../pages/SparePartsPage.jsx';
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage.jsx';
-import AdminInquiriesPage from '../pages/admin/AdminInquiriesPage.jsx';
+import AdminConsultasPage from '../pages/admin/AdminConsultasPage.jsx';
 import AdminMachinesPage from '../pages/admin/AdminMachinesPage.jsx';
 import AdminSettingsPage from '../pages/admin/AdminSettingsPage.jsx';
 import AdminUsersPage from '../pages/admin/AdminUsersPage.jsx';
@@ -19,7 +19,7 @@ export const routes = {
   '/admin': AdminDashboardPage,
   '/admin/maquinarias': AdminMachinesPage,
   '/admin/usuarios': AdminUsersPage,
-  '/admin/consultas': AdminInquiriesPage,
+  '/admin/consultas': AdminConsultasPage,
   '/admin/configuracion': AdminSettingsPage,
   '/repuestos': SparePartsPage,
   '/buscador-repuestos': ManualSparePartsSearchPage,
