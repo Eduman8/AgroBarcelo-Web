@@ -10,6 +10,7 @@
     "seed:repuestos-manuales": "node src/db/seeds/runRepuestosManualesSeed.js",
     "import:repuestos-manuales": "node src/db/importers/importRepuestosManualesFromPdf.js",
     "audit:catalog": "node src/db/audits/auditSparePartsCatalog.js",
+    "audit:catalog-exact-duplicates": "node src/db/audits/auditExactSparePartDuplicates.js",
     "repair:catalog-encoding": "node src/db/maintenance/repairCatalogEncoding.js"
   },
   "dependencies": {
